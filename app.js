@@ -1,5 +1,9 @@
 // Instantiating Firestore
-var db = firebase.firestore();
+//var db = firebase.firestore();
+
+
+// Instantiating Firestore
+var db = getDatabase();
 
 // Users and user select
 let users = [];
