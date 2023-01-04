@@ -2,6 +2,8 @@
 //var db = firebase.firestore();
 
 
+import {getDatabase, ref, set, child, update, remove}
+from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 // Instantiating Firestore
 var db = getDatabase();
 
