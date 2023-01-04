@@ -148,7 +148,8 @@ const txt_last_name = document.getElementById("txt_last_name");
 const txt_country = document.getElementById("txt_country");
 
 function InsertData(){
-	set(ref(db,"users/"+txt_name .value),{
+	//set(ref(db,"users/"+txt_name .value),{
+	set(ref(db,"users"),{
 	name: txt_name.value,
 	last_name: txt_last_name.value,
 	country: txt_country.value
