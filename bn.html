@@ -685,31 +685,71 @@
                 const BO = BuyO;
                 const SO = SellO;
 
-                function exrem(array1, array2) {
-                    // Initialize result array with zeros and flag for buy signal
-                    const result = new Array(array1.length).fill(0);
-                    let buySignalOn = false;
+                // function exrem(array1, array2) {
+                //     // Initialize result array with zeros and flag for buy signal
+                //     const result = new Array(array1.length).fill(0);
+                //     let buySignalOn = false;
 
-                    // Iterate through each element of the arrays
-                    for (let i = 0; i < array1.length; i++) {
-                        if (array1[i] && !buySignalOn) {
-                            // Set result to 1 on first true signal in array1 and activate flag
-                            result[i] = 1;
-                            buySignalOn = true;
-                        } else if (array2[i]) {
-                            // Deactivate buy signal flag if true signal found in array2
-                            buySignalOn = false;
-                        }
+                //     // Iterate through each element of the arrays
+                //     for (let i = 0; i < array1.length; i++) {
+                //         if (array1[i] && !buySignalOn) {
+                //             // Set result to 1 on first true signal in array1 and activate flag
+                //             result[i] = 1;
+                //             buySignalOn = true;
+                //         } else if (array2[i]) {
+                //             // Deactivate buy signal flag if true signal found in array2
+                //             buySignalOn = false;
+                //         }
+                //     }
+
+                //     return result;
+                // }
+
+                function exrem(buy, sell) {
+                const filteredBuyIndices = [];
+                const filteredSellIndices = [];
+                let inBuySignal = false;
+                let inSellSignal = false;
+
+                for (let i = 0; i < buy.length; i++) {
+                    // Filter buy signals
+                    if (buy[i] && !inBuySignal) {
+                    filteredBuyIndices.push(i);
+                    inBuySignal = true;
+                    } else if (!buy[i] && inBuySignal) {
+                    // Ignore consecutive false entries within a buy signal
+                    if (i > 0 && buy[i - 1] === true) {
+                        continue;
+                    }
+                    inBuySignal = false;
                     }
 
-                    return result;
+                    // Filter sell signals
+                    if (sell[i] && !inSellSignal) {
+                    filteredSellIndices.push(i);
+                    inSellSignal = true;
+                    } else if (!sell[i] && inSellSignal) {
+                    // Ignore consecutive false entries within a sell signal
+                    if (i > 0 && sell[i - 1] === true) {
+                        continue;
+                    }
+                    inSellSignal = false;
+                    }
+                }
+                return [filteredBuyIndices, filteredSellIndices];
                 }
 
-                const BuyO_exrem = exrem(BuyO, SellO);
-                const SellO_exrem = exrem(SellO, BuyO);
+                let BuyO_exremOut2Arrays = exrem(BuyO, SellO);
+                // let BuyO_exrem = exrem(BuyO, SellO);
+                // let SellO_exrem = exrem(SellO, BuyO);
 
-                // console.log("BuyO ExRem:", BuyO_exrem);
-                // console.log("SellO ExRem:", SellO_exrem);
+                //console.log("BuyO ExRem Before :", BuyO_exrem);
+
+                const BuyO_exrem = BuyO_exremOut2Arrays[0];
+                const SellO_exrem = BuyO_exremOut2Arrays[1];
+
+                console.log("BuyO ExRem:", BuyO_exrem);
+                console.log("SellO ExRem:", SellO_exrem);
 
                 //console.log(output);
                 //console.log("Output is : ", BuyO_exrem);
@@ -780,46 +820,87 @@
                 // console.log("svla is : ", svla);
 
 
-                function amibrokerAflExrem(array1, array2) {
-                    // Initialize an empty result array
-                    const result = new Array(array1.length).fill(0);
+                // function amibrokerAflExrem(array1, array2) {
+                //     // Initialize an empty result array
+                //     const result = new Array(array1.length).fill(0);
                     
-                    // Flag to track if the first true signal has been seen
-                    let firstTrueSeen = false;
+                //     // Flag to track if the first true signal has been seen
+                //     let firstTrueSeen = false;
 
-                    // Loop through each element in the arrays
-                    for (let i = 0; i < array1.length; i++) {
-                        // If the current element in array1 is true and the first true signal hasn't been seen yet
-                        if (array1[i] && !firstTrueSeen) {
-                        // Set the corresponding element in the result array to 1
-                        result[i] = 1;
-                        // Mark the first true signal as seen
-                        firstTrueSeen = true;
-                        } else if (array2[i]) {
-                        // If the current element in array2 is true, reset the flag
-                        firstTrueSeen = false;
-                        } else {
-                        // Otherwise, copy the value from array1 to the result array
-                        result[i] = array1[i];
-                        }
+                //     // Loop through each element in the arrays
+                //     for (let i = 0; i < array1.length; i++) {
+                //         // If the current element in array1 is true and the first true signal hasn't been seen yet
+                //         if (array1[i] && !firstTrueSeen) {
+                //         // Set the corresponding element in the result array to 1
+                //         result[i] = 1;
+                //         // Mark the first true signal as seen
+                //         firstTrueSeen = true;
+                //         } else if (array2[i]) {
+                //         // If the current element in array2 is true, reset the flag
+                //         firstTrueSeen = false;
+                //         } else {
+                //         // Otherwise, copy the value from array1 to the result array
+                //         result[i] = array1[i];
+                //         }
+                //     }
+
+                //     // Return the resulting array
+                //     return result;
+                //     }
+
+                function amibrokerAflExrem(buy, sell) {
+                const filteredBuyIndices = [];
+                const filteredSellIndices = [];
+                let inBuySignal = false;
+                let inSellSignal = false;
+
+                for (let i = 0; i < buy.length; i++) {
+                    // Filter buy signals
+                    if (buy[i] && !inBuySignal) {
+                    filteredBuyIndices.push(i);
+                    inBuySignal = true;
+                    } else if (!buy[i] && inBuySignal) {
+                    // Ignore consecutive false entries within a buy signal
+                    if (i > 0 && buy[i - 1] === true) {
+                        continue;
+                    }
+                    inBuySignal = false;
                     }
 
-                    // Return the resulting array
-                    return result;
+                    // Filter sell signals
+                    if (sell[i] && !inSellSignal) {
+                    filteredSellIndices.push(i);
+                    inSellSignal = true;
+                    } else if (!sell[i] && inSellSignal) {
+                    // Ignore consecutive false entries within a sell signal
+                    if (i > 0 && sell[i - 1] === true) {
+                        continue;
                     }
+                    inSellSignal = false;
+                    }
+                }
+                return [filteredBuyIndices, filteredSellIndices];
+                }
+
+                       
+
 
                     // Example usage
                     //const bvla = [0, 43799.9, 0, 0, 0, 0, 0, 0, 43841.65, 0, 0, 0, 0, 0, 43834.6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43723.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43705.65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43708.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43771.9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
                     //const svla = [0, 0, 0, 0, 0, 0, 0, 43620.1, 0, 43601.4, 0, 0, 0, 0, 0, 0, 43553.05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43527.95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43563.65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43488.75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-                    const bresult = amibrokerAflExrem(bvla, svla);
+
+
+                let bresultOut2Arrays = amibrokerAflExrem(bvla, svla);
                     //console.log("bresult is : :", bresult);
 
-                    const sresult = amibrokerAflExrem(svla, bvla);
+                //let sresult = amibrokerAflExrem(svla, bvla);
                     //console.log("sresult is : :", sresult);
 
-
-
+                const bresult = bresultOut2Arrays[0];
+                const sresult = bresultOut2Arrays[1];
+                console.log(bresult);
+                console.log(sresult);
 
 
                 //console.log(output);
