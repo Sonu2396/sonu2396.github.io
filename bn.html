@@ -16,6 +16,9 @@
                 // try 
                 // {
 
+
+                    //*****************************************************************Start API
+
                     let reposedata; // Declare outside for wider scope
 
                     try {
@@ -43,6 +46,10 @@
                     console.warn("Data could not be fetched successfully.");
                     }
 
+                    const jsonData = reposedata;
+
+                //*****************************************************************End API    
+
 
                 //const resposedata = await fetch("https://inservice.onrender.com/scrape").then((response) => response.json());
                 // }
@@ -57,12 +64,12 @@
                 //console.log(user);
                 //console.log(resposedata.data);
 
-                const jsonData = reposedata;
+                
 
                 //
                 //
                 //
-
+                ////*****************************************************************Readymade   
                 // const jsonData = {
                 //     data: [
                 //       [1697779500000, 43702.65, 43714.35, 43695.2, 43703.15, 1315, 47736],
@@ -168,6 +175,9 @@
                 //     events: null,
                 //   };
 
+
+
+                ////*****************************************************************Readymade
                 //const data = jsonData.data;
                 //const data = jsonData.data;
 
@@ -748,8 +758,10 @@
                 const BuyO_exrem = BuyO_exremOut2Arrays[0];
                 const SellO_exrem = BuyO_exremOut2Arrays[1];
 
-                console.log("BuyO ExRem:", BuyO_exrem);
-                console.log("SellO ExRem:", SellO_exrem);
+                //console.log("BuyO ExRem:", BuyO_exrem);
+                //console.log("SellO ExRem:", SellO_exrem);
+
+
 
                 //console.log(output);
                 //console.log("Output is : ", BuyO_exrem);
@@ -778,28 +790,154 @@
                 //console.log("SellO_exremCandleNum is : ", SellO_exremCandleNum);
                 //console.log(output);
                 //console.log("Output is : ", BuyO_exrem);
+                //const bvl = [];
+                const bvl = Array(jsonData.data.length).fill(0);
 
-                const bvl = [];
-                for (let i = 0; i < BuyO_exremCandleNum.length; i++) {
-                    if (BuyO_exremCandleNum[i] >= 1) {
-                        bvl.push(jsonData.data[i][4]);
+                for (let i = 0; i < BuyO_exrem.length; i++) {
+                    const number = BuyO_exrem[i];
+                    // Optimized check using modulo operator, assuming elements in array2 are positive and less than 25
+                    if (number >= 0 && number < jsonData.data.length) {
+                        bvl[number] = 1; // Update the corresponding element in array1 directly
                     } else {
-                        bvl.push(0);
+                        console.log(`Warning: Element ${number} in array2 is out of bounds for array1 (0-24). Skipping.`);
+                    }
+                }
+                for (let i = 0; i < bvl.length; i++) {
+                    if(bvl[i]===1){
+
+                        bvl[i] = jsonData.data[i][4];
                     }
                 }
 
-                const svl = [];
-                for (let i = 0; i < SellO_exremCandleNum.length; i++) {
-                    if (SellO_exremCandleNum[i] >= 1) {
-                        svl.push(jsonData.data[i][4]);
+
+                // for (let i = 0; i < jsonData.data.length; i++) {
+                    
+                //     if (i === BuyO_exrem[i]) {
+                //         bvl.push(jsonData.data[i][4]);
+                //     } else {
+                //         bvl.push(0);
+                //     }
+                // }
+
+                const svl = Array(jsonData.data.length).fill(0);
+
+                for (let i = 0; i < SellO_exrem.length; i++) {
+                    const number = SellO_exrem[i];
+                    // Optimized check using modulo operator, assuming elements in array2 are positive and less than 25
+                    if (number >= 0 && number < jsonData.data.length) {
+                        svl[number] = 1; // Update the corresponding element in array1 directly
                     } else {
-                        svl.push(0);
+                        console.log(`Warning: Element ${number} in array2 is out of bounds for array1 (0-24). Skipping.`);
                     }
                 }
+                for (let i = 0; i < svl.length; i++) {
+                    if(svl[i]===1){
+
+                        svl[i] = jsonData.data[i][4];
+                    }
+                }
+                //console.log("bvl is : ", bvl);
+                //console.log(output);
+                //console.log("svl is : ", svl);
+                // const svl = [];
+                // for (let i = 0; i < jsonData.data.length; i++) {
+                    
+                //     if (i == SellO_exrem[i]) {
+                //         svl.push(jsonData.data[i][4]);
+                //     } else {
+                //         svl.push(0);
+                //     }
+                // }
+                // const bvl = [];
+                // for (let i = 0; i < BuyO_exremCandleNum.length; i++) {
+                //     if (BuyO_exremCandleNum[i] >= 1) {
+                //         bvl.push(jsonData.data[i][4]);
+                //     } else {
+                //         bvl.push(0);
+                //     }
+                // }
+
+                // const svl = [];
+                // for (let i = 0; i < SellO_exremCandleNum.length; i++) {
+                //     if (SellO_exremCandleNum[i] >= 1) {
+                //         svl.push(jsonData.data[i][4]);
+                //     } else {
+                //         svl.push(0);
+                //     }
+                // }
+
+                const bvlaBinary = [];
+                for (let i = 0; i < bvl.length; i++) {
+                    // for (let j = 0; j < BuyO_exrem.length; j++)
+                    if (bvl[i]>0) {
+                        bvlaBinary.push(jsonData.data[i][4] + 80);
+                    } else {
+                        bvlaBinary.push(0);
+                    }
+                }
+
+                const svlaBinary = [];
+                for (let i = 0; i < svl.length; i++) {
+                    //for (let j = 0; j < SellO_exrem.length; j++)
+                    if (svl[i]>0) {
+                        svlaBinary.push(jsonData.data[i][4] - 80);
+                    } else {
+                        svlaBinary.push(0);
+                    }
+                }
+                //console.log("bvlaBinary is : ", bvlaBinary);
+                //console.log(output);
+                //console.log("svlaBinary is : ", svlaBinary);
+
+
+                // const bvla = [];
+                // for (let i = 0; i < bvl.length; i++) {
+                //     // for (let j = 0; j < BuyO_exrem.length; j++)
+                //     if (bvl[i]>0) {
+                //         bvla.push(jsonData.data[i][4] + 80);
+                //     } else {
+                //         bvla.push(jsonData.data[i][4]);
+                //     }
+                // }
+
+                // const svla = [];
+                // for (let i = 0; i < svl.length; i++) {
+                //     //for (let j = 0; j < SellO_exrem.length; j++)
+                //     if (bvl[i]>0) {
+                //         svla.push(jsonData.data[i][4] - 80);
+                //     } else {
+                //         svla.push(jsonData.data[i][4]);
+                //     }
+                // }
+                
+                
+                // console.log("bvl is : ", bvl);
+                // //console.log(output);
+                // console.log("svl is : ", svl);
+
+                // const bvla = [];
+                // for (let i = 0; i < BuyO_exremCandleNum.length; i++) {
+                //     if (BuyO_exremCandleNum[i] >= 1) {
+                //         bvla.push(jsonData.data[i][4] + 80);
+                //     } else {
+                //         bvla.push(0);
+                //     }
+                // }
+
+                // const svla = [];
+                // for (let i = 0; i < SellO_exremCandleNum.length; i++) {
+                //     if (SellO_exremCandleNum[i] >= 1) {
+                //         svla.push(jsonData.data[i][4] - 80);
+                //     } else {
+                //         svla.push(0);
+                //     }
+                // }
 
                 const bvla = [];
-                for (let i = 0; i < BuyO_exremCandleNum.length; i++) {
-                    if (BuyO_exremCandleNum[i] >= 1) {
+                for (let i = 1; i < bvlaBinary.length; i++) {
+
+                    const CP = bvlaBinary[i-1];
+                    if (CP[i] > 0) {
                         bvla.push(jsonData.data[i][4] + 80);
                     } else {
                         bvla.push(0);
@@ -815,11 +953,75 @@
                     }
                 }
 
-                // console.log("bvla is : ", bvla);
-                // //console.log(output);
-                // console.log("svla is : ", svla);
+                //console.log("bvla is : ", bvla);
+                //console.log(output);
+                //console.log("svla is : ", svla);
 
 
+
+                function fillZeros(array) {
+                    let prevNonZero = null; // Keep track of the previous non-zero value
+
+                    for (let i = 0; i < array.length; i++) {
+                        if (array[i] > 1) {
+                        prevNonZero = array[i]; // Update prevNonZero only if the value is > 1
+                        }
+                        array[i] = prevNonZero || 0; // Fill with prevNonZero (if valid) or 0
+                    }
+
+                    return array;
+                    }
+
+                    // Example usage
+                //const inputArray = bvlaBinary;
+
+                const bvlaFinal = fillZeros(bvlaBinary);
+
+                const svlaFinal = fillZeros(svlaBinary);
+
+                console.log("Filled zeros : ");
+
+                //console.log("Filled bvlaFinal : ", bvlaFinal);
+                //console.log("Filled svlaFinal : ", svlaFinal);
+
+                //console.log(outputArray);
+
+
+                let ClosedPricesArray = [];
+                function ClosedPricesArrayFunction() {
+                    const crossovers = [];
+                    for (let i = 1; i < jsonData.data.length; i++) {
+                        // Check if the previous day's values were on different sides of the crossover point.
+                        ClosedPricesArray.push(jsonData.data[i][4]);
+                        crossovers.push(jsonData.data[i][4]);
+                    }
+                    return crossovers;
+                }
+                ClosedPricesArray = ClosedPricesArrayFunction();
+
+
+                function cross(array1, array2) {
+                    const crossovers = [];
+                    for (let i = 1; i < array1.length; i++) {
+                        // Check if the previous day's values were on different sides of the crossover point.
+                        if ((array1[i - 1] < array2[i - 1] && array1[i] >= array2[i]) ||
+                            (array1[i - 1] > array2[i - 1] && array1[i] <= array2[i])) {
+                        crossovers.push(1);
+                        } else {
+                        crossovers.push(0);
+                        }
+                    }
+                    return crossovers;
+                }
+
+                const CrossBuySignal = cross(ClosedPricesArray, bvlaFinal);
+                //console.log("CrossBuySignal is : ");
+                //console.log(CrossBuySignal);
+                
+                const CrossSellSignal = cross(svlaFinal, ClosedPricesArray);
+                //console.log("CrossSellSignal is : ");
+                //console.log(CrossBuySignal);
+                // Output: [0, 0, 0, 0, 1, 0, 0]
                 // function amibrokerAflExrem(array1, array2) {
                 //     // Initialize an empty result array
                 //     const result = new Array(array1.length).fill(0);
@@ -890,18 +1092,76 @@
                     //const svla = [0, 0, 0, 0, 0, 0, 0, 43620.1, 0, 43601.4, 0, 0, 0, 0, 0, 0, 43553.05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43527.95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43563.65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43488.75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 
+                //let bresultOut2Arrays = amibrokerAflExrem(CrossBuySignal, CrossSellSignal);
+                let bresultOut2Arrays = amibrokerAflExrem(CrossBuySignal, CrossSellSignal);
 
-                let bresultOut2Arrays = amibrokerAflExrem(bvla, svla);
-                    //console.log("bresult is : :", bresult);
+                // Print the filtered results
+                // console.log("Filtered buy signals:", filteredBresult);
+                // console.log("Filtered sell signals:", filteredSresult);
+                function filterSignals(bresult, sresult) {
+                    // Filter buy signals based on next greater sell signal
+                    const filteredBuySignals = [];
+                    let i = 0;
+                    while (i < bresult.length) {
+                        let j = i + 1;
+                        while (j < sresult.length && sresult[j] <= bresult[i]) {
+                        j++;
+                        }
+                        filteredBuySignals.push(bresult[i]);
+                        i = j;
+                    }
 
-                //let sresult = amibrokerAflExrem(svla, bvla);
-                    //console.log("sresult is : :", sresult);
+                    // Base case: check if buy signals are empty (no need to filter sell signals)
+                    if (filteredBuySignals.length === 0) {
+                        return [[], []];
+                    }
 
-                const bresult = bresultOut2Arrays[0];
-                const sresult = bresultOut2Arrays[1];
-                console.log(bresult);
-                console.log(sresult);
+                    // Check if next buy signal exists (avoid infinite recursion)
+                    if (i === bresult.length) {
+                        return [filteredBuySignals, []]; // return buy signals only
+                    }
 
+                    // Filter sell signals based on next greater buy signal (reversed arrays)
+                    const reversedBuy = filteredBuySignals.slice().reverse();
+                    const reversedSell = sresult.slice().reverse();
+
+                    // Ensure sell signals exist before recursion (avoid endless recursion)
+                    if (reversedSell.length > 0) {
+                        const filteredSellSignals = filterSignals(reversedSell, reversedBuy).reverse();
+                        return [filteredBuySignals, filteredSellSignals];
+                    } else {
+                        // If no sell signals, return existing buy signals
+                        return [filteredBuySignals, []];
+                    }
+                    }
+
+
+                const bresultAfterCross = bresultOut2Arrays[0];
+                const sresultAfterCross = bresultOut2Arrays[1];
+
+                let bresultOut2ArraysAfterCross = amibrokerAflExrem(bresultAfterCross, sresultAfterCross);
+
+                let bresult = bresultOut2Arrays[0];
+                let sresult = bresultOut2Arrays[1];
+
+                console.log("bresult is : :", bresult);
+                console.log("sresult is : :", sresult);
+
+                //console.log(bresult);
+                //console.log(sresult);
+                //let filteredBresultOut, filteredSresultOut = filterSignals(bresult, sresult);
+
+                let filterSignalsOutArray = filterSignals(bresult, sresult);
+
+                            // Print the filtered results
+                // console.log("Filtered buy signals:", filteredBresult[0]);
+                // console.log("Filtered sell signals:", filteredSresult[1]);
+
+                bresult = filterSignalsOutArray[0];
+                sresult = filterSignalsOutArray[1];
+
+                console.log("last filter bresult is : :", bresult);
+                console.log("last filter sresult is : :", sresult);
 
                 //console.log(output);
                 //console.log("Output is : ", bvla);
@@ -930,6 +1190,59 @@
                     ]);
                 }
 
+
+                                // Function to get the x-axis value for a given candle index
+                // function getXValue(candleIndex) {
+                //     return jsonData.data[candleIndex].x;
+                // }
+
+                
+                
+                // Function to create line data for a specific point
+                // function createLineData(candleIndex, color) {
+                //     return {
+                //         x: getXValue(candleIndex),
+                //         //y: candlestickData[candleIndex].close, 
+                //         y: jsonData.data[candleIndex][4],
+                //         // Adjust y-value as needed
+                //         marker: {
+                //             enabled: true,
+                //             symbol: 'diamond',
+                //             fillColor: color
+                //         }
+                //     };
+                // }
+
+
+
+
+                // const buyArray = bresult;
+                // const sellArray = sresult;
+
+                // // Generate line data based on buy and sell signals
+                // const lineData = [];
+                // for (let i = 0; i < buyArray.length; i++) {
+                //     const buyIndex = buyArray[i];
+                //     lineData.push(createLineData(buyIndex, 'green'));
+                //     for (let j = 1; j <= 10; j++) {
+                //         const nextIndex = buyIndex + j;
+                //         if (nextIndex < jsonData.data.length) {
+                //             lineData.push(createLineData(nextIndex, 'green'));
+                //         }
+                //     }
+                // }
+                // for (let i = 0; i < sellArray.length; i++) {
+                //     const sellIndex = sellArray[i];
+                //     lineData.push(createLineData(sellIndex, 'red'));
+                //     for (let j = 1; j <= 10; j++) {
+                //         const nextIndex = sellIndex + j;
+                //         if (nextIndex < jsonData.data.length) {
+                //             lineData.push(createLineData(nextIndex, 'red'));
+                //         }
+                //     }
+                // }
+
+
                 function addSignal(arg) {
                     arg.series.addPoint({
                         x: arg.point[0],
@@ -951,27 +1264,32 @@
                             events: {
                                 load() {
                                     const chart = this,
-                                        series = chart.series;
-                                    for (let i = 4000; i < bresult.length; i += 1) {
+                                    series = chart.series;
+                                    for (let i = bresult.length-30; i < bresult.length; i += 1) {
                                         if (bresult[i] > 0) {
+                                        const bpoint = bresult[i]
                                             addSignal({
                                                 series: series[4], // Scatter series
                                                 //point: jsonData.data[i], // Choose a point where you would like to append a triangle
-                                                point: jsonData.data[i],
+                                                point: jsonData.data[bpoint],
+
+                                                //point: bresult[i],
                                                 direction: "up", // 'triangle' or 'triangle-down'
                                                 size: 8,
                                                 triangleOffset: 5, // Choose how far shoud a triangle be from candlestick
                                             });
-                                            //console.log(i);
+                                            
                                         }
                                     }
                                     console.log("BResult done");
 
-                                    for (let i = 4000; i < sresult.length; i += 1) {
+                                    for (let i = sresult.length-30; i < sresult.length; i += 1) {
                                         if (sresult[i] > 0) {
+                                        const spoint = sresult[i]
                                             addSignal({
                                                 series: series[4],
-                                                point: jsonData.data[i],
+                                                //point: bresult[i],
+                                                point: jsonData.data[spoint],
                                                 // Scatter series
                                                 //point: jsonData.data[i], // Choose a point where you would like to append a triangle
                                                 direction: "down", // 'triangle' or 'triangle-down'
@@ -1059,7 +1377,7 @@
                                 type: "scatter",
                                 name: "Signal",
                                 animation: false,
-                            }
+                            },
                             // {
                             //   type: 'ohlc',
                             //     id      : 'aapl',
@@ -1075,7 +1393,7 @@
                             //       period: 50
                             //     }
                             // } 
-                            ,{
+                            {
                                 type: 'sma',
                                 linkedTo: 'aapl',
                                 params: {
@@ -1090,7 +1408,7 @@
                                     period: 280
                                 }
                             }
-
+                            
 
                             //, {
                             //     type    : 'line',
@@ -1105,10 +1423,11 @@
                             //     data    : svla
                             // }       
 
-
+                        ]
+                    }, 
                             
-                        ],
-                    },
+                    //     ],
+                    // },
                     function (chart) {
                         document.getElementById("overlays").addEventListener("change", function (e) {
                             const series = chart.get("overlay");
@@ -1136,9 +1455,12 @@
                                 });
                             }
                         });
-                    }
-                );
-            })();
+                    });
+            
+                
+            
+                })();           
+            // })();
         </script>
         <style>
             .selectors-container {
