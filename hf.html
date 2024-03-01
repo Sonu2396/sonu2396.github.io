@@ -677,16 +677,17 @@
                 let BuyoEma20After = [];
                 let SelloEma20After = [];
 
-                BuyoEma20AfterTF = ExRem(BuyoEma20TF, SelloEma20TF);
+                // BuyoEma20AfterTF = ExRem(BuyoEma20TF, SelloEma20TF);
 
-                SelloEma20AfterTF = ExRem(SelloEma20TF, BuyoEma20TF);
+                // SelloEma20AfterTF = ExRem(SelloEma20TF, BuyoEma20TF);
+                BuyoEma20AfterTF = BuyoEma20TF;
+                SelloEma20AfterTF = SelloEma20TF;
 
 
 
 
-
-                //console.log("BuyoEma20AfterTF is : ", BuyoEma20AfterTF);
-                //console.log("SelloEma20AfterTF is : ", SelloEma20AfterTF);
+                // console.log("BuyoEma20AfterTF is : ", BuyoEma20AfterTF);
+                // console.log("SelloEma20AfterTF is : ", SelloEma20AfterTF);
 
                 function BuyprocessArrays(boolArray, priceArray) {
 
@@ -697,7 +698,7 @@
                         if (boolArray[i]) {
                             // If true is encountered, check if it's the start of a new set
                             if (currentPrice === 0) {
-                                currentPrice = CA[i] + 80;
+                                currentPrice = CA[i];
                             }
                             newarray.push(currentPrice);
                         } else {
@@ -724,7 +725,7 @@
                         if (boolArray[i]) {
                             // If true is encountered, check if it's the start of a new set
                             if (currentPrice === 0) {
-                                currentPrice = CA[i] - 80;
+                                currentPrice = CA[i];
                             }
                             newarray.push(currentPrice);
                         } else {
@@ -828,6 +829,49 @@
                     return result;
                 }
 
+
+                function removeExcessiveSignals(array1, array2) {
+                    var filteredArray = [];
+                    var i = 0;
+                    var j = 0;
+
+                    while (i < array1.length) {
+                        var FValue = array1[i];
+                        var SValue = Infinity;
+
+                        // Find the next value in array2 greater than FValue
+                        while (j < array2.length && array2[j] <= FValue) {
+                            j++;
+                        }
+
+                        if (j < array2.length) {
+                            SValue = array2[j];
+                        }
+
+                        // Remove items in array1 greater than FValue but less than SValue
+                        while (i < array1.length && array1[i] < SValue) {
+                            filteredArray.push(array1[i]);
+                            i++;
+                        }
+                    }
+
+                    return filteredArray;
+                }
+
+                // Example usage
+                var BcrossAboveIndex = [90, 99, 125, 127, 131, 146, 174, 179, 181, 194, 208, 212, 222, 230, 234, 239, 242, 248, 255, 272, 276, 293, 295, 297, 323, 331, 339, 341, 348, 350, 362, 372, 376, 390, 393, 396, 402, 404, 408, 411, 414, 418, 423, 430, 435, 439, 456, 463, 469, 490, 492, 498, 508, 511, 524, 528, 543, 549, 559, 565, 573, 581, 585, 663, 668, 670, 678, 698, 700, 702, 712, 716, 720, 731, 808, 811, 873, 877, 884, 904, 912, 1053];
+                var ScrossBelowIndex = [33, 38, 41, 107, 150, 614, 623, 636, 641, 757, 801, 815, 919, 1010, 1012];
+
+                var filteredArray = removeExcessiveSignals(BcrossAboveIndex, ScrossBelowIndex);
+                console.log(filteredArray);
+
+
+
+
+
+
+
+
                 // Example usage
                 var buySignals = BcrossAboveIndex;
                 var sellSignals = ScrossBelowIndex;
@@ -879,7 +923,9 @@
 
             function addSignal(arg) {
                 arg.series.addPoint({
-                    x: arg.point[0],
+                    // x: arg.point[0],
+                    x: arg.sginaldate,
+
                     y: arg.direction == "up" ? arg.point[3] - arg.triangleOffset : arg.point[2] + arg.triangleOffset,
                     marker: {
                         symbol: arg.direction === "up" ? "triangle" : "triangle-down",
@@ -909,6 +955,7 @@
                                             series: series[3], // Scatter series
                                             //point: jsonData.data[i], // Choose a point where you would like to append a triangle
                                             point: ohlc[bpoint],
+                                            sginaldate: ohlc[bpoint][0],
 
                                             //point: bresult[i],
                                             direction: "up", // 'triangle' or 'triangle-down'
@@ -927,6 +974,7 @@
                                             series: series[3],
                                             //point: bresult[i],
                                             point: ohlc[spoint],
+                                            sginaldate: ohlc[spoint][0],
                                             // Scatter series
                                             //point: jsonData.data[i], // Choose a point where you would like to append a triangle
                                             direction: "down", // 'triangle' or 'triangle-down'
