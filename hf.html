@@ -204,7 +204,7 @@
             // split the data set into ohlc and volume
             const ohlc = [],
                 volume = [],
-                dataLength = jsonData.candles.length;
+                dataLength = reposedata.candles.length;
 
             // for (let i = 0; i < dataLength; i += 1) {
             //     ohlc.push([
@@ -225,23 +225,23 @@
 
 
             // split the data set into ohlc and volume
-            let data = reposedata.candles;
+            //let data = reposedata.candles;
 
             for (let i = 0; i < dataLength; i += 1) {
                 ohlc.push([
-                    ((data[i][0] + 19080) * 1000), // the date
+                    ((reposedata.candles[i][0] + 19080) * 1000), // the date
 
                     //data[i][0],
-                    data[i][1], // open
-                    data[i][2], // high
-                    data[i][3], // low
-                    data[i][4] // close
+                    reposedata.candles[i][1], // open
+                    reposedata.candles[i][2], // high
+                    reposedata.candles[i][3], // low
+                    reposedata.candles[i][4] // close
                 ]);
 
                 volume.push([
-                    ((data[i][0] + 19080) * 1000),
+                    ((reposedata.candles[i][0] + 19080) * 1000),
                     //data[i][0], // the date
-                    data[i][5] // the volume
+                    reposedata.candles[i][5] // the volume
                 ]);
             }
 
@@ -252,7 +252,7 @@
             let CA = [];
             for (let i = 0; i < dataLength; i += 1) {
                 CA.push([
-                    data[i][4] // close
+                    reposedata.candles[i][4] // close
                 ]);
             }
 
@@ -261,91 +261,239 @@
             for (let i = 0; i < dataLength; i += 1) {
                 OA.push([
                     // the date
-                    data[i][1] // open
+                    reposedata.candles[i][1] // open
 
                 ]);
             }
 
 
 
-            function StochD(data, period1, period2, period3) {
-                // Implementation of Stochastic D
+            // function StochD(data, period1, period2, period3) {
+            //     // Implementation of Stochastic D
+            //     // Calculate %K
+            //     var k = [];
+            //     var d = [];
+            //     var sd = [];
+            //     for (var i = period1 - 1; i < data.length; i++) {
+            //         var highHigh = Math.max.apply(null, data.slice(i - period1 + 1, i + 1));
+            //         var lowLow = Math.min.apply(null, data.slice(i - period1 + 1, i + 1));
+            //         k.push((data[i] - lowLow) / (highHigh - lowLow) * 100);
+            //     }
+
+            //     // Calculate %D
+            //     for (var j = period1 + period2 - 2; j < data.length; j++) {
+            //         var sumK = 0;
+            //         for (var kIndex = j - period1 + 1; kIndex <= j; kIndex++) {
+            //             highHigh = Math.max.apply(null, data.slice(kIndex - period2 + 1, kIndex + 1));
+            //             lowLow = Math.min.apply(null, data.slice(kIndex - period2 + 1, kIndex + 1));
+            //             sumK += (data[kIndex] - lowLow) / (highHigh - lowLow) * 100;
+            //         }
+            //         d.push(sumK / period2);
+            //     }
+
+            //     // Calculate %SD
+            //     for (var l = period1 + period2 + period3 - 3; l < data.length; l++) {
+            //         var sumD = 0;
+            //         for (var dIndex = l - period1 - period2 + 1; dIndex <= l; dIndex++) {
+            //             highHigh = Math.max.apply(null, data.slice(dIndex - period3 + 1, dIndex + 1));
+            //             lowLow = Math.min.apply(null, data.slice(dIndex - period3 + 1, dIndex + 1));
+            //             sumD += (data[dIndex] - lowLow) / (highHigh - lowLow) * 100;
+            //         }
+            //         sd.push(sumD / period3);
+            //     }
+
+            //     return { k: k, d: d, sd: sd };
+            // }
+            function StochD(data, periods = 14, Ksmooth = 3, Dsmooth = 3) {
                 // Calculate %K
-                var k = [];
-                var d = [];
-                var sd = [];
-                for (var i = period1 - 1; i < data.length; i++) {
-                    var highHigh = Math.max.apply(null, data.slice(i - period1 + 1, i + 1));
-                    var lowLow = Math.min.apply(null, data.slice(i - period1 + 1, i + 1));
-                    k.push((data[i] - lowLow) / (highHigh - lowLow) * 100);
-                }
-
-                // Calculate %D
-                for (var j = period1 + period2 - 2; j < data.length; j++) {
-                    var sumK = 0;
-                    for (var kIndex = j - period1 + 1; kIndex <= j; kIndex++) {
-                        highHigh = Math.max.apply(null, data.slice(kIndex - period2 + 1, kIndex + 1));
-                        lowLow = Math.min.apply(null, data.slice(kIndex - period2 + 1, kIndex + 1));
-                        sumK += (data[kIndex] - lowLow) / (highHigh - lowLow) * 100;
+                function calculateK(data, periods) {
+                    let k = [];
+                    for (let i = periods - 1; i < data.length; i++) {
+                        const periodData = data.slice(i - periods + 1, i + 1);
+                        const high = Math.max(...periodData);
+                        const low = Math.min(...periodData);
+                        const currentClose = data[i];
+                        const kValue = ((currentClose - low) / (high - low)) * 100;
+                        k.push(kValue);
                     }
-                    d.push(sumK / period2);
+                    return k;
                 }
 
-                // Calculate %SD
-                for (var l = period1 + period2 + period3 - 3; l < data.length; l++) {
-                    var sumD = 0;
-                    for (var dIndex = l - period1 - period2 + 1; dIndex <= l; dIndex++) {
-                        highHigh = Math.max.apply(null, data.slice(dIndex - period3 + 1, dIndex + 1));
-                        lowLow = Math.min.apply(null, data.slice(dIndex - period3 + 1, dIndex + 1));
-                        sumD += (data[dIndex] - lowLow) / (highHigh - lowLow) * 100;
+                // Calculate smoothed %K
+                function calculateSmoothedK(k, periods) {
+                    let smoothedK = [];
+                    for (let i = periods - 1; i < k.length; i++) {
+                        const smoothedValue = k.slice(i - periods + 1, i + 1).reduce((sum, val) => sum + val, 0) / periods;
+                        smoothedK.push(smoothedValue);
                     }
-                    sd.push(sumD / period3);
+                    return smoothedK;
                 }
 
-                return { k: k, d: d, sd: sd };
+                // Calculate smoothed %D
+                function calculateSmoothedD(smoothedK, periods) {
+                    let smoothedD = [];
+                    for (let i = periods - 1; i < smoothedK.length; i++) {
+                        const smoothedValue = smoothedK.slice(i - periods + 1, i + 1).reduce((sum, val) => sum + val, 0) / periods;
+                        smoothedD.push(smoothedValue);
+                    }
+                    return smoothedD;
+                }
+
+                const k = calculateK(data, periods);
+                const smoothedK = calculateSmoothedK(k, Ksmooth);
+                const smoothedD = calculateSmoothedD(smoothedK, Dsmooth);
+
+                return smoothedD;
             }
 
-            function MACD(data, shortPeriod, longPeriod) {
-                // Implementation of Moving Average Convergence Divergence (MACD)
-                var emaShort = [];
-                var emaLong = [];
-                var macd = [];
-                for (var i = 0; i < data.length; i++) {
-                    if (i >= longPeriod - 1) {
-                        emaShort.push(EMA(data.slice(i - shortPeriod + 1, i + 1)));
-                        emaLong.push(EMA(data.slice(i - longPeriod + 1, i + 1)));
-                        macd.push(emaShort[emaShort.length - 1] - emaLong[emaLong.length - 1]);
-                    } else {
-                        emaShort.push(null);
-                        emaLong.push(null);
-                        macd.push(null);
-                    }
+            // Example usage:
+            //const data = [/* your price data array */];
+            const periods = 8;
+            const Ksmooth = 3;
+            const Dsmooth = 3;
+
+            const stochD = StochD(CA, periods, Ksmooth, Dsmooth);
+            console.log("stochD is ");
+            //console.log(stochD);
+
+
+            // function StochD(data, period1, period2, period3) {
+            //     // Implementation of Stochastic D
+            //     // Calculate %K
+            //     var k = [];
+            //     var d = [];
+            //     var sd = [];
+            //     for (var i = period1 - 1; i < data.length; i++) {
+            //         var highHigh = Math.max.apply(null, data.slice(i - period1 + 1, i + 1));
+            //         var lowLow = Math.min.apply(null, data.slice(i - period1 + 1, i + 1));
+            //         k.push((data[i] - lowLow) / (highHigh - lowLow) * 100);
+            //     }
+
+            //     // Calculate %D
+            //     for (var j = period1 + period2 - 2; j < data.length; j++) {
+            //         var sumK = 0;
+            //         for (var kIndex = j - period1 + 1; kIndex <= j; kIndex++) {
+            //             highHigh = Math.max.apply(null, data.slice(kIndex - period2 + 1, kIndex + 1));
+            //             lowLow = Math.min.apply(null, data.slice(kIndex - period2 + 1, kIndex + 1));
+            //             sumK += (data[kIndex] - lowLow) / (highHigh - lowLow) * 100;
+            //         }
+            //         d.push(sumK / period2);
+            //     }
+
+            //     // Calculate %SD
+            //     for (var l = period1 + period2 + period3 - 3; l < data.length; l++) {
+            //         var sumD = 0;
+            //         for (var dIndex = l - period1 - period2 + 1; dIndex <= l; dIndex++) {
+            //             highHigh = Math.max.apply(null, data.slice(dIndex - period3 + 1, dIndex + 1));
+            //             lowLow = Math.min.apply(null, data.slice(dIndex - period3 + 1, dIndex + 1));
+            //             sumD += (data[dIndex] - lowLow) / (highHigh - lowLow) * 100;
+            //         }
+            //         sd.push(sumD / period3);
+            //     }
+
+            //     // Adding zeros at the beginning if necessary
+            //     var zerosToAdd = period1 - 1;
+            //     for (var m = 0; m < zerosToAdd; m++) {
+            //         k.unshift(0);
+            //     }
+            //     zerosToAdd = period1 + period2 - 2;
+            //     for (var n = 0; n < zerosToAdd; n++) {
+            //         d.unshift(0);
+            //     }
+            //     zerosToAdd = period1 + period2 + period3 - 3;
+            //     for (var p = 0; p < zerosToAdd; p++) {
+            //         sd.unshift(0);
+            //     }
+
+            //     return { k: k, d: d, sd: sd };
+            // }
+
+            // function Signal(data, shortPeriod, longPeriod, signalPeriod) {
+            //     // Implementation of Signal Line for MACD
+            //     var signalLine = [];
+            //     var macd = MACD(data, shortPeriod, longPeriod);
+            //     for (var i = 0; i < data.length; i++) {
+            //         if (i >= longPeriod + signalPeriod - 2) {
+            //             signalLine.push(EMA(macd.slice(i - signalPeriod + 1, i + 1)));
+            //         } else {
+            //             signalLine.push(null);
+            //         }
+            //     }
+            //     return signalLine;
+            // }
+
+            function calculateMACD(data, fastPeriod = 8, slowPeriod = 21, signalPeriod = 5) {
+                // Calculate EMA (Exponential Moving Average)
+
+                // Calculate MACD line
+                let emaFast = EMA(data, fastPeriod);
+                let emaSlow = EMA(data, slowPeriod);
+                let macdLine = [];
+                for (let i = 0; i < data.length; i++) {
+                    macdLine.push(emaFast[i] - emaSlow[i]);
                 }
-                return macd;
+
+                // Calculate Signal line
+                let signalLine = EMA(macdLine, signalPeriod);
+
+                return { macdLine: macdLine, signalLine: signalLine };
             }
 
-            function Signal(data, shortPeriod, longPeriod, signalPeriod) {
-                // Implementation of Signal Line for MACD
-                var signalLine = [];
-                var macd = MACD(data, shortPeriod, longPeriod);
-                for (var i = 0; i < data.length; i++) {
-                    if (i >= longPeriod + signalPeriod - 2) {
-                        signalLine.push(EMA(macd.slice(i - signalPeriod + 1, i + 1)));
-                    } else {
-                        signalLine.push(null);
-                    }
-                }
-                return signalLine;
-            }
+            // Example usage:
 
-            function EMA(data) {
-                // Implementation of Exponential Moving Average (EMA)
-                var ema = 0;
-                for (var i = 0; i < data.length; i++) {
-                    ema = (data[i] - ema) * (2 / (data.length + 1)) + ema;
+            const { macdLine, signalLine } = calculateMACD(CA);
+            // console.log("MACD Line:", macdLine);
+            // console.log("Signal Line:", signalLine);
+
+
+
+
+
+            function EMA(data, period) {
+                const multiplier = 2 / (period + 1);
+                let ema = [];
+                var sum = 0;
+
+
+                // Calculate SMA for the first period
+                for (let i = 0; i < period; i++) {
+                    if (i == 0) {
+                        ema.push(data[i]);
+                    }
+                    else {
+                        sum = parseFloat(sum) + parseFloat(data[i]);
+                        //sum = sum + data[i];
+                        const sma = sum / i;
+                        ema.push(sma);
+                    }
+
                 }
+                //let sma = sum / period;
+
+
+                // Calculate EMA for the remaining data points
+                for (let i = period; i < data.length; i++) {
+                    let currentPrice = data[i];
+                    let prevEMA = ema[i - period];
+                    //let currentEMA = (currentPrice - prevEMA) * multiplier + prevEMA;
+
+                    let currentEMA = (parseFloat(currentPrice) - parseFloat(prevEMA)) * parseFloat(multiplier) + parseFloat(prevEMA);
+
+                    ema.push(currentEMA);
+                }
+
                 return ema;
             }
+
+
+            // function EMA(data) {
+            //     // Implementation of Exponential Moving Average (EMA)
+            //     var ema = 0;
+            //     for (var i = 0; i < data.length; i++) {
+            //         ema = (data[i] - ema) * (2 / (data.length + 1)) + ema;
+            //     }
+            //     return ema;
+            // }
 
             function RSI(data, period) {
                 // Implementation of Relative Strength Index (RSI)
@@ -372,6 +520,36 @@
                 return rsi;
             }
 
+
+            function valueWhen(expression, array, n = 1) {
+                let result = [];
+                let count = 0;
+
+                // Iterate over the array and check the expression
+                for (let i = array.length - 1; i >= 0; i--) {
+                    if (expression(array[i])) {
+                        count++;
+                        if (count === n) {
+                            result.push(array[i]);
+                            return result;
+                        }
+                    }
+                }
+
+                // If the expression was not met 'n' times, return undefined
+                return undefined;
+            }
+
+            // Example usage:
+            const closePrices = CA;
+            const openPrices = OA;
+
+            const result = valueWhen((close) => close.open < close.close, openPrices);
+            //console.log(result); // Output: array of open prices when close price is greater than open price
+
+
+
+
             let bresult = [];
             let sresult = [];
             var FBindex = [];
@@ -385,8 +563,22 @@
             function main(closeData) {
                 // Main function
                 var SD = StochD(closeData, 8, 3, 3);
-                var MH = MACD(closeData, 8, 21);
-                var signalLine = Signal(closeData, 8, 21, 5);
+                var MJ = calculateMACD(closeData, 8, 21);
+                //var signalLine = Signal(closeData, 8, 21, 5);
+
+                var signalLineFinal = signalLine;
+
+                var MH = [];
+                for (var c = 0; c < closeData.length; c++) {
+
+                    var MHdiff = MJ.macdLine[c] - signalLineFinal[c];
+
+                    MH.push(MHdiff);
+                }
+                //console.log("MH cal is : ", MH);
+
+
+
                 var RSI3 = RSI(closeData, 3);
 
                 var trendup = [];
@@ -394,130 +586,290 @@
 
 
                 var RSI50p = [];
-                for (var a = 0; a < RSI3.length; a++) {
-                    if (RSI3[a] > 50) {
-                        RSI50p.push(a, RSI3[a]);
+                for (var b = 0; b < RSI3.length; b++) {
+                    if (RSI3[b] > 50) {
+                        RSI50p.push(b);
                     }
                 }
-                console.log("RSI 50 p :", RSI50p);
+                //console.log("RSI 50 p :", RSI50p);
 
 
-                for (var i = 0; i < closeData.length; i++) {
-                    var trendupCondition = (MH[i] > 0 || (MH[i] > 0 && MH[i] > MH[i - 1])) && RSI3[i] > 50 && SD.sd[i] < 80 && SD.sd[i] > SD.sd[i - 1] && closeData[i] < closeData[i - 1];
-                    var trendcolorCondition = (MH[i] < 0 || (MH[i] < 0 && MH[i] < MH[i - 1])) && RSI3[i] < 50 && SD.sd[i] > 20 && SD.sd[i] < SD.sd[i - 1] && closeData[i] > closeData[i - 1];
-                    trendup.push(trendupCondition ? "colorBlue" : "colorWhite");
-                    trendcolor.push(trendcolorCondition ? "colorRed" : trendupCondition ? "colorBlue" : "colorWhite");
-                }
+                // for (var i = 0; i < closeData.length; i++) {
+                //     var trendupCondition = (MH[i] > 0 || (MH[i] > 0 && MH[i] > MH[i - 1])) && RSI3[i] > 50 && SD.sd[i] < 80 && SD.sd[i] > SD.sd[i - 1] && closeData[i] < closeData[i - 1];
+                //     var trendcolorCondition = MH[i] < 0 || (MH[i] < 0 && MH[i] < MH[i - 1]) && RSI3[i] < 50 && SD.sd[i] > 20 && SD.sd[i] < SD.sd[i - 1] && closeData[i] > closeData[i - 1];
+                //     trendup.push(trendupCondition ? "colorBlue" : "colorWhite");
+                //     trendcolor.push(trendcolorCondition ? "colorRed" : trendupCondition ? "colorBlue" : "colorWhite");
+                // }
 
                 var EMA20 = [];
-                for (var j = 0; j < closeData.length; j++) {
-                    EMA20.push(EMA(closeData.slice(Math.max(0, j - 99), j + 1)));
-                }
+                EMA20 = EMA(CA, 20);
+                // for (var j = 0; j < closeData.length; j++) {
+                //     EMA20.push(EMA(closeData.slice(Math.max(0, j - 99), j + 1)));
+                // }
 
                 var Buyo = [];
                 var Sello = [];
-                for (var k = 0; k < closeData.length; k++) {
+                for (var i = 0; i < closeData.length; i++) {
                     // var buyoCondition = ((MH[k] > 0 || (MH[k] > 0) && MH[k] > MH[Math.max(0, k - 1)])) && RSI3[k] > 50 && SD.sd[k] < 80 && SD.sd[k] > SD.sd[Math.max(0, k - 1)] && closeData[k] < closeData[Math.max(0, k - 1)];
                     // var selloCondition = ((MH[k] < 0 || (MH[k] < 0) && MH[k] < MH[Math.max(0, k - 1)])) && RSI3[k] < 50 && SD.sd[k] > 20 && SD.sd[k] < SD.sd[Math.max(0, k - 1)] && closeData[k] > closeData[Math.max(0, k - 1)];
 
 
-                    var buyoCondition = ((MH[k] > 0 || (MH[k] > 0) && MH[k] > MH[Math.max(0, k - 1)])) && RSI3[k] > 50 && SD.sd[k] < 80 && SD.sd[k] > SD.sd[Math.max(0, k - 1)];
-                    var selloCondition = ((MH[k] < 0 || (MH[k] < 0) && MH[k] < MH[Math.max(0, k - 1)])) && RSI3[k] < 50 && SD.sd[k] > 20 && SD.sd[k] < SD.sd[Math.max(0, k - 1)] && closeData[k] > closeData[Math.max(0, k - 1)];
+
+                    // var buyoCondition = MH[i] > 0 || (MH[i] > 0 && MH[i] > MH[i - 1]) && RSI3[i] > 50 && SD.sd[i] < 80 && SD.sd[i] > SD.sd[i - 1] && closeData[i] < closeData[i - 1];
+                    // var selloCondition = MH[i] < 0 || (MH[i] < 0 && MH[i] < MH[i - 1]) && RSI3[i] < 50 && SD.sd[i] > 20 && SD.sd[i] < SD.sd[i - 1] && closeData[i] > closeData[i - 1];
+
+
+                    var buyoCondition = MH[i] > 0 || (MH[i] > 0 && MH[i] > MH[i - 1]) && RSI3[i] > 50 && stochD[i] < 80 && stochD[i] > stochD[i - 1];
+                    var selloCondition = MH[i] < 0 || (MH[i] < 0 && MH[i] < MH[i - 1]) && RSI3[i] < 50 && stochD[i] > 20 && stochD[i] < stochD[i - 1];
 
 
                     Buyo.push(buyoCondition);
                     Sello.push(selloCondition);
                 }
 
+                //console.log("Buyo is : ", Buyo);
+                //console.log("Sello is : ", Sello);
 
 
-                var bvl = [];
-                var bvla = [];
-                for (var l = 0; l < closeData.length; l++) {
-                    if (Buyo[l]) {
-                        bvl.push(closeData[l]);
-                        bvla.push(closeData[l] + 80);
-                        bvlindex.push(l);
+                let BuyoEma20 = [];
+                for (var y = 0; y < Buyo.length; y++) {
+                    if (Buyo[y] == true) {
+                        BuyoIndexVal = y;
+                        if (BuyoIndexVal && (closeData[BuyoIndexVal] > EMA20[BuyoIndexVal])) {
+                            BuyoEma20.push(BuyoIndexVal);
+                        }
+                    }
+
+                }
+                let SelloEma20 = [];
+                for (var y = 0; y < Sello.length; y++) {
+                    if (Sello[y] == true) {
+                        SelloIndexVal = y;
+                        if (SelloIndexVal && (closeData[SelloIndexVal] < EMA20[SelloIndexVal])) {
+                            SelloEma20.push(SelloIndexVal);
+                        }
+
+                    }
+
+                }
+
+                //console.log("BuyoEma20 is : ", BuyoEma20);
+                //console.log("SelloEma20 is : ", SelloEma20);
+
+
+                const arr2 = BuyoEma20;
+                const arr3 = SelloEma20;
+
+                const BuyoEma20TF = [];
+                const SelloEma20TF = [];
+
+                for (let i = 0; i < closeData.length; i++) {
+                    BuyoEma20TF.push(arr2.includes(i));
+                }
+                //console.log(BuyoEma20TF);
+
+
+                for (let i = 0; i < closeData.length; i++) {
+                    SelloEma20TF.push(arr3.includes(i));
+                }
+                //console.log(SelloEma20TF);
+
+                let BuyoEma20After = [];
+                let SelloEma20After = [];
+
+                BuyoEma20AfterTF = ExRem(BuyoEma20TF, SelloEma20TF);
+
+                SelloEma20AfterTF = ExRem(SelloEma20TF, BuyoEma20TF);
+
+
+
+
+
+                //console.log("BuyoEma20AfterTF is : ", BuyoEma20AfterTF);
+                //console.log("SelloEma20AfterTF is : ", SelloEma20AfterTF);
+
+                function BuyprocessArrays(boolArray, priceArray) {
+
+                    var newarray = [];
+                    var currentPrice = 0;
+
+                    for (var i = 0; i < boolArray.length; i++) {
+                        if (boolArray[i]) {
+                            // If true is encountered, check if it's the start of a new set
+                            if (currentPrice === 0) {
+                                currentPrice = CA[i] + 80;
+                            }
+                            newarray.push(currentPrice);
+                        } else {
+                            // If false is encountered, push 0 and reset currentPrice
+                            newarray.push(0);
+                            currentPrice = 0;
+                        }
+                    }
+
+                    return newarray;
+                }
+
+                // Example usage:
+                const bvl = BuyprocessArrays(BuyoEma20AfterTF, CA);
+                //console.log("bvl newArray");
+                //console.log(bvl);
+
+                function SellprocessArrays(boolArray, priceArray) {
+
+                    var newarray = [];
+                    var currentPrice = 0;
+
+                    for (var i = 0; i < boolArray.length; i++) {
+                        if (boolArray[i]) {
+                            // If true is encountered, check if it's the start of a new set
+                            if (currentPrice === 0) {
+                                currentPrice = CA[i] - 80;
+                            }
+                            newarray.push(currentPrice);
+                        } else {
+                            // If false is encountered, push 0 and reset currentPrice
+                            newarray.push(0);
+                            currentPrice = 0;
+                        }
+                    }
+
+                    return newarray;
+                }
+                const svl = SellprocessArrays(SelloEma20AfterTF, CA);
+                //console.log("svl newArray");
+                //console.log(svl);
+
+
+
+                function Lastcross(array1, array2) {
+                    if (array1.length !== array2.length) {
+                        throw new Error('Arrays must be of equal length');
+                    }
+
+                    var result = [];
+
+                    for (var i = 1; i < array1.length; i++) {
+                        if (array1[i] > array2[i] && array1[i - 1] <= array2[i - 1]) {
+                            result.push(1); // Crossing up
+                        } else {
+                            result.push(0);
+                        }
+                    }
+
+                    return result;
+                }
+                var BcrossAbove = Lastcross(CA, bvl);
+                //console.log("crossAbove");
+                //console.log(BcrossAbove);
+                var ScrossBelow = Lastcross(svl, CA);
+                //console.log("crossBelow");
+                //console.log(ScrossBelow);
+
+
+                var BcrossAboveIndex = [];
+                var ScrossBelowIndex = [];
+
+
+                for (var s = 0; s < BcrossAbove.length; s++) {
+                    if (BcrossAbove[s] == 1) {
+                        BcrossAboveIndex.push(s);
                     }
                 }
+                console.log("BcrossAboveIndex");
+                console.log(BcrossAboveIndex);
 
-                var svl = [];
-                var svla = [];
-                for (var m = 0; m < closeData.length; m++) {
-                    if (Sello[m]) {
-                        svl.push(closeData[m]);
-                        svla.push(closeData[m] - 80);
-                        svlindex.push(m);
+                for (var s = 0; s < ScrossBelow.length; s++) {
+                    if (ScrossBelow[s] == 1) {
+                        ScrossBelowIndex.push(s);
                     }
                 }
+                console.log("ScrossBelowIndex");
+                console.log(ScrossBelowIndex);
 
 
 
-                // Trading signals
-                var Buy = [];
-                var Sell = [];
+                function exrem(array1, array2) {
+                    var result = [];
+                    var flag = false; // Flag to track if ARRAY1 has already encountered a true value
+                    var minLength = Math.min(array1.length, array2.length);
 
-                var BuyTIndex = [];
-                var SellTIndex = [];
-
-
-                for (var s = 0; s < Buyo.length; s++) {
-                    if (Buyo[s] === true) {
-                        BuyTIndex.push(s);
+                    for (var i = 0; i < minLength; i++) {
+                        if (array1[i]) {
+                            if (!flag && array2[i]) {
+                                // If ARRAY1 is true and ARRAY2 is also true, mark the flag and push 1
+                                result.push(1);
+                                flag = true;
+                            } else {
+                                // If ARRAY1 is true but ARRAY2 is false or flag is already set, push 0
+                                result.push(0);
+                            }
+                        } else {
+                            // If ARRAY1 is false, push 0 and reset the flag
+                            result.push(0);
+                            flag = false;
+                        }
                     }
-                }
 
-
-                for (var t = 0; t < Sello.length; t++) {
-                    if (Sello[t] === true) {
-                        SellTIndex.push(t);
+                    // If ARRAY1 is longer, handle the remaining elements
+                    if (array1.length > minLength) {
+                        for (var i = minLength; i < array1.length; i++) {
+                            result.push(0);
+                        }
                     }
-                }
 
-                console.log("Buy before exrem :", BuyTIndex);
-                console.log("Sell before exrem :", SellTIndex);
-
-                for (var n = 0; n < closeData.length; n++) {
-                    Buy.push(Buyo[n]);
-                    Sell.push(Sello[n]);
-                }
-                Buy = ExRem(Buy, Sell);
-                Sell = ExRem(Sell, Buy);
-
-
-
-                for (var o = 0; o < Buy.length; o++) {
-                    if (Buy[o] === true) {
-                        FBindex.push(o);
+                    // If ARRAY2 is longer, handle the remaining elements
+                    if (array2.length > minLength) {
+                        for (var i = minLength; i < array2.length; i++) {
+                            result.push(0);
+                        }
                     }
+
+                    return result;
                 }
 
+                // Example usage
+                var buySignals = BcrossAboveIndex;
+                var sellSignals = ScrossBelowIndex;
+                var filteredBuySignals = exrem(buySignals, sellSignals);
+                var filteredSellSignals = exrem(sellSignals, buySignals);
+                //console.log("Filtered Buy Signals:", filteredBuySignals);
+                //console.log("Filtered Sell Signals:", filteredSellSignals);
 
-                for (var p = 0; p < Sell.length; p++) {
-                    if (Sell[p] === true) {
-                        FSindex.push(p);
-                    }
-                }
-                bresult = FBindex;
-                sresult = FSindex;
-                var Short = Sell;
-                var Cover = Buy;
+                bresult = BcrossAboveIndex;
+                sresult = ScrossBelowIndex;
+
+                FBindex = BcrossAboveIndex;
+                FSindex = ScrossBelowIndex;
+
 
                 // Remaining code for trading strategy
             }
 
-            // Auxiliary function to replicate ExRem function in Amibroker
+
             function ExRem(array1, array2) {
-                var result = [];
-                for (var i = 0; i < array1.length; i++) {
-                    if (array1[i] && !array2[i]) {
+                let result = [];
+                let removing = false;
+
+                for (let i = 0; i < array1.length; i++) {
+                    if (array1[i]) {
+                        if (!removing) {
+                            result.push(true);
+                            removing = true;
+                        } else {
+                            result.push(false);
+                        }
+                    } else if (array2[i]) {
                         result.push(true);
+                        removing = false;
                     } else {
                         result.push(false);
                     }
                 }
+
                 return result;
             }
+
 
             // Example usage of main function
             var closeData = CA; // Insert your close price data here
