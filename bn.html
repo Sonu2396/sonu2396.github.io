@@ -1,1561 +1,1389 @@
 <html>
-    <head>
-        <!-- <meta http-equiv="refresh" content="60"> -->
-        <script src="https://code.highcharts.com/stock/highstock.js"></script>
-        <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
-        <script src="https://code.highcharts.com/stock/indicators/indicators-all.js"></script>
-        <script src="https://code.highcharts.com/stock/modules/accessibility.js"></script>
-        <script src="https://code.highcharts.com/stock/modules/data.js"></script>
-        <script src="Mainscript.js" type="script"></script>
-        <script>
-            (async () => {
-                // const data = await fetch(
-                //     'https://demo-live-data.highcharts.com/aapl-ohlcv.json'
-                // ).then(response => response.json());
-                //const resposedata = {};
-                // try 
-                // {
+
+<head>
+    <!-- <meta http-equiv="refresh" content="60"> -->
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+
+    <!-- <script src="https://code.highcharts.com/stock/6.1.0/highstock.js"></script> -->
 
 
-                    //*****************************************************************Start API
-
-                    let reposedata; // Declare outside for wider scope
-
-                    try {
-                    const response = await fetch("https://inservice.onrender.com/scrape");
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    reposedata = await response.json();
-                    } catch (error) {
-
-                    console.error('Error fetching data:', error);
-                    let labelElement = document.getElementById("labelWithHTML");
-                    labelElement.innerText = `Error: ${error.message}`;
-                    // Handle the error gracefully, e.g., display an error message, provide retry options, etc.
-                    }
-
-                    // Now you can use reposedata outside the try...catch block
-
-                    if (reposedata) {
-                    // Process the fetched data using reposedata
-                    console.log(reposedata.data.length);
-                    
-                    } else {
-                    // Handle the case where data fetching failed
-                    console.warn("Data could not be fetched successfully.");
-                    }
-
-                    const jsonData = reposedata;
-
-                //*****************************************************************End API    
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/stock/indicators/indicators-all.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/accessibility.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/data.js"></script>
+    <script src="Mainscript.js" type="script"></script>
+    <script>
+        (async () => {
+            // const data = await fetch(
+            //     'https://demo-live-data.highcharts.com/aapl-ohlcv.json'
+            // ).then(response => response.json());
+            //const resposedata = {};
+            // try 
+            // {
 
 
-                //const resposedata = await fetch("https://inservice.onrender.com/scrape").then((response) => response.json());
-                // }
-                // catch (error) {
-                // let labelElement = document.getElementById("labelWithHTML");
-                // labelElement.innerText = `Error: ${error.message}`;
-                // console.error("Error fetching API data:", error);
-                // }
-   
-                // Deserializing the JSON string into a JavaScript object
-                //let user = JSON.parse(resposedata);
-                //console.log(user);
-                //console.log(resposedata.data);
+            //*****************************************************************Start API
 
-                
+            let reposedata; // Declare outside for wider scope
 
-                //
-                //
-                //
-                ////*****************************************************************Readymade   
-                // const jsonData = {
-                //     data: [
-                //       [1697779500000, 43702.65, 43714.35, 43695.2, 43703.15, 1315, 47736],
-                //       [1697779800000, 43701.6, 43730.35, 43701.6, 43728.45, 2515, 49051],
-                //       [1697780100000, 43732.05, 43746.95, 43724.95, 43731, 1159, 51566],
-                //       [1697780400000, 43731.15, 43756.05, 43721.1, 43743.2, 2127, 52725],
-                //       [1697780700000, 43744.75, 43768.6, 43735.35, 43757.3, 1440, 54852],
-                //       [1697781000000, 43754.45, 43761.15, 43731.65, 43744.95, 1696, 56292],
-                //       [1697781300000, 43745.25, 43764.05, 43736, 43745.45, 1669, 57988],
-                //       [1697781600000, 43745.2, 43756.35, 43724.25, 43728.35, 1197, 59657],
-                //       [1697781900000, 43724.25, 43743.5, 43724.25, 43733.9, 799, 60854],
-                //       [1697782200000, 43733.6, 43734.35, 43682.35, 43682.35, 2074, 61653],
-                //       [1697782500000, 43682.45, 43696.95, 43674.95, 43695.5, 4667, 63727],
-                //       [1697782800000, 43694.45, 43710.7, 43680.55, 43710.7, 2871, 68394],
-                //       [1697783100000, 43706.1, 43706.1, 43618.75, 43664.35, 3773, 71265],
-                //       [1697783400000, 43664.45, 43671.25, 43649.5, 43658.65, 3021, 75038],
-                //       [1697783700000, 43658.7, 43691.85, 43658.7, 43689.85, 1514, 78059],
-                //       [1697784000000, 43690.5, 43737.15, 43687.4, 43708.8, 2098, 79573],
-                //       [1697784300000, 43710.05, 43731.75, 43707.75, 43718.45, 1803, 81671],
-                //       [1697784600000, 43716.35, 43743.9, 43701.15, 43737.75, 1740, 83474],
-                //       [1697784900000, 43740.2, 43750.95, 43732.35, 43737.6, 1495, 85214],
-                //       [1697785200000, 43735.65, 43741.05, 43711.7, 43731.9, 1644, 86709],
-                //       [1697785500000, 43728.8, 43734.8, 43710.1, 43714, 1665, 88353],
-                //       [1697785800000, 43711.8, 43729.4, 43702.9, 43714.2, 1569, 90018],
-                //       [1697786100000, 43711, 43728.15, 43708.75, 43725.45, 1175, 91587],
-                //       [1697786400000, 43721.2, 43745.1, 43708.2, 43745.1, 1558, 92762],
-                //       [1697786700000, 43743.65, 43743.65, 43693.25, 43698.75, 1759, 94320],
-                //       [1697787000000, 43695.65, 43732.2, 43686.9, 43714.05, 2295, 96079],
-                //       [1697787300000, 43711.5, 43738.7, 43711.3, 43715.95, 1336, 98374],
-                //       [1697787600000, 43718.2, 43740.2, 43709.1, 43730.45, 1507, 99710],
-                //       [1697787900000, 43726.75, 43871.9, 43726.75, 43845.35, 2457, 101217],
-                //       [1697788200000, 43845.55, 43845.55, 43798.85, 43807, 1224, 103674],
-                //       [1697788500000, 43814.45, 43827.7, 43810.05, 43810.05, 790, 104898],
-                //       [1697788800000, 43809.25, 43809.25, 43734.85, 43748.85, 1455, 105688],
-                //       [1697789100000, 43748.8, 43759.8, 43741.7, 43745.25, 1177, 107143],
-                //       [1697789400000, 43744.25, 43763.45, 43737.2, 43749.35, 787, 108320],
-                //       [1697789700000, 43747.7, 43748.5, 43693.6, 43694.7, 1306, 109107],
-                //       [1697790000000, 43694.85, 43753.2, 43694.85, 43743.9, 1065, 110413],
-                //       [1697790300000, 43745, 43769.35, 43738.55, 43743.25, 1072, 111478],
-                //       [1697790600000, 43742.9, 43754.1, 43719.95, 43744.95, 1042, 112550],
-                //       [1697790900000, 43743.9, 43763.5, 43735.6, 43758.2, 1300, 113592],
-                //       [1697791200000, 43758.25, 43773.1, 43745.5, 43745.5, 1126, 114892],
-                //       [1697791500000, 43747.9, 43798.1, 43746.6, 43789.85, 1335, 116018],
-                //       [1697791800000, 43787.9, 43810.5, 43774.3, 43786.9, 1450, 117353],
-                //       [1697792100000, 43785, 43803.1, 43763.5, 43763.5, 1158, 118803],
-                //       [1697792400000, 43772.2, 43778.45, 43758.55, 43769.9, 1082, 119961],
-                //       [1697792700000, 43770.4, 43770.4, 43729.35, 43746.15, 1765, 121043],
-                //       [1697793000000, 43743.75, 43766.3, 43740.55, 43751.25, 1193, 122808],
-                //       [1697793300000, 43748.5, 43754.75, 43735.05, 43745.2, 1696, 124001],
-                //       [1697793600000, 43740.25, 43751.85, 43732.6, 43745.9, 1224, 125697],
-                //       [1697793900000, 43742.4, 43742.4, 43696.7, 43703.55, 2281, 126921],
-                //       [1697794200000, 43708.95, 43738.55, 43678.45, 43722.55, 3106, 129202],
-                //       [1697794500000, 43721.25, 43742.25, 43721.25, 43734.6, 2562, 132308],
-                //       [1697794800000, 43733.1, 43741.75, 43720.9, 43729.85, 3363, 134870],
-                //       [1697795100000, 43735.6, 43739.1, 43714, 43720.3, 4553, 138233],
-                //       [1697795400000, 43731.8, 43738.4, 43713.75, 43732.35, 5543, 142786],
-                //       [1697795700000, 43730.05, 43740.65, 43719.1, 43740.65, 3988, 148329],
-                //       [1697796000000, 43737.1, 43737.1, 43737.1, 43737.1, 11, 152317],
-                //       [1698032700000, 43773.7, 43816, 43760.3, 43802.85, 7781, 0],
-                //       [1698033000000, 43803.45, 43824.95, 43773.55, 43773.55, 6326, 7781],
-                //       [1698033300000, 43772.8, 43786.35, 43748.5, 43759.95, 4039, 14107],
-                //       [1698033600000, 43753, 43764.4, 43738.75, 43749.25, 4148, 18146],
-                //       [1698033900000, 43740.35, 43786.35, 43734.6, 43784, 3196, 22294],
-                //       [1698034200000, 43785.8, 43803.75, 43767.3, 43792, 3123, 25490],
-                //       [1698034500000, 43788.6, 43797.65, 43770.7, 43770.7, 2818, 28613],
-                //       [1698034800000, 43772.7, 43794.75, 43769.2, 43775.4, 2069, 31431],
-                //       [1698035100000, 43774.75, 43797.35, 43774.75, 43785.5, 2302, 33500],
-                //       [1698035400000, 43787.8, 43803.25, 43786.75, 43787.05, 1769, 35802],
-                //       [1698035700000, 43785.9, 43790.7, 43742.45, 43745.1, 2369, 37571],
-                //       [1698036000000, 43742.9, 43758.7, 43645.75, 43664, 3349, 39940],
-                //       [1698036300000, 43669.3, 43682.55, 43629.8, 43662.2, 3748, 43289],
-                //       [1698036600000, 43665.25, 43665.25, 43628.25, 43643.7, 3020, 47037],
-                //       [1698036900000, 43642.5, 43655, 43626.6, 43645, 3135, 50057],
-                //       [1698037200000, 43650.25, 43667.4, 43637.35, 43663.05, 2201, 53192],
-                //       [1698037500000, 43657.65, 43671, 43652.6, 43652.6, 1614, 55393],
-                //       [1698037800000, 43651.15, 43659.7, 43640.5, 43647.85, 1466, 57007],
-                //       [1698038100000, 43648.65, 43655.6, 43634.15, 43643.55, 1602, 58473],
-                //       [1698038400000, 43642.05, 43677.5, 43640.95, 43677.5, 1274, 60075],
-                //       [1698038700000, 43671.65, 43681.55, 43662.5, 43665.15, 1251, 61349],
-                //       [1698039000000, 43666.95, 43685.95, 43655.75, 43683.85, 1327, 62600],
-                //       [1698039300000, 43683.6, 43693.15, 43670.6, 43687.3, 1681, 63927],
-                //       [1698039600000, 43688.45, 43688.7, 43659.95, 43664.75, 972, 65608],
-                //       [1698039900000, 43662.75, 43683.95, 43659.3, 43682.9, 838, 66580],
-                //       [1698040200000, 43684.85, 43684.85, 43652.65, 43657.6, 2088, 67418],
-                //       [1698040500000, 43651.4, 43673.75, 43633.7, 43667.2, 2093, 69506],
-                //       [1698040800000, 43670.15, 43673.4, 43659.8, 43670.4, 1195, 71599],
-                //       [1698041100000, 43672.5, 43679.95, 43664.25, 43665.7, 1150, 72794],
-                //       [1698041400000, 43665.55, 43665.55, 43613.55, 43613.55, 2048, 73944],
-                //       [1698041700000, 43589.4, 43638.85, 43589.4, 43634.45, 3235, 75992],
-                //       [1698042000000, 43645.7, 43686.9, 43634.9, 43686.25, 1367, 79227],
-                //       [1698042300000, 43685.25, 43705.15, 43676.6, 43687.8, 1917, 80594],
-                //       [1698042600000, 43691.3, 43722.4, 43686.35, 43696.25, 2454, 82511],
-                //       [1698042900000, 43699, 43701.35, 43685.4, 43688.5, 1412, 84965],
-                //       [1698043200000, 43690.05, 43701.6, 43682.65, 43682.65, 2088, 86377],
-                //       [1698043500000, 43687.2, 43687.2, 43669.3, 43678.35, 1455, 88465],
-                //       [1698043800000, 43678.45, 43725.45, 43678.45, 43715.55, 2182, 89920],
-                //       [1698044100000, 43715.3, 43717.85, 43667.4, 43667.75, 1655, 92102],
-                //       [1698044400000, 43667.05, 43667.65, 43650.3, 43662.6, 1359, 93757],
-                //       [1698044700000, 43662.6, 43679, 43641.8, 43647.5, 1081, 95116],
-                //       [1698045000000, 43650.05, 43664.8, 43643, 43660.85, 1571, 96197],
-                //       [1698045300000, 43660.35, 43665.45, 43644.15, 43648.2, 1317, 97768],
-                //     ],
-                //     events: null,
-                //   };
-
-
-
-                ////*****************************************************************Readymade
-                //const data = jsonData.data;
-                //const data = jsonData.data;
-
-                console.log("jsonData is : ", jsonData.data.length);
-                const CalculatedEMA20 = [];
-                const CalculatedStocD = [];
-                function calculateStochD(data, periods = 14, Ksmooth = 3, Dsmooth = 3) {
-                    const lowestLows = [];
-                    const highestHighs = [];
-                    const stochK = [];
-                    const stochD = [];
-                    // Calculate lowestLows and highestHighs for each period
-                    for (let i = 0; i < data.length; i++) {
-                        // Adjust windowStart based on the current candle index and period
-                        const windowStart = Math.max(0, i - periods + 1);
-                        const windowEnd = i;
-                        lowestLows.push(Math.min(...data.slice(windowStart, windowEnd + 1).map((d) => d[3])));
-                        highestHighs.push(Math.max(...data.slice(windowStart, windowEnd + 1).map((d) => d[2])));
-                    }
-                    // Calculate %K (Fast Stochastic) and %D (Slow Stochastic) for each candle
-                    for (let i = 0; i < data.length; i++) {
-                        const currentClose = data[i][4];
-                        const currentLowestLow = lowestLows[i];
-                        const currentHighestHigh = highestHighs[i];
-                        // Calculate %K
-                        const percentK = 100 * ((currentClose - currentLowestLow) / (currentHighestHigh - currentLowestLow));
-                        stochK.push(percentK);
-                        // Calculate %D (Smooth %K using simple moving average)
-                        let smoothedK = null;
-                        if (i >= Ksmooth - 1) {
-                            smoothedK = simpleMovingAverage(stochK.slice(i - Ksmooth + 1, i + 1)); // Use last Ksmooth values
-                        }
-                        stochD.push(smoothedK);
-                        //console.log("candle number : ", i);
-                        // Log date, open, high, low, close, %K, and %D (if available)
-                        const date = new Date(data[i][0]);
-                        //console.log(
-                        //   `${date.toISOString()},${data[i][1]},${data[i][2]},${data[i][3]},${
-                        //     data[i][4]
-                        //   },${percentK},${smoothedK}`
-                        // );
-                        CalculatedStocD.push(smoothedK);
-                    }
+            try {
+                const response = await fetch("https://inservice.onrender.com/scrape");
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                function simpleMovingAverage(data) {
-                    const sum = data.reduce((acc, val) => acc + val, 0);
-                    return sum / data.length;
-                }
-                const periods = 8;
-                const Ksmooth = 3;
-                const Dsmooth = 3;
-                calculateStochD(jsonData.data, periods, Ksmooth, Dsmooth);
-                //console.log("StochD is done");
+                reposedata = await response.json();
+            } catch (error) {
 
-                //   const CalculatedMH = [];
-                //   function calculateMH(data) {
-                //     const fastLength = 8;
-                //     const slowLength = 21;
-                //     const signalLength = 5;
-                //     const macdLine = [];
-                //     const signalLine = [];
-                //     const mh = [];
-                //     for (let i = 0; i < jsonData.data.length; i++) {
-                //       // Calculate MACD line
-                //       const macd = calculateMACDLine(jsonData.data, i, fastLength, slowLength);
-                //       macdLine.push(macd);
-                //       // Calculate signal line (EMA of MACD line)
-                //       const signal = calculateEMA(macdLine, i, signalLength);
-                //       signalLine.push(signal);
-                //       // Calculate MH
-                //       mh.push(macd - signal);
-                //       CalculatedMH.push(macd - signal);
-                //     }
-                //     return mh;
-                //   }
-                //   function calculateMACDLine(data, index, fastLength, slowLength) {
-                //     // Ensure enough data points for moving averages
-                //     if (index < Math.max(fastLength, slowLength) - 1) {
-                //       return null;
-                //     }
-                //     const fastMA = calculateSMA(jsonData.data, index, fastLength);
-                //     const slowMA = calculateSMA(jsonData.data, index, slowLength);
-                //     return fastMA - slowMA;
-                //   }
-                //   function calculateSMA(data, index, period) {
-                //     const windowStart = Math.max(0, index - period + 1);
-                //     const windowEnd = index;
-                //     const sum = data
-                //       .slice(windowStart, windowEnd + 1)
-                //       .map((d) => d[4])
-                //       .reduce((acc, val) => acc + val, 0);
-                //     return sum / period;
-                //   }
-                //   function calculateEMA(data, index, period) {
-                //     // Ensure enough data points for EMA
-                //     if (index < period - 1) {
-                //       return null;
-                //     }
-                //     const multiplier = 2 / (period + 1);
-                //     const prevEMA = data[index - 1];
-                //     const currentValue = data[index];
-                //     return currentValue * multiplier + prevEMA * (1 - multiplier);
-                //   }
-                //   // Example usage:
+                console.error('Error fetching data:', error);
+                let labelElement = document.getElementById("labelWithHTML");
+                labelElement.innerText = `Error: ${error.message}`;
+                // Handle the error gracefully, e.g., display an error message, provide retry options, etc.
+            }
 
-                //   const mhValues = calculateMH(jsonData.data);
+            // Now you can use reposedata outside the try...catch block
 
-                const CalculatedMH = [];
+            if (reposedata) {
+                // Process the fetched data using reposedata
+                console.log(reposedata.candles.length);
 
-                const calculateEMA = (data, period) => {
-                    const ema = new Array(data.length).fill(null); // Use null for initial values
-                    ema[0] = data[0][4]; // Initialize with the first close price
+            } else {
+                // Handle the case where data fetching failed
+                console.warn("Data could not be fetched successfully.");
+            }
 
-                    for (let i = 1; i < data.length; i++) {
-                        const multiplier = 2 / (period + 1);
-                        ema[i] = data[i][4] * multiplier + (ema[i - 1] !== null ? ema[i - 1] * (1 - multiplier) : 0);
+            const jsonData = reposedata;
+
+            //*****************************************************************End API    
+
+
+            //const resposedata = await fetch("https://inservice.onrender.com/scrape").then((response) => response.json());
+            // }
+            // catch (error) {
+            // let labelElement = document.getElementById("labelWithHTML");
+            // labelElement.innerText = `Error: ${error.message}`;
+            // console.error("Error fetching API data:", error);
+            // }
+
+            // Deserializing the JSON string into a JavaScript object
+            //let user = JSON.parse(resposedata);
+            //console.log(user);
+            //console.log(resposedata.data);
+
+
+
+            //
+            //
+            //
+            ////*****************************************************************Readymade   
+            // const jsonData = {
+            //     data: [
+            //       [1697779500000, 43702.65, 43714.35, 43695.2, 43703.15, 1315, 47736],
+            //       [1697779800000, 43701.6, 43730.35, 43701.6, 43728.45, 2515, 49051],
+            //       [1697780100000, 43732.05, 43746.95, 43724.95, 43731, 1159, 51566],
+            //       [1697780400000, 43731.15, 43756.05, 43721.1, 43743.2, 2127, 52725],
+            //       [1697780700000, 43744.75, 43768.6, 43735.35, 43757.3, 1440, 54852],
+            //       [1697781000000, 43754.45, 43761.15, 43731.65, 43744.95, 1696, 56292],
+            //       [1697781300000, 43745.25, 43764.05, 43736, 43745.45, 1669, 57988],
+            //       [1697781600000, 43745.2, 43756.35, 43724.25, 43728.35, 1197, 59657],
+            //       [1697781900000, 43724.25, 43743.5, 43724.25, 43733.9, 799, 60854],
+            //       [1697782200000, 43733.6, 43734.35, 43682.35, 43682.35, 2074, 61653],
+            //       [1697782500000, 43682.45, 43696.95, 43674.95, 43695.5, 4667, 63727],
+            //       [1697782800000, 43694.45, 43710.7, 43680.55, 43710.7, 2871, 68394],
+            //       [1697783100000, 43706.1, 43706.1, 43618.75, 43664.35, 3773, 71265],
+            //       [1697783400000, 43664.45, 43671.25, 43649.5, 43658.65, 3021, 75038],
+            //       [1697783700000, 43658.7, 43691.85, 43658.7, 43689.85, 1514, 78059],
+            //       [1697784000000, 43690.5, 43737.15, 43687.4, 43708.8, 2098, 79573],
+            //       [1697784300000, 43710.05, 43731.75, 43707.75, 43718.45, 1803, 81671],
+            //       [1697784600000, 43716.35, 43743.9, 43701.15, 43737.75, 1740, 83474],
+            //       [1697784900000, 43740.2, 43750.95, 43732.35, 43737.6, 1495, 85214],
+            //       [1697785200000, 43735.65, 43741.05, 43711.7, 43731.9, 1644, 86709],
+            //       [1697785500000, 43728.8, 43734.8, 43710.1, 43714, 1665, 88353],
+            //       [1697785800000, 43711.8, 43729.4, 43702.9, 43714.2, 1569, 90018],
+            //       [1697786100000, 43711, 43728.15, 43708.75, 43725.45, 1175, 91587],
+            //       [1697786400000, 43721.2, 43745.1, 43708.2, 43745.1, 1558, 92762],
+            //       [1697786700000, 43743.65, 43743.65, 43693.25, 43698.75, 1759, 94320],
+            //       [1697787000000, 43695.65, 43732.2, 43686.9, 43714.05, 2295, 96079],
+            //       [1697787300000, 43711.5, 43738.7, 43711.3, 43715.95, 1336, 98374],
+            //       [1697787600000, 43718.2, 43740.2, 43709.1, 43730.45, 1507, 99710],
+            //       [1697787900000, 43726.75, 43871.9, 43726.75, 43845.35, 2457, 101217],
+            //       [1697788200000, 43845.55, 43845.55, 43798.85, 43807, 1224, 103674],
+            //       [1697788500000, 43814.45, 43827.7, 43810.05, 43810.05, 790, 104898],
+            //       [1697788800000, 43809.25, 43809.25, 43734.85, 43748.85, 1455, 105688],
+            //       [1697789100000, 43748.8, 43759.8, 43741.7, 43745.25, 1177, 107143],
+            //       [1697789400000, 43744.25, 43763.45, 43737.2, 43749.35, 787, 108320],
+            //       [1697789700000, 43747.7, 43748.5, 43693.6, 43694.7, 1306, 109107],
+            //       [1697790000000, 43694.85, 43753.2, 43694.85, 43743.9, 1065, 110413],
+            //       [1697790300000, 43745, 43769.35, 43738.55, 43743.25, 1072, 111478],
+            //       [1697790600000, 43742.9, 43754.1, 43719.95, 43744.95, 1042, 112550],
+            //       [1697790900000, 43743.9, 43763.5, 43735.6, 43758.2, 1300, 113592],
+            //       [1697791200000, 43758.25, 43773.1, 43745.5, 43745.5, 1126, 114892],
+            //       [1697791500000, 43747.9, 43798.1, 43746.6, 43789.85, 1335, 116018],
+            //       [1697791800000, 43787.9, 43810.5, 43774.3, 43786.9, 1450, 117353],
+            //       [1697792100000, 43785, 43803.1, 43763.5, 43763.5, 1158, 118803],
+            //       [1697792400000, 43772.2, 43778.45, 43758.55, 43769.9, 1082, 119961],
+            //       [1697792700000, 43770.4, 43770.4, 43729.35, 43746.15, 1765, 121043],
+            //       [1697793000000, 43743.75, 43766.3, 43740.55, 43751.25, 1193, 122808],
+            //       [1697793300000, 43748.5, 43754.75, 43735.05, 43745.2, 1696, 124001],
+            //       [1697793600000, 43740.25, 43751.85, 43732.6, 43745.9, 1224, 125697],
+            //       [1697793900000, 43742.4, 43742.4, 43696.7, 43703.55, 2281, 126921],
+            //       [1697794200000, 43708.95, 43738.55, 43678.45, 43722.55, 3106, 129202],
+            //       [1697794500000, 43721.25, 43742.25, 43721.25, 43734.6, 2562, 132308],
+            //       [1697794800000, 43733.1, 43741.75, 43720.9, 43729.85, 3363, 134870],
+            //       [1697795100000, 43735.6, 43739.1, 43714, 43720.3, 4553, 138233],
+            //       [1697795400000, 43731.8, 43738.4, 43713.75, 43732.35, 5543, 142786],
+            //       [1697795700000, 43730.05, 43740.65, 43719.1, 43740.65, 3988, 148329],
+            //       [1697796000000, 43737.1, 43737.1, 43737.1, 43737.1, 11, 152317],
+            //       [1698032700000, 43773.7, 43816, 43760.3, 43802.85, 7781, 0],
+            //       [1698033000000, 43803.45, 43824.95, 43773.55, 43773.55, 6326, 7781],
+            //       [1698033300000, 43772.8, 43786.35, 43748.5, 43759.95, 4039, 14107],
+            //       [1698033600000, 43753, 43764.4, 43738.75, 43749.25, 4148, 18146],
+            //       [1698033900000, 43740.35, 43786.35, 43734.6, 43784, 3196, 22294],
+            //       [1698034200000, 43785.8, 43803.75, 43767.3, 43792, 3123, 25490],
+            //       [1698034500000, 43788.6, 43797.65, 43770.7, 43770.7, 2818, 28613],
+            //       [1698034800000, 43772.7, 43794.75, 43769.2, 43775.4, 2069, 31431],
+            //       [1698035100000, 43774.75, 43797.35, 43774.75, 43785.5, 2302, 33500],
+            //       [1698035400000, 43787.8, 43803.25, 43786.75, 43787.05, 1769, 35802],
+            //       [1698035700000, 43785.9, 43790.7, 43742.45, 43745.1, 2369, 37571],
+            //       [1698036000000, 43742.9, 43758.7, 43645.75, 43664, 3349, 39940],
+            //       [1698036300000, 43669.3, 43682.55, 43629.8, 43662.2, 3748, 43289],
+            //       [1698036600000, 43665.25, 43665.25, 43628.25, 43643.7, 3020, 47037],
+            //       [1698036900000, 43642.5, 43655, 43626.6, 43645, 3135, 50057],
+            //       [1698037200000, 43650.25, 43667.4, 43637.35, 43663.05, 2201, 53192],
+            //       [1698037500000, 43657.65, 43671, 43652.6, 43652.6, 1614, 55393],
+            //       [1698037800000, 43651.15, 43659.7, 43640.5, 43647.85, 1466, 57007],
+            //       [1698038100000, 43648.65, 43655.6, 43634.15, 43643.55, 1602, 58473],
+            //       [1698038400000, 43642.05, 43677.5, 43640.95, 43677.5, 1274, 60075],
+            //       [1698038700000, 43671.65, 43681.55, 43662.5, 43665.15, 1251, 61349],
+            //       [1698039000000, 43666.95, 43685.95, 43655.75, 43683.85, 1327, 62600],
+            //       [1698039300000, 43683.6, 43693.15, 43670.6, 43687.3, 1681, 63927],
+            //       [1698039600000, 43688.45, 43688.7, 43659.95, 43664.75, 972, 65608],
+            //       [1698039900000, 43662.75, 43683.95, 43659.3, 43682.9, 838, 66580],
+            //       [1698040200000, 43684.85, 43684.85, 43652.65, 43657.6, 2088, 67418],
+            //       [1698040500000, 43651.4, 43673.75, 43633.7, 43667.2, 2093, 69506],
+            //       [1698040800000, 43670.15, 43673.4, 43659.8, 43670.4, 1195, 71599],
+            //       [1698041100000, 43672.5, 43679.95, 43664.25, 43665.7, 1150, 72794],
+            //       [1698041400000, 43665.55, 43665.55, 43613.55, 43613.55, 2048, 73944],
+            //       [1698041700000, 43589.4, 43638.85, 43589.4, 43634.45, 3235, 75992],
+            //       [1698042000000, 43645.7, 43686.9, 43634.9, 43686.25, 1367, 79227],
+            //       [1698042300000, 43685.25, 43705.15, 43676.6, 43687.8, 1917, 80594],
+            //       [1698042600000, 43691.3, 43722.4, 43686.35, 43696.25, 2454, 82511],
+            //       [1698042900000, 43699, 43701.35, 43685.4, 43688.5, 1412, 84965],
+            //       [1698043200000, 43690.05, 43701.6, 43682.65, 43682.65, 2088, 86377],
+            //       [1698043500000, 43687.2, 43687.2, 43669.3, 43678.35, 1455, 88465],
+            //       [1698043800000, 43678.45, 43725.45, 43678.45, 43715.55, 2182, 89920],
+            //       [1698044100000, 43715.3, 43717.85, 43667.4, 43667.75, 1655, 92102],
+            //       [1698044400000, 43667.05, 43667.65, 43650.3, 43662.6, 1359, 93757],
+            //       [1698044700000, 43662.6, 43679, 43641.8, 43647.5, 1081, 95116],
+            //       [1698045000000, 43650.05, 43664.8, 43643, 43660.85, 1571, 96197],
+            //       [1698045300000, 43660.35, 43665.45, 43644.15, 43648.2, 1317, 97768],
+            //     ],
+            //     events: null,
+            //   };
+
+
+
+            ////*****************************************************************Readymade
+            //const data = jsonData.data;
+            //const data = jsonData.data;
+
+            console.log("jsonData is : ", jsonData.candles.length);
+
+
+
+
+
+
+
+            //console.log(output);
+            //console.log("Output is : ", bvla);
+            console.log("Data Js done");
+            //
+            //
+            //
+
+            // split the data set into ohlc and volume
+            const ohlc = [],
+                volume = [],
+                dataLength = reposedata.candles.length;
+
+            // for (let i = 0; i < dataLength; i += 1) {
+            //     ohlc.push([
+            //         jsonData.candles[i][0], // the date
+            //         jsonData.candles[i][1], // open
+            //         jsonData.candles[i][2], // high
+            //         jsonData.candles[i][3], // low
+            //         jsonData.candles[i][4], // close
+            //     ]);
+
+            //     volume.push([
+            //         jsonData.candles[i][0], // the date
+            //         jsonData.candles[i][5], // the volume
+            //     ]);
+            // }
+
+
+
+
+            // split the data set into ohlc and volume
+            //let data = reposedata.candles;
+
+            for (let i = 0; i < dataLength; i += 1) {
+                ohlc.push([
+                    ((reposedata.candles[i][0] + 19080) * 1000), // the date
+
+                    //data[i][0],
+                    reposedata.candles[i][1], // open
+                    reposedata.candles[i][2], // high
+                    reposedata.candles[i][3], // low
+                    reposedata.candles[i][4] // close
+                ]);
+
+                volume.push([
+                    ((reposedata.candles[i][0] + 19080) * 1000),
+                    //data[i][0], // the date
+                    reposedata.candles[i][5] // the volume
+                ]);
+            }
+
+            let minR = ohlc[dataLength - 100][0];
+            let maxR = ohlc[dataLength - 1][0];
+
+
+            let CA = [];
+            for (let i = 0; i < dataLength; i += 1) {
+                CA.push([
+                    reposedata.candles[i][4] // close
+                ]);
+            }
+
+
+            let OA = [];
+            for (let i = 0; i < dataLength; i += 1) {
+                OA.push([
+                    // the date
+                    reposedata.candles[i][1] // open
+
+                ]);
+            }
+
+
+
+            // function StochD(data, period1, period2, period3) {
+            //     // Implementation of Stochastic D
+            //     // Calculate %K
+            //     var k = [];
+            //     var d = [];
+            //     var sd = [];
+            //     for (var i = period1 - 1; i < data.length; i++) {
+            //         var highHigh = Math.max.apply(null, data.slice(i - period1 + 1, i + 1));
+            //         var lowLow = Math.min.apply(null, data.slice(i - period1 + 1, i + 1));
+            //         k.push((data[i] - lowLow) / (highHigh - lowLow) * 100);
+            //     }
+
+            //     // Calculate %D
+            //     for (var j = period1 + period2 - 2; j < data.length; j++) {
+            //         var sumK = 0;
+            //         for (var kIndex = j - period1 + 1; kIndex <= j; kIndex++) {
+            //             highHigh = Math.max.apply(null, data.slice(kIndex - period2 + 1, kIndex + 1));
+            //             lowLow = Math.min.apply(null, data.slice(kIndex - period2 + 1, kIndex + 1));
+            //             sumK += (data[kIndex] - lowLow) / (highHigh - lowLow) * 100;
+            //         }
+            //         d.push(sumK / period2);
+            //     }
+
+            //     // Calculate %SD
+            //     for (var l = period1 + period2 + period3 - 3; l < data.length; l++) {
+            //         var sumD = 0;
+            //         for (var dIndex = l - period1 - period2 + 1; dIndex <= l; dIndex++) {
+            //             highHigh = Math.max.apply(null, data.slice(dIndex - period3 + 1, dIndex + 1));
+            //             lowLow = Math.min.apply(null, data.slice(dIndex - period3 + 1, dIndex + 1));
+            //             sumD += (data[dIndex] - lowLow) / (highHigh - lowLow) * 100;
+            //         }
+            //         sd.push(sumD / period3);
+            //     }
+
+            //     return { k: k, d: d, sd: sd };
+            // }
+            function StochD(data, periods = 14, Ksmooth = 3, Dsmooth = 3) {
+                // Calculate %K
+                function calculateK(data, periods) {
+                    let k = [];
+                    for (let i = periods - 1; i < data.length; i++) {
+                        const periodData = data.slice(i - periods + 1, i + 1);
+                        const high = Math.max(...periodData);
+                        const low = Math.min(...periodData);
+                        const currentClose = data[i];
+                        const kValue = ((currentClose - low) / (high - low)) * 100;
+                        k.push(kValue);
                     }
-
-                    return ema;
-                };
-
-                const calculateMACD = (data, fastPeriod, slowPeriod) => {
-                    const fastEMA = calculateEMA(data, fastPeriod);
-                    const slowEMA = calculateEMA(data, slowPeriod);
-
-                    const macd = new Array(data.length).fill(null);
-                    for (let i = 0; i < data.length; i++) {
-                        macd[i] = fastEMA[i] !== null && slowEMA[i] !== null ? fastEMA[i] - slowEMA[i] : null;
-                    }
-
-                    return macd;
-                };
-
-                const fastPeriod = 8;
-                const slowPeriod = 21;
-
-                const mD = calculateMACD(jsonData.data, fastPeriod, slowPeriod);
-                // console.log("MD values are  :");
-                // console.log(mD); // This will print the calculated MH values (or null for initial points)
-                //console.log("MD is done.");
-                // This will print the calculated MH values (or null for initial points)
-                function calculateMACDSignalLine(prices, fastEMA, slowEMA, period) {
-                    let emaFast = 0;
-                    let emaSlow = 0;
-                    let signalLine = [];
-
-                    for (let i = 0; i < prices.length; i++) {
-                        if (i === 0) {
-                            emaFast = prices[i];
-                            emaSlow = prices[i];
-                        } else {
-                            emaFast = fastEMA * prices[i] + (1 - fastEMA) * emaFast;
-                            emaSlow = slowEMA * prices[i] + (1 - slowEMA) * emaSlow;
-                        }
-
-                        if (i >= period - 1) {
-                            let macd = emaFast - emaSlow;
-                            let prevSignal = signalLine.length > 0 ? signalLine[signalLine.length - 1] : 0;
-                            let currentSignal = (2 / (period + 1)) * macd + (1 - 2 / (period + 1)) * prevSignal;
-                            signalLine.push(currentSignal);
-                        } else {
-                            signalLine.push(0); // or any default value you prefer instead of NaN
-                        }
-                    }
-
-                    return signalLine;
+                    return k;
                 }
 
-                const prices = jsonData.data.map((row) => row[4]);
-
-                const fastEMA = 8;
-                const slowEMA = 21;
-                const period = 5;
-
-                const signalLine = calculateMACDSignalLine(prices, 2 / (fastEMA + 1), 2 / (slowEMA + 1), period);
-                //console.log(signalLine);
-
-                //const prices = jsonData.data.map((row) => row[4]);
-                //const signalLine = calculateMACDSL(prices, fastEMA, slowEMA, signalPeriod);
-                //console.log(signalLine);
-                //console.log("Signal line is done.");
-
-                // Example usage:
-
-                // Sample data
-
-                //console.log("Signal Line:", signalLine);
-
-                for (let i = 0; i < jsonData.data.length; i++) {
-                    const CalculatedMHval = mD[i] - signalLine[i];
-
-                    CalculatedMH.push(CalculatedMHval);
-                }
-
-                //console.log("CalculatedMH Line:", CalculatedMH);
-                //console.log("CalculatedMH Line:", CalculatedMH);
-                //console.log("MH is done.");
-
-                // Log MH values along with dates and OHLC
-                //   for (let i = 0; i < jsonData.length; i++) {
-                //     const date = new Date(jsonData.data[i][0]);
-                //   //   console.log("MH candle number : ", i);
-                //   //   console.log(
-                //   //     `${date.toISOString()},${jsonData.data[i][1]},${jsonData.data[i][2]},${jsonData.data[i][3]},${
-                //   //         jsonData.data[i][4]
-                //   //     },${mhValues[i]}`
-                //   //   );
-                //   }
-                //   const CalculatedSignal = [];
-
-                //   function calculateSignal(candles, fastPeriod, slowPeriod, signalPeriod) {
-                //     const fastMA = [];
-                //     const slowMA = [];
-                //     const signal = [];
-
-                //     for (let i = 0; i < candles.length; i++) {
-                //       const currentClose = candles[i][4];
-
-                //       if (i < fastPeriod - 1) {
-                //         fastMA.push(null); // Not enough data for initial MA values
-                //         slowMA.push(null);
-                //         signal.push(null);
-                //       } else {
-                //         // Calculate fast and slow moving averages
-                //         const fastSum = candles
-                //           .slice(i - fastPeriod + 1, i + 1)
-                //           .reduce((sum, candle) => sum + candle[4], 0);
-                //         const fastMAValue = fastSum / fastPeriod;
-                //         const slowSum = candles
-                //           .slice(i - slowPeriod + 1, i + 1)
-                //           .reduce((sum, candle) => sum + candle[4], 0);
-                //         const slowMAValue = slowSum / slowPeriod;
-
-                //         fastMA.push(fastMAValue);
-                //         slowMA.push(slowMAValue);
-
-                //         // Calculate signal line (5-period moving average of fastMA)
-                //         const signalSum = fastMA
-                //           .slice(i - signalPeriod + 1, i + 1)
-                //           .reduce((sum, value) => sum + value, 0);
-                //         const signalValue = signalSum / signalPeriod;
-                //         signal.push(signalValue);
-                //       }
-                //     }
-
-                //     return signal;
-                //   }
-
-                //   const signal = calculateSignal(jsonData.data, 8, 21, 5);
-
-                //   // Log dates, close prices, and signal values
-                //   for (let i = 0; i < jsonData.data.length; i++) {
-                //     const date = new Date(jsonData.data[i][0]);
-                //     // console.log("Signal Values are : ");
-                //     CalculatedSignal.push(signal[i] ? signal[i].toFixed(2) : null);
-                //     // console.log(
-                //     //   `${date.toISOString()},${jsonData.data[i][4]},${
-                //     //     signal[i] ? signal[i].toFixed(2) : null
-                //     //   }`
-                //     // );
-                //   }
-                //   const CalculatedMACDSignal = [];
-
-                //   function calculateMACD(candles, fastPeriod, slowPeriod) {
-                //     const fastMA = [];
-                //     const slowMA = [];
-                //     const macd = [];
-
-                //     for (let i = 0; i < candles.length; i++) {
-                //       const currentClose = candles[i][4];
-
-                //       if (i < fastPeriod - 1) {
-                //         fastMA.push(null); // Not enough data for initial MA values
-                //         slowMA.push(null);
-                //         macd.push(null);
-                //       } else {
-                //         // Calculate fast and slow moving averages
-                //         const fastSum = candles
-                //           .slice(i - fastPeriod + 1, i + 1)
-                //           .reduce((sum, candle) => sum + candle[4], 0);
-                //         const fastMAValue = fastSum / fastPeriod;
-                //         const slowSum = candles
-                //           .slice(i - slowPeriod + 1, i + 1)
-                //           .reduce((sum, candle) => sum + candle[4], 0);
-                //         const slowMAValue = slowSum / slowPeriod;
-
-                //         fastMA.push(fastMAValue);
-                //         slowMA.push(slowMAValue);
-
-                //         // Calculate MACD line (fast MA - slow MA)
-                //         const macdValue = fastMAValue - slowMAValue;
-                //         macd.push(macdValue);
-                //       }
-                //     }
-
-                //     return macd;
-                //   }
-
-                //   const macd = calculateMACD(jsonData.data, 8, 21);
-                //   console.log("MACD is done");
-
-                //   // Log dates, close prices, and MACD values
-                //   for (let i = 0; i < jsonData.data.length; i++) {
-                //     const date = new Date(jsonData.data[i][0]);
-                //     CalculatedMACDSignal.push(macd[i] ? macd[i].toFixed(2) : null);
-                //   //   console.log(
-                //   //     `${date.toISOString()},${jsonData.data[i][4]},${macd[i] ? macd[i].toFixed(2) : null}`
-                //   //   );
-                //   }
-
-                //   console.log("CalculatedSignal length is : ", CalculatedSignal.length);
-                //   console.log("CalculatedMACDSignal length is : ", CalculatedMACDSignal.length);
-                //   CalculatedMH.length = 0;
-                //   for (let i = 0; i < jsonData.data.length; i++) {
-                //     CalculatedMH[i] = CalculatedMACDSignal[i] - CalculatedSignal[i];
-                //   }
-                const CalculatedrefMH = [];
-                const CalculatedrefSD = [];
-                const CalculatedvalueWhenCO = [];
-                const CalculatedvalueWhenOC = [];
-                function calculateRefMHSDandValueWhen(data) {
-                    const refMH = [];
-                    const refSD = [];
-                    const valueWhen = [];
-                    for (let i = 0; i < data.length; i++) {
-                        // Ref(MH, -1)
-                        refMH.push(i > 0 ? data[i - 1][5] : null); // Access MH from previous candle
-                        CalculatedrefMH.push(i > 0 ? data[i - 1][5] : null);
-                        // Ref(SD, -1)
-                        refSD.push(i > 0 ? data[i - 1][6] : null); // Access SD from previous candle
-                        CalculatedrefSD.push(i > 0 ? data[i - 1][6] : null);
-                        // ValueWhen(C, O<C)
-                        valueWhen.push(data[i][5] > data[i][1] ? data[i][5] : null); // Check if close > open
-                        if (data[i][4] > data[i][1]) {
-                            CalculatedvalueWhenCO.push(data[i][4]);
-                        } else {
-                            CalculatedvalueWhenCO.push(0);
-                        }
-                        if (data[i][4] < data[i][1]) {
-                            CalculatedvalueWhenOC.push(data[i][4]);
-                        } else {
-                            CalculatedvalueWhenOC.push(0);
-                        }
-                        // CalculatedvalueWhenCO.push(data[i][5] > data[i][1] ? data[i][5] : null);
-                        // CalculatedvalueWhenOC.push(data[i][5] < data[i][1] ? data[i][5] : null);
+                // Calculate smoothed %K
+                function calculateSmoothedK(k, periods) {
+                    let smoothedK = [];
+                    for (let i = periods - 1; i < k.length; i++) {
+                        const smoothedValue = k.slice(i - periods + 1, i + 1).reduce((sum, val) => sum + val, 0) / periods;
+                        smoothedK.push(smoothedValue);
                     }
-                    return { refMH, refSD, valueWhen };
+                    return smoothedK;
                 }
-                const results = calculateRefMHSDandValueWhen(jsonData.data);
-                // Log results along with dates and OHLC
-                for (let i = 0; i < jsonData.data.length; i++) {
-                    const date = new Date(jsonData.data[i][0]);
-                    // console.log("Ref and C candle number : ", i);
-                    // console.log(
-                    //   `${date.toISOString()},${jsonData.data[i][1]},${jsonData.data[i][2]},${jsonData.data[i][3]},${
-                    //       jsonData.data[i][4]
-                    //   },${results.refMH[i]},${results.refSD[i]},${results.valueWhen[i]}`
-                    // );
+
+                // Calculate smoothed %D
+                function calculateSmoothedD(smoothedK, periods) {
+                    let smoothedD = [];
+                    for (let i = periods - 1; i < smoothedK.length; i++) {
+                        const smoothedValue = smoothedK.slice(i - periods + 1, i + 1).reduce((sum, val) => sum + val, 0) / periods;
+                        smoothedD.push(smoothedValue);
+                    }
+                    return smoothedD;
                 }
-                const CalculatedRSI = [];
-                function calculateRSI(candles, period) {
-                    const rsi = [];
-                    for (let i = 0; i < candles.length; i++) {
-                        const currentClose = candles[i][4];
-                        if (i < 5) {
-                            rsi.push(30);
-                            CalculatedRSI.push(30); // Not enough data for initial RSI values
-                        } else {
-                            let avgGain = 0;
-                            let avgLoss = 0;
-                            for (let j = i - period + 1; j <= i; j++) {
-                                const priceChange = candles[j][4] - candles[j - 1][4];
-                                if (priceChange > 0) {
-                                    avgGain += priceChange;
-                                } else {
-                                    avgLoss += Math.abs(priceChange);
-                                }
+
+                const k = calculateK(data, periods);
+                const smoothedK = calculateSmoothedK(k, Ksmooth);
+                const smoothedD = calculateSmoothedD(smoothedK, Dsmooth);
+
+                return smoothedD;
+            }
+
+            // Example usage:
+            //const data = [/* your price data array */];
+            const periods = 8;
+            const Ksmooth = 3;
+            const Dsmooth = 3;
+
+            const stochD = StochD(CA, periods, Ksmooth, Dsmooth);
+            console.log("stochD is ");
+            //console.log(stochD);
+
+
+            // function StochD(data, period1, period2, period3) {
+            //     // Implementation of Stochastic D
+            //     // Calculate %K
+            //     var k = [];
+            //     var d = [];
+            //     var sd = [];
+            //     for (var i = period1 - 1; i < data.length; i++) {
+            //         var highHigh = Math.max.apply(null, data.slice(i - period1 + 1, i + 1));
+            //         var lowLow = Math.min.apply(null, data.slice(i - period1 + 1, i + 1));
+            //         k.push((data[i] - lowLow) / (highHigh - lowLow) * 100);
+            //     }
+
+            //     // Calculate %D
+            //     for (var j = period1 + period2 - 2; j < data.length; j++) {
+            //         var sumK = 0;
+            //         for (var kIndex = j - period1 + 1; kIndex <= j; kIndex++) {
+            //             highHigh = Math.max.apply(null, data.slice(kIndex - period2 + 1, kIndex + 1));
+            //             lowLow = Math.min.apply(null, data.slice(kIndex - period2 + 1, kIndex + 1));
+            //             sumK += (data[kIndex] - lowLow) / (highHigh - lowLow) * 100;
+            //         }
+            //         d.push(sumK / period2);
+            //     }
+
+            //     // Calculate %SD
+            //     for (var l = period1 + period2 + period3 - 3; l < data.length; l++) {
+            //         var sumD = 0;
+            //         for (var dIndex = l - period1 - period2 + 1; dIndex <= l; dIndex++) {
+            //             highHigh = Math.max.apply(null, data.slice(dIndex - period3 + 1, dIndex + 1));
+            //             lowLow = Math.min.apply(null, data.slice(dIndex - period3 + 1, dIndex + 1));
+            //             sumD += (data[dIndex] - lowLow) / (highHigh - lowLow) * 100;
+            //         }
+            //         sd.push(sumD / period3);
+            //     }
+
+            //     // Adding zeros at the beginning if necessary
+            //     var zerosToAdd = period1 - 1;
+            //     for (var m = 0; m < zerosToAdd; m++) {
+            //         k.unshift(0);
+            //     }
+            //     zerosToAdd = period1 + period2 - 2;
+            //     for (var n = 0; n < zerosToAdd; n++) {
+            //         d.unshift(0);
+            //     }
+            //     zerosToAdd = period1 + period2 + period3 - 3;
+            //     for (var p = 0; p < zerosToAdd; p++) {
+            //         sd.unshift(0);
+            //     }
+
+            //     return { k: k, d: d, sd: sd };
+            // }
+
+            // function Signal(data, shortPeriod, longPeriod, signalPeriod) {
+            //     // Implementation of Signal Line for MACD
+            //     var signalLine = [];
+            //     var macd = MACD(data, shortPeriod, longPeriod);
+            //     for (var i = 0; i < data.length; i++) {
+            //         if (i >= longPeriod + signalPeriod - 2) {
+            //             signalLine.push(EMA(macd.slice(i - signalPeriod + 1, i + 1)));
+            //         } else {
+            //             signalLine.push(null);
+            //         }
+            //     }
+            //     return signalLine;
+            // }
+
+            function calculateMACD(data, fastPeriod = 8, slowPeriod = 21, signalPeriod = 5) {
+                // Calculate EMA (Exponential Moving Average)
+
+                // Calculate MACD line
+                let emaFast = EMA(data, fastPeriod);
+                let emaSlow = EMA(data, slowPeriod);
+                let macdLine = [];
+                for (let i = 0; i < data.length; i++) {
+                    macdLine.push(emaFast[i] - emaSlow[i]);
+                }
+
+                // Calculate Signal line
+                let signalLine = EMA(macdLine, signalPeriod);
+
+                return { macdLine: macdLine, signalLine: signalLine };
+            }
+
+            // Example usage:
+
+            const { macdLine, signalLine } = calculateMACD(CA);
+            // console.log("MACD Line:", macdLine);
+            // console.log("Signal Line:", signalLine);
+
+
+
+
+
+            function EMA(data, period) {
+                const multiplier = 2 / (period + 1);
+                let ema = [];
+                var sum = 0;
+
+
+                // Calculate SMA for the first period
+                for (let i = 0; i < period; i++) {
+                    if (i == 0) {
+                        ema.push(data[i]);
+                    }
+                    else {
+                        sum = parseFloat(sum) + parseFloat(data[i]);
+                        //sum = sum + data[i];
+                        const sma = sum / i;
+                        ema.push(sma);
+                    }
+
+                }
+                //let sma = sum / period;
+
+
+                // Calculate EMA for the remaining data points
+                for (let i = period; i < data.length; i++) {
+                    let currentPrice = data[i];
+                    let prevEMA = ema[i - period];
+                    //let currentEMA = (currentPrice - prevEMA) * multiplier + prevEMA;
+
+                    let currentEMA = (parseFloat(currentPrice) - parseFloat(prevEMA)) * parseFloat(multiplier) + parseFloat(prevEMA);
+
+                    ema.push(currentEMA);
+                }
+
+                return ema;
+            }
+
+
+            // function EMA(data) {
+            //     // Implementation of Exponential Moving Average (EMA)
+            //     var ema = 0;
+            //     for (var i = 0; i < data.length; i++) {
+            //         ema = (data[i] - ema) * (2 / (data.length + 1)) + ema;
+            //     }
+            //     return ema;
+            // }
+
+            function RSI(data, period) {
+                // Implementation of Relative Strength Index (RSI)
+                var rsi = [];
+                for (var i = 0; i < data.length; i++) {
+                    if (i >= period) {
+                        var gains = 0;
+                        var losses = 0;
+                        for (var j = i - period; j < i; j++) {
+                            var diff = data[j + 1] - data[j];
+                            if (diff > 0) {
+                                gains += diff;
+                            } else {
+                                losses += Math.abs(diff);
                             }
-                            const rs = avgGain / avgLoss;
-                            const rsiValue = 100 - 100 / (1 + rs);
-                            rsi.push(rsiValue);
-                            CalculatedRSI.push(rsiValue);
+                        }
+                        var avgGain = gains / period;
+                        var avgLoss = losses / period;
+                        rsi.push(100 - (100 / (1 + avgGain / avgLoss)));
+                    } else {
+                        rsi.push(null);
+                    }
+                }
+                return rsi;
+            }
+
+
+            function valueWhen(expression, array, n = 1) {
+                let result = [];
+                let count = 0;
+
+                // Iterate over the array and check the expression
+                for (let i = array.length - 1; i >= 0; i--) {
+                    if (expression(array[i])) {
+                        count++;
+                        if (count === n) {
+                            result.push(array[i]);
+                            return result;
                         }
                     }
-                    return rsi;
-                }
-                const rsi3 = calculateRSI(jsonData.data, 3);
-                // Log dates, close prices, and RSI3 values
-                for (let i = 0; i < jsonData.data.length; i++) {
-                    const date = new Date(jsonData.data[i][0]);
-                    // console.log(
-                    //   `${date.toISOString()},${jsonData.data[i][4]},${rsi3[i] ? rsi3[i].toFixed(2) : null}`
-                    // );
                 }
 
-                function ema(data, period) {
-                    const emaValues = [];
-                    const alpha = 2 / (period + 1);
+                // If the expression was not met 'n' times, return undefined
+                return undefined;
+            }
 
-                    // Calculate the first EMA value
-                    if (data.length >= period) {
-                        emaValues.push(data.slice(0, period).reduce((acc, curr) => acc + curr, 0) / period);
-                    } else {
-                        emaValues.push(data[0]);
-                    }
+            // Example usage:
+            const closePrices = CA;
+            const openPrices = OA;
 
-                    // Calculate subsequent EMA values
-                    for (let i = 1; i < data.length; i++) {
-                        emaValues.push(alpha * data[i] + (1 - alpha) * emaValues[i - 1]);
-                    }
+            const result = valueWhen((close) => close.open < close.close, openPrices);
+            //console.log(result); // Output: array of open prices when close price is greater than open price
 
-                    return emaValues;
+
+
+
+            let bresult = [];
+            let sresult = [];
+            var FBindex = [];
+            var bvlindex = [];
+            var svlindex = [];
+            var FSindex = [];
+
+
+
+
+            function main(closeData) {
+                // Main function
+                var SD = StochD(closeData, 8, 3, 3);
+                var MJ = calculateMACD(closeData, 8, 21);
+                //var signalLine = Signal(closeData, 8, 21, 5);
+
+                var signalLineFinal = signalLine;
+
+                var MH = [];
+                for (var c = 0; c < closeData.length; c++) {
+
+                    var MHdiff = MJ.macdLine[c] - signalLineFinal[c];
+
+                    MH.push(MHdiff);
                 }
+                //console.log("MH cal is : ", MH);
 
-                // Example usage
-                const dataema20 = jsonData.data.map((row) => row[4]);
-                const periodema20 = 20;
 
-                const emaValues = ema(dataema20, periodema20);
 
-                //console.log(emaValues);
-                //console.log("emaval is done.");
-                // Example usage:
-                //const numbers = jsonData.data.map((row) => row[4]);
+                var RSI3 = RSI(closeData, 3);
 
-                // console.log("datalength is :", jsonData.data.length);
-                // console.log("CalculatedRSI is :", CalculatedRSI.length);
-                // console.log("calstockD  is :", CalculatedStocD.length);
-                // console.log("calMH  is :", CalculatedMH.length);
-                // console.log("CalculatedrefMH  is :", CalculatedrefMH.length);
+                var trendup = [];
+                var trendcolor = [];
 
-                // console.log("CalculatedrefSD  is :", CalculatedrefSD.length);
-                // console.log("CalculatedvalueWhenCO  is :", CalculatedvalueWhenCO.length);
-                // console.log("CalculatedvalueWhenOC  is :", CalculatedvalueWhenOC.length);
 
-                const BuyOO = [];
-                for (let i = 0; i < jsonData.data.length; i++) {
-                    if (
-                        CalculatedMH[i] > 0 ||
-                        (CalculatedMH[i] > 0 && //CalculatedMH[i] > CalculatedrefMH[i]
-                        CalculatedMH[i] > CalculatedMH[i - 1] &&
-                        CalculatedRSI[i] > 50 &&
-                        CalculatedStocD[i] < 80 && //CalculatedStocD[i] > CalculatedrefSD[i]
-                            CalculatedStocD[i] > CalculatedStocD[i - 1] &&
-                            CalculatedvalueWhenCO[i] > 0)
-                    ) {
-                        //console.log("BuyOO candle number is : ", i);
-                        BuyOO.push(i);
-                        //console.log("BuyOO is done.");
-                    } else {
-                        BuyOO.push(0);
-                        //console.log("Not found");
-                        
+                var RSI50p = [];
+                for (var b = 0; b < RSI3.length; b++) {
+                    if (RSI3[b] > 50) {
+                        RSI50p.push(b);
                     }
                 }
-                const SellOO = [];
-                for (let i = 0; i < jsonData.data.length; i++) {
-                    if (
-                        CalculatedMH[i] < 0 ||
-                        (CalculatedMH[i] < 0 && //CalculatedMH[i] < CalculatedrefMH[i]
-                        CalculatedMH[i] < CalculatedMH[i - 1] &&
-                        CalculatedRSI[i] < 50 &&
-                        CalculatedStocD[i] > 20 && //CalculatedStocD[i] > CalculatedrefSD[i]
-                            CalculatedStocD[i] > CalculatedStocD[i - 1] &&
-                            CalculatedvalueWhenOC[i] > 0)
-                    ) {
-                        //console.log("SellOO candle number is : ", i);
-                        SellOO.push(i);
-                        //console.log("SellOO is done.");
-                    } else {
-                        SellOO.push(0);
-                        //console.log("Not found");
-                    }
-                }
-                const BuyO = [];
-                for (let i = 0; i < jsonData.data.length; i++) {
-                    if (
-                        BuyOO[i] > 0 &&
-                        //jsonData.data[i][4] > CalculatedEMA20[i]
-                        jsonData.data[i][4] > emaValues[i]
-                    ) {
-                        //console.log("BuyO candle number is : ", i);
-                        BuyO.push(i);
-                        //console.log("BuyO is done.");
-                    } else {
-                        BuyO.push(0);
-                        //console.log("Not found");
-                    }
-                }
-                const SellO = [];
-                for (let i = 0; i < jsonData.data.length; i++) {
-                    if (
-                        SellOO[i] > 0 &&
-                        //jsonData.data[i][4] < CalculatedEMA20[i]
-                        jsonData.data[i][4] < emaValues[i]
-                    ) {
-                        //console.log("SellO candle number is : ", i);
-                        SellO.push(i);
-                        //console.log("SellO is done.");
-                    } else {
-                        SellO.push(0);
-                        //console.log("Not found");
-                    }
-                }
-                //console.log("BuyO length is : ", BuyO.length);
-                //console.log("SellO length is : ", SellO.length);
-                // const BuyAfterRem = BuyO.filter((value) => !SellO.includes(value));
-                // console.log(BuyAfterRem);
-                // const SellAfterRem = SellO.filter((value) => !BuyO.includes(value));
-                // console.log(SellAfterRem);
-                // console.log(SellAfterRem);
-                // console.log("BuyO  is : ", BuyO);
-                // console.log("SellO  is : ", SellO);
+                //console.log("RSI 50 p :", RSI50p);
 
-                const BO = BuyO;
-                const SO = SellO;
 
-                // function exrem(array1, array2) {
-                //     // Initialize result array with zeros and flag for buy signal
-                //     const result = new Array(array1.length).fill(0);
-                //     let buySignalOn = false;
-
-                //     // Iterate through each element of the arrays
-                //     for (let i = 0; i < array1.length; i++) {
-                //         if (array1[i] && !buySignalOn) {
-                //             // Set result to 1 on first true signal in array1 and activate flag
-                //             result[i] = 1;
-                //             buySignalOn = true;
-                //         } else if (array2[i]) {
-                //             // Deactivate buy signal flag if true signal found in array2
-                //             buySignalOn = false;
-                //         }
-                //     }
-
-                //     return result;
+                // for (var i = 0; i < closeData.length; i++) {
+                //     var trendupCondition = (MH[i] > 0 || (MH[i] > 0 && MH[i] > MH[i - 1])) && RSI3[i] > 50 && SD.sd[i] < 80 && SD.sd[i] > SD.sd[i - 1] && closeData[i] < closeData[i - 1];
+                //     var trendcolorCondition = MH[i] < 0 || (MH[i] < 0 && MH[i] < MH[i - 1]) && RSI3[i] < 50 && SD.sd[i] > 20 && SD.sd[i] < SD.sd[i - 1] && closeData[i] > closeData[i - 1];
+                //     trendup.push(trendupCondition ? "colorBlue" : "colorWhite");
+                //     trendcolor.push(trendcolorCondition ? "colorRed" : trendupCondition ? "colorBlue" : "colorWhite");
                 // }
 
-                function exrem(buy, sell) {
-                const filteredBuyIndices = [];
-                const filteredSellIndices = [];
-                let inBuySignal = false;
-                let inSellSignal = false;
-
-                for (let i = 0; i < buy.length; i++) {
-                    // Filter buy signals
-                    if (buy[i] && !inBuySignal) {
-                    filteredBuyIndices.push(i);
-                    inBuySignal = true;
-                    } else if (!buy[i] && inBuySignal) {
-                    // Ignore consecutive false entries within a buy signal
-                    if (i > 0 && buy[i - 1] === true) {
-                        continue;
-                    }
-                    inBuySignal = false;
-                    }
-
-                    // Filter sell signals
-                    if (sell[i] && !inSellSignal) {
-                    filteredSellIndices.push(i);
-                    inSellSignal = true;
-                    } else if (!sell[i] && inSellSignal) {
-                    // Ignore consecutive false entries within a sell signal
-                    if (i > 0 && sell[i - 1] === true) {
-                        continue;
-                    }
-                    inSellSignal = false;
-                    }
-                }
-                return [filteredBuyIndices, filteredSellIndices];
-                }
-
-                let BuyO_exremOut2Arrays = exrem(BuyO, SellO);
-                // let BuyO_exrem = exrem(BuyO, SellO);
-                // let SellO_exrem = exrem(SellO, BuyO);
-
-                //console.log("BuyO ExRem Before :", BuyO_exrem);
-
-                const BuyO_exrem = BuyO_exremOut2Arrays[0];
-                const SellO_exrem = BuyO_exremOut2Arrays[1];
-
-                //console.log("BuyO ExRem:", BuyO_exrem);
-                //console.log("SellO ExRem:", SellO_exrem);
-
-
-
-                //console.log(output);
-                //console.log("Output is : ", BuyO_exrem);
-
-                const BuyO_exremCandleNum = [];
-                for (let i = 0; i < BuyO_exrem.length; i++) {
-                    if (BuyO_exrem[i] === 1) {
-                        BuyO_exremCandleNum.push(i);
-                    } else {
-                        BuyO_exremCandleNum.push(0);
-                    }
-                }
-
-                const SellO_exremCandleNum = [];
-                for (let i = 0; i < SellO_exrem.length; i++) {
-                    if (SellO_exrem[i] === 1) {
-                        SellO_exremCandleNum.push(i);
-                    } else {
-                        SellO_exremCandleNum.push(0);
-                    }
-                }
-
-                //console.log(output);
-                //console.log("BuyO_exremCandleNum is : ", BuyO_exremCandleNum);
-                //console.log(output);
-                //console.log("SellO_exremCandleNum is : ", SellO_exremCandleNum);
-                //console.log(output);
-                //console.log("Output is : ", BuyO_exrem);
-                //const bvl = [];
-                const bvl = Array(jsonData.data.length).fill(0);
-
-                for (let i = 0; i < BuyO_exrem.length; i++) {
-                    const number = BuyO_exrem[i];
-                    // Optimized check using modulo operator, assuming elements in array2 are positive and less than 25
-                    if (number >= 0 && number < jsonData.data.length) {
-                        bvl[number] = 1; // Update the corresponding element in array1 directly
-                    } else {
-                        console.log(`Warning: Element ${number} in array2 is out of bounds for array1 (0-24). Skipping.`);
-                    }
-                }
-                for (let i = 0; i < bvl.length; i++) {
-                    if(bvl[i]===1){
-
-                        bvl[i] = jsonData.data[i][4];
-                    }
-                }
-
-
-                // for (let i = 0; i < jsonData.data.length; i++) {
-                    
-                //     if (i === BuyO_exrem[i]) {
-                //         bvl.push(jsonData.data[i][4]);
-                //     } else {
-                //         bvl.push(0);
-                //     }
+                var EMA20 = [];
+                EMA20 = EMA(CA, 20);
+                // for (var j = 0; j < closeData.length; j++) {
+                //     EMA20.push(EMA(closeData.slice(Math.max(0, j - 99), j + 1)));
                 // }
 
-                const svl = Array(jsonData.data.length).fill(0);
+                var Buyo = [];
+                var Sello = [];
+                for (var i = 0; i < closeData.length; i++) {
+                    // var buyoCondition = ((MH[k] > 0 || (MH[k] > 0) && MH[k] > MH[Math.max(0, k - 1)])) && RSI3[k] > 50 && SD.sd[k] < 80 && SD.sd[k] > SD.sd[Math.max(0, k - 1)] && closeData[k] < closeData[Math.max(0, k - 1)];
+                    // var selloCondition = ((MH[k] < 0 || (MH[k] < 0) && MH[k] < MH[Math.max(0, k - 1)])) && RSI3[k] < 50 && SD.sd[k] > 20 && SD.sd[k] < SD.sd[Math.max(0, k - 1)] && closeData[k] > closeData[Math.max(0, k - 1)];
 
-                for (let i = 0; i < SellO_exrem.length; i++) {
-                    const number = SellO_exrem[i];
-                    // Optimized check using modulo operator, assuming elements in array2 are positive and less than 25
-                    if (number >= 0 && number < jsonData.data.length) {
-                        svl[number] = 1; // Update the corresponding element in array1 directly
-                    } else {
-                        console.log(`Warning: Element ${number} in array2 is out of bounds for array1 (0-24). Skipping.`);
-                    }
-                }
-                for (let i = 0; i < svl.length; i++) {
-                    if(svl[i]===1){
 
-                        svl[i] = jsonData.data[i][4];
-                    }
-                }
-                //console.log("bvl is : ", bvl);
-                //console.log(output);
-                //console.log("svl is : ", svl);
-                // const svl = [];
-                // for (let i = 0; i < jsonData.data.length; i++) {
-                    
-                //     if (i == SellO_exrem[i]) {
-                //         svl.push(jsonData.data[i][4]);
-                //     } else {
-                //         svl.push(0);
-                //     }
-                // }
-                // const bvl = [];
-                // for (let i = 0; i < BuyO_exremCandleNum.length; i++) {
-                //     if (BuyO_exremCandleNum[i] >= 1) {
-                //         bvl.push(jsonData.data[i][4]);
-                //     } else {
-                //         bvl.push(0);
-                //     }
-                // }
 
-                // const svl = [];
-                // for (let i = 0; i < SellO_exremCandleNum.length; i++) {
-                //     if (SellO_exremCandleNum[i] >= 1) {
-                //         svl.push(jsonData.data[i][4]);
-                //     } else {
-                //         svl.push(0);
-                //     }
-                // }
+                    // var buyoCondition = MH[i] > 0 || (MH[i] > 0 && MH[i] > MH[i - 1]) && RSI3[i] > 50 && SD.sd[i] < 80 && SD.sd[i] > SD.sd[i - 1] && closeData[i] < closeData[i - 1];
+                    // var selloCondition = MH[i] < 0 || (MH[i] < 0 && MH[i] < MH[i - 1]) && RSI3[i] < 50 && SD.sd[i] > 20 && SD.sd[i] < SD.sd[i - 1] && closeData[i] > closeData[i - 1];
 
-                const bvlaBinary = [];
-                for (let i = 0; i < bvl.length; i++) {
-                    // for (let j = 0; j < BuyO_exrem.length; j++)
-                    if (bvl[i]>0) {
-                        bvlaBinary.push(jsonData.data[i][4] + 80);
-                    } else {
-                        bvlaBinary.push(0);
-                    }
+
+                    var buyoCondition = MH[i] > 0 || (MH[i] > 0 && MH[i] > MH[i - 1]) && RSI3[i] > 50 && stochD[i] < 80 && stochD[i] > stochD[i - 1];
+                    var selloCondition = MH[i] < 0 || (MH[i] < 0 && MH[i] < MH[i - 1]) && RSI3[i] < 50 && stochD[i] > 20 && stochD[i] < stochD[i - 1];
+
+
+                    Buyo.push(buyoCondition);
+                    Sello.push(selloCondition);
                 }
 
-                const svlaBinary = [];
-                for (let i = 0; i < svl.length; i++) {
-                    //for (let j = 0; j < SellO_exrem.length; j++)
-                    if (svl[i]>0) {
-                        svlaBinary.push(jsonData.data[i][4] - 80);
-                    } else {
-                        svlaBinary.push(0);
-                    }
-                }
-                //console.log("bvlaBinary is : ", bvlaBinary);
-                //console.log(output);
-                //console.log("svlaBinary is : ", svlaBinary);
+                //console.log("Buyo is : ", Buyo);
+                //console.log("Sello is : ", Sello);
 
 
-                // const bvla = [];
-                // for (let i = 0; i < bvl.length; i++) {
-                //     // for (let j = 0; j < BuyO_exrem.length; j++)
-                //     if (bvl[i]>0) {
-                //         bvla.push(jsonData.data[i][4] + 80);
-                //     } else {
-                //         bvla.push(jsonData.data[i][4]);
-                //     }
-                // }
-
-                // const svla = [];
-                // for (let i = 0; i < svl.length; i++) {
-                //     //for (let j = 0; j < SellO_exrem.length; j++)
-                //     if (bvl[i]>0) {
-                //         svla.push(jsonData.data[i][4] - 80);
-                //     } else {
-                //         svla.push(jsonData.data[i][4]);
-                //     }
-                // }
-                
-                
-                // console.log("bvl is : ", bvl);
-                // //console.log(output);
-                // console.log("svl is : ", svl);
-
-                // const bvla = [];
-                // for (let i = 0; i < BuyO_exremCandleNum.length; i++) {
-                //     if (BuyO_exremCandleNum[i] >= 1) {
-                //         bvla.push(jsonData.data[i][4] + 80);
-                //     } else {
-                //         bvla.push(0);
-                //     }
-                // }
-
-                // const svla = [];
-                // for (let i = 0; i < SellO_exremCandleNum.length; i++) {
-                //     if (SellO_exremCandleNum[i] >= 1) {
-                //         svla.push(jsonData.data[i][4] - 80);
-                //     } else {
-                //         svla.push(0);
-                //     }
-                // }
-
-                const bvla = [];
-                for (let i = 1; i < bvlaBinary.length; i++) {
-
-                    const CP = bvlaBinary[i-1];
-                    if (CP[i] > 0) {
-                        bvla.push(jsonData.data[i][4] + 80);
-                    } else {
-                        bvla.push(0);
-                    }
-                }
-
-                const svla = [];
-                for (let i = 0; i < SellO_exremCandleNum.length; i++) {
-                    if (SellO_exremCandleNum[i] >= 1) {
-                        svla.push(jsonData.data[i][4] - 80);
-                    } else {
-                        svla.push(0);
-                    }
-                }
-
-                //console.log("bvla is : ", bvla);
-                //console.log(output);
-                //console.log("svla is : ", svla);
-
-
-
-                function fillZeros(array) {
-                    let prevNonZero = null; // Keep track of the previous non-zero value
-
-                    for (let i = 0; i < array.length; i++) {
-                        if (array[i] > 1) {
-                        prevNonZero = array[i]; // Update prevNonZero only if the value is > 1
+                let BuyoEma20 = [];
+                for (var y = 0; y < Buyo.length; y++) {
+                    if (Buyo[y] == true) {
+                        BuyoIndexVal = y;
+                        if (BuyoIndexVal && (closeData[BuyoIndexVal] > EMA20[BuyoIndexVal])) {
+                            BuyoEma20.push(BuyoIndexVal);
                         }
-                        array[i] = prevNonZero || 0; // Fill with prevNonZero (if valid) or 0
                     }
 
-                    return array;
-                    }
-
-                    // Example usage
-                //const inputArray = bvlaBinary;
-
-                const bvlaFinal = fillZeros(bvlaBinary);
-
-                const svlaFinal = fillZeros(svlaBinary);
-
-                console.log("Filled zeros : ");
-
-                //console.log("Filled bvlaFinal : ", bvlaFinal);
-                //console.log("Filled svlaFinal : ", svlaFinal);
-
-                //console.log(outputArray);
-
-
-                let ClosedPricesArray = [];
-                function ClosedPricesArrayFunction() {
-                    const crossovers = [];
-                    for (let i = 1; i < jsonData.data.length; i++) {
-                        // Check if the previous day's values were on different sides of the crossover point.
-                        ClosedPricesArray.push(jsonData.data[i][4]);
-                        crossovers.push(jsonData.data[i][4]);
-                    }
-                    return crossovers;
                 }
-                ClosedPricesArray = ClosedPricesArrayFunction();
+                let SelloEma20 = [];
+                for (var y = 0; y < Sello.length; y++) {
+                    if (Sello[y] == true) {
+                        SelloIndexVal = y;
+                        if (SelloIndexVal && (closeData[SelloIndexVal] < EMA20[SelloIndexVal])) {
+                            SelloEma20.push(SelloIndexVal);
+                        }
+
+                    }
+
+                }
+
+                //console.log("BuyoEma20 is : ", BuyoEma20);
+                //console.log("SelloEma20 is : ", SelloEma20);
 
 
-                function cross(array1, array2) {
-                    const crossovers = [];
-                    for (let i = 1; i < array1.length; i++) {
-                        // Check if the previous day's values were on different sides of the crossover point.
-                        if ((array1[i - 1] < array2[i - 1] && array1[i] >= array2[i]) ||
-                            (array1[i - 1] > array2[i - 1] && array1[i] <= array2[i])) {
-                        crossovers.push(1);
+                const arr2 = BuyoEma20;
+                const arr3 = SelloEma20;
+
+                const BuyoEma20TF = [];
+                const SelloEma20TF = [];
+
+                for (let i = 0; i < closeData.length; i++) {
+                    BuyoEma20TF.push(arr2.includes(i));
+                }
+                //console.log(BuyoEma20TF);
+
+
+                for (let i = 0; i < closeData.length; i++) {
+                    SelloEma20TF.push(arr3.includes(i));
+                }
+                //console.log(SelloEma20TF);
+
+                let BuyoEma20After = [];
+                let SelloEma20After = [];
+
+                // BuyoEma20AfterTF = ExRem(BuyoEma20TF, SelloEma20TF);
+
+                // SelloEma20AfterTF = ExRem(SelloEma20TF, BuyoEma20TF);
+                BuyoEma20AfterTF = BuyoEma20TF;
+                SelloEma20AfterTF = SelloEma20TF;
+
+
+
+
+                // console.log("BuyoEma20AfterTF is : ", BuyoEma20AfterTF);
+                // console.log("SelloEma20AfterTF is : ", SelloEma20AfterTF);
+
+                function BuyprocessArrays(boolArray, priceArray) {
+
+                    var newarray = [];
+                    var currentPrice = 0;
+
+                    for (var i = 0; i < boolArray.length; i++) {
+                        if (boolArray[i]) {
+                            // If true is encountered, check if it's the start of a new set
+                            if (currentPrice === 0) {
+                                currentPrice = CA[i];
+                            }
+                            newarray.push(currentPrice);
                         } else {
-                        crossovers.push(0);
+                            // If false is encountered, push 0 and reset currentPrice
+                            newarray.push(0);
+                            currentPrice = 0;
                         }
                     }
-                    return crossovers;
+
+                    return newarray;
                 }
 
-                const CrossBuySignal = cross(ClosedPricesArray, bvlaFinal);
-                //console.log("CrossBuySignal is : ");
-                //console.log(CrossBuySignal);
+                // Example usage:
+                const bvl = BuyprocessArrays(BuyoEma20AfterTF, CA);
+                //console.log("bvl newArray");
+                //console.log(bvl);
+
+                function SellprocessArrays(boolArray, priceArray) {
+
+                    var newarray = [];
+                    var currentPrice = 0;
+
+                    for (var i = 0; i < boolArray.length; i++) {
+                        if (boolArray[i]) {
+                            // If true is encountered, check if it's the start of a new set
+                            if (currentPrice === 0) {
+                                currentPrice = CA[i];
+                            }
+                            newarray.push(currentPrice);
+                        } else {
+                            // If false is encountered, push 0 and reset currentPrice
+                            newarray.push(0);
+                            currentPrice = 0;
+                        }
+                    }
+
+                    return newarray;
+                }
+                const svl = SellprocessArrays(SelloEma20AfterTF, CA);
+                //console.log("svl newArray");
+                //console.log(svl);
+
+
+
+                function Lastcross(array1, array2) {
+                    if (array1.length !== array2.length) {
+                        throw new Error('Arrays must be of equal length');
+                    }
+
+                    var result = [];
+
+                    for (var i = 1; i < array1.length; i++) {
+                        if (array1[i] > array2[i] && array1[i - 1] <= array2[i - 1]) {
+                            result.push(1); // Crossing up
+                        } else {
+                            result.push(0);
+                        }
+                    }
+
+                    return result;
+                }
+                var BcrossAbove = Lastcross(CA, bvl);
+                //console.log("crossAbove");
+                //console.log(BcrossAbove);
+                var ScrossBelow = Lastcross(svl, CA);
+                //console.log("crossBelow");
+                //console.log(ScrossBelow);
+
+
+                var BcrossAboveIndex = [];
+                var ScrossBelowIndex = [];
+
+
+                for (var s = 0; s < BcrossAbove.length; s++) {
+                    if (BcrossAbove[s] == 1) {
+                        BcrossAboveIndex.push(s);
+                    }
+                }
+                console.log("BcrossAboveIndex");
+                console.log(BcrossAboveIndex);
+
+                for (var s = 0; s < ScrossBelow.length; s++) {
+                    if (ScrossBelow[s] == 1) {
+                        ScrossBelowIndex.push(s);
+                    }
+                }
+                console.log("ScrossBelowIndex");
+                console.log(ScrossBelowIndex);
+
+
+
+                function exrem(array1, array2) {
+                    var result = [];
+                    var flag = false; // Flag to track if ARRAY1 has already encountered a true value
+                    var minLength = Math.min(array1.length, array2.length);
+
+                    for (var i = 0; i < minLength; i++) {
+                        if (array1[i]) {
+                            if (!flag && array2[i]) {
+                                // If ARRAY1 is true and ARRAY2 is also true, mark the flag and push 1
+                                result.push(1);
+                                flag = true;
+                            } else {
+                                // If ARRAY1 is true but ARRAY2 is false or flag is already set, push 0
+                                result.push(0);
+                            }
+                        } else {
+                            // If ARRAY1 is false, push 0 and reset the flag
+                            result.push(0);
+                            flag = false;
+                        }
+                    }
+
+                    // If ARRAY1 is longer, handle the remaining elements
+                    if (array1.length > minLength) {
+                        for (var i = minLength; i < array1.length; i++) {
+                            result.push(0);
+                        }
+                    }
+
+                    // If ARRAY2 is longer, handle the remaining elements
+                    if (array2.length > minLength) {
+                        for (var i = minLength; i < array2.length; i++) {
+                            result.push(0);
+                        }
+                    }
+
+                    return result;
+                }
+
+
+                function removeExcessiveSignals(array1, array2) {
+
+                    var result = [];
+
+                    var j = 0;
+                    for (var i = 0; i < BcrossAboveIndex.length; i++) {
+                        var FValue = BcrossAboveIndex[i];
+                        var SValue = null;
+
+                        // Find the first element in ScrossBelowIndex that is greater than FValue
+                        while (j < ScrossBelowIndex.length && ScrossBelowIndex[j] <= FValue) {
+                            j++;
+                        }
+
+                        // If such element exists, update SValue
+                        if (j < ScrossBelowIndex.length) {
+                            SValue = ScrossBelowIndex[j];
+                        }
+
+                        // Remove items in BcrossAboveIndex greater than FValue but less than SValue
+                        for (var k = i + 1; k < BcrossAboveIndex.length; k++) {
+                            if (BcrossAboveIndex[k] < SValue) {
+                                result.push(BcrossAboveIndex[k]);
+                            } else {
+                                break;
+                            }
+                        }
+
+                        // Update i to the index of SValue
+                        if (SValue !== null) {
+                            while (i < BcrossAboveIndex.length && BcrossAboveIndex[i] < SValue) {
+                                i++;
+                            }
+                        }
+                    }
+
+                    console.log("Items to remove:", result);
+
+
+                    return result;
+                }
+
+
+                var BRfilteredArray = removeExcessiveSignals(BcrossAboveIndex, ScrossBelowIndex);
+                console.log("BRfilteredArray");
+                console.log(BRfilteredArray);
+
+                function removeItems(array1, array2) {
+                    // Filter array2 to remove items present in array1
+                    var filteredArray2 = array2.filter(item => !array1.includes(item));
+                    return filteredArray2;
+                }
+
                 
-                const CrossSellSignal = cross(svlaFinal, ClosedPricesArray);
-                //console.log("CrossSellSignal is : ");
-                //console.log(CrossBuySignal);
-                // Output: [0, 0, 0, 0, 1, 0, 0]
-                // function amibrokerAflExrem(array1, array2) {
-                //     // Initialize an empty result array
-                //     const result = new Array(array1.length).fill(0);
-                    
-                //     // Flag to track if the first true signal has been seen
-                //     let firstTrueSeen = false;
 
-                //     // Loop through each element in the arrays
-                //     for (let i = 0; i < array1.length; i++) {
-                //         // If the current element in array1 is true and the first true signal hasn't been seen yet
-                //         if (array1[i] && !firstTrueSeen) {
-                //         // Set the corresponding element in the result array to 1
-                //         result[i] = 1;
-                //         // Mark the first true signal as seen
-                //         firstTrueSeen = true;
-                //         } else if (array2[i]) {
-                //         // If the current element in array2 is true, reset the flag
-                //         firstTrueSeen = false;
-                //         } else {
-                //         // Otherwise, copy the value from array1 to the result array
-                //         result[i] = array1[i];
-                //         }
-                //     }
-
-                //     // Return the resulting array
-                //     return result;
-                //     }
-
-                function amibrokerAflExrem(buy, sell) {
-                const filteredBuyIndices = [];
-                const filteredSellIndices = [];
-                let inBuySignal = false;
-                let inSellSignal = false;
-
-                for (let i = 0; i < buy.length; i++) {
-                    // Filter buy signals
-                    if (buy[i] && !inBuySignal) {
-                    filteredBuyIndices.push(i);
-                    inBuySignal = true;
-                    } else if (!buy[i] && inBuySignal) {
-                    // Ignore consecutive false entries within a buy signal
-                    if (i > 0 && buy[i - 1] === true) {
-                        continue;
-                    }
-                    inBuySignal = false;
-                    }
-
-                    // Filter sell signals
-                    if (sell[i] && !inSellSignal) {
-                    filteredSellIndices.push(i);
-                    inSellSignal = true;
-                    } else if (!sell[i] && inSellSignal) {
-                    // Ignore consecutive false entries within a sell signal
-                    if (i > 0 && sell[i - 1] === true) {
-                        continue;
-                    }
-                    inSellSignal = false;
-                    }
-                }
-                return [filteredBuyIndices, filteredSellIndices];
-                }
-
-                       
+                var BnewArray2 = removeItems(BRfilteredArray, BcrossAboveIndex);
+                console.log("BnewArray2");
+                console.log(BnewArray2); // Output: [6, 7]
 
 
-                    // Example usage
-                    //const bvla = [0, 43799.9, 0, 0, 0, 0, 0, 0, 43841.65, 0, 0, 0, 0, 0, 43834.6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43723.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43705.65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43708.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43771.9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-                    //const svla = [0, 0, 0, 0, 0, 0, 0, 43620.1, 0, 43601.4, 0, 0, 0, 0, 0, 0, 43553.05, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43527.95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43563.65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43488.75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                var SRfilteredArray = removeExcessiveSignals(ScrossBelowIndex, BcrossAboveIndex);
+                console.log("SRfilteredArray");
+                console.log(SRfilteredArray);
+
+                var SnewArray2 = removeItems(SRfilteredArray, ScrossBelowIndex);
+                console.log("SnewArray2");
+                console.log(SnewArray2); // Output: [6, 7]
 
 
-                //let bresultOut2Arrays = amibrokerAflExrem(CrossBuySignal, CrossSellSignal);
-                let bresultOut2Arrays = amibrokerAflExrem(CrossBuySignal, CrossSellSignal);
 
-                // Print the filtered results
-                // console.log("Filtered buy signals:", filteredBresult);
-                // console.log("Filtered sell signals:", filteredSresult);
-                function filterSignals(bresult, sresult) {
-                    // Filter buy signals based on next greater sell signal
-                    const filteredBuySignals = [];
-                    let i = 0;
-                    while (i < bresult.length) {
-                        let j = i + 1;
-                        while (j < sresult.length && sresult[j] <= bresult[i]) {
-                        j++;
+
+
+
+
+
+
+
+
+                //Example usage
+                var buySignals = BcrossAboveIndex;
+                var sellSignals = ScrossBelowIndex;
+                var filteredBuySignals = exrem(buySignals, sellSignals);
+                var filteredSellSignals = exrem(sellSignals, buySignals);
+                console.log("Filtered Buy Signals:", filteredBuySignals);
+                console.log("Filtered Sell Signals:", filteredSellSignals);
+
+                bresult = BnewArray2;
+                sresult = SnewArray2;
+
+                FBindex = BnewArray2;
+                FSindex = SnewArray2;
+
+
+                // Remaining code for trading strategy
+            }
+
+
+            function ExRem(array1, array2) {
+                let result = [];
+                let removing = false;
+
+                for (let i = 0; i < array1.length; i++) {
+                    if (array1[i]) {
+                        if (!removing) {
+                            result.push(true);
+                            removing = true;
+                        } else {
+                            result.push(false);
                         }
-                        filteredBuySignals.push(bresult[i]);
-                        i = j;
-                    }
-
-                    // Base case: check if buy signals are empty (no need to filter sell signals)
-                    if (filteredBuySignals.length === 0) {
-                        return [[], []];
-                    }
-
-                    // Check if next buy signal exists (avoid infinite recursion)
-                    if (i === bresult.length) {
-                        return [filteredBuySignals, []]; // return buy signals only
-                    }
-
-                    // Filter sell signals based on next greater buy signal (reversed arrays)
-                    const reversedBuy = filteredBuySignals.slice().reverse();
-                    const reversedSell = sresult.slice().reverse();
-
-                    // Ensure sell signals exist before recursion (avoid endless recursion)
-                    if (reversedSell.length > 0) {
-                        const filteredSellSignals = filterSignals(reversedSell, reversedBuy).reverse();
-                        return [filteredBuySignals, filteredSellSignals];
+                    } else if (array2[i]) {
+                        result.push(true);
+                        removing = false;
                     } else {
-                        // If no sell signals, return existing buy signals
-                        return [filteredBuySignals, []];
+                        result.push(false);
                     }
-                    }
-
-
-                const bresultAfterCross = bresultOut2Arrays[0];
-                const sresultAfterCross = bresultOut2Arrays[1];
-
-                let bresultOut2ArraysAfterCross = amibrokerAflExrem(bresultAfterCross, sresultAfterCross);
-
-                let bresult = bresultOut2Arrays[0];
-                let sresult = bresultOut2Arrays[1];
-
-                console.log("bresult is : :", bresult);
-                console.log("sresult is : :", sresult);
-
-                //console.log(bresult);
-                //console.log(sresult);
-                //let filteredBresultOut, filteredSresultOut = filterSignals(bresult, sresult);
-
-                let filterSignalsOutArray = filterSignals(bresult, sresult);
-
-                            // Print the filtered results
-                // console.log("Filtered buy signals:", filteredBresult[0]);
-                // console.log("Filtered sell signals:", filteredSresult[1]);
-
-                bresult = filterSignalsOutArray[0];
-                sresult = filterSignalsOutArray[1];
-
-                console.log("last filter bresult is : :", bresult);
-                console.log("last filter sresult is : :", sresult);
-
-                //console.log(output);
-                //console.log("Output is : ", bvla);
-                console.log("Data Js done");
-                //
-                //
-                //
-
-                // split the data set into ohlc and volume
-                const ohlc = [],
-                    volume = [],
-                    dataLength = jsonData.data.length;
-
-                for (let i = 0; i < dataLength; i += 1) {
-                    ohlc.push([
-                        jsonData.data[i][0], // the date
-                        jsonData.data[i][1], // open
-                        jsonData.data[i][2], // high
-                        jsonData.data[i][3], // low
-                        jsonData.data[i][4], // close
-                    ]);
-
-                    volume.push([
-                        jsonData.data[i][0], // the date
-                        jsonData.data[i][5], // the volume
-                    ]);
                 }
 
+                return result;
+            }
 
-                                // Function to get the x-axis value for a given candle index
-                // function getXValue(candleIndex) {
-                //     return jsonData.data[candleIndex].x;
-                // }
 
+            // Example usage of main function
+            var closeData = CA; // Insert your close price data here
+            main(closeData);
+
+            function timestampToDateTime(timestamp) {
+                // Create a new Date object with the timestamp
+                var date = new Date(timestamp);
+
+                // Extract the date components
+                var year = date.getFullYear();
+                var month = ('0' + (date.getMonth() + 1)).slice(-2); // Months are zero-based
+                var day = ('0' + date.getDate()).slice(-2);
+
+                // Extract the time components
+                var hours = ('0' + date.getHours()).slice(-2);
+                var minutes = ('0' + date.getMinutes()).slice(-2);
+                var seconds = ('0' + date.getSeconds()).slice(-2);
+
+                // Construct the datetime string in the desired format
+                var dateTimeString = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+
+                return dateTimeString;
+            }
+
+            // Example usage
+            //var timestamp = 1614576896000; // Unix timestamp in milliseconds
+            //var dateTime = timestampToDateTime(timestamp);
+            //console.log(dateTime);
+
+            function addSignal(arg) {
                 
-                
-                // Function to create line data for a specific point
-                // function createLineData(candleIndex, color) {
-                //     return {
-                //         x: getXValue(candleIndex),
-                //         //y: candlestickData[candleIndex].close, 
-                //         y: jsonData.data[candleIndex][4],
-                //         // Adjust y-value as needed
-                //         marker: {
-                //             enabled: true,
-                //             symbol: 'diamond',
-                //             fillColor: color
-                //         }
-                //     };
-                // }
+                arg.series.addPoint({
+                    // x: arg.point[0],
+                    x: arg.sginaldate,
 
+                    y: arg.direction == "up" ? arg.point[3] - arg.triangleOffset : arg.point[2] + arg.triangleOffset,
+                    marker: {
+                        symbol: arg.direction === "up" ? "triangle" : "triangle-down",
+                        fillColor: arg.direction === "up" ? "green" : "red",
+                        radius: arg.size,
+                    },
+                });
+            }
 
-
-
-                // const buyArray = bresult;
-                // const sellArray = sresult;
-
-                // // Generate line data based on buy and sell signals
-                // const lineData = [];
-                // for (let i = 0; i < buyArray.length; i++) {
-                //     const buyIndex = buyArray[i];
-                //     lineData.push(createLineData(buyIndex, 'green'));
-                //     for (let j = 1; j <= 10; j++) {
-                //         const nextIndex = buyIndex + j;
-                //         if (nextIndex < jsonData.data.length) {
-                //             lineData.push(createLineData(nextIndex, 'green'));
-                //         }
-                //     }
-                // }
-                // for (let i = 0; i < sellArray.length; i++) {
-                //     const sellIndex = sellArray[i];
-                //     lineData.push(createLineData(sellIndex, 'red'));
-                //     for (let j = 1; j <= 10; j++) {
-                //         const nextIndex = sellIndex + j;
-                //         if (nextIndex < jsonData.data.length) {
-                //             lineData.push(createLineData(nextIndex, 'red'));
-                //         }
-                //     }
-                // }
-
-
-                function addSignal(arg) {
-                    arg.series.addPoint({
-                        x: arg.point[0],
-                        y: arg.direction == "up" ? arg.point[3] - arg.triangleOffset : arg.point[2] + arg.triangleOffset,
-                        marker: {
-                            symbol: arg.direction === "up" ? "triangle" : "triangle-down",
-                            fillColor: arg.direction === "up" ? "green" : "red",
-                            radius: arg.size,
+            // create the chart
+            Highcharts.stockChart(
+                "container",
+                {
+                    chart: {
+                        height: 600,
+                        scrollbar: {
+                            enabled: true
                         },
-                    });
-                }
-
-                // create the chart
-                Highcharts.stockChart(
-                    "container",
-                    {
-                        chart: {
-                            height: 600,
-                            events: {
-                                load() {
-                                    const chart = this,
+                        events: {
+                            load() {
+                                const chart = this,
                                     series = chart.series;
-                                    for (let i = bresult.length-30; i < bresult.length; i += 1) {
-                                        if (bresult[i] > 0) {
-                                        const bpoint = bresult[i]
-                                            addSignal({
-                                                series: series[4], // Scatter series
-                                                //point: jsonData.data[i], // Choose a point where you would like to append a triangle
-                                                point: jsonData.data[bpoint],
+                                for (let i = 0; i < FBindex.length; i += 1) {
+                                    if (FBindex[i] > 0) {
+                                        const bpoint = FBindex[i]
+                                        addSignal({
+                                            series: series[3], // Scatter series
+                                            //point: jsonData.data[i], // Choose a point where you would like to append a triangle
+                                            point: ohlc[bpoint],
+                                            sginaldate: ohlc[bpoint][0],
 
-                                                //point: bresult[i],
-                                                direction: "up", // 'triangle' or 'triangle-down'
-                                                size: 8,
-                                                triangleOffset: 5, // Choose how far shoud a triangle be from candlestick
-                                            });
-                                            
-                                        }
+                                            //point: bresult[i],
+                                            direction: "up", // 'triangle' or 'triangle-down'
+                                            size: 8,
+                                            triangleOffset: 0, // Choose how far shoud a triangle be from candlestick
+                                        });
+
                                     }
-                                    console.log("BResult done");
+                                }
 
-                                    for (let i = sresult.length-30; i < sresult.length; i += 1) {
-                                        if (sresult[i] > 0) {
-                                        const spoint = sresult[i]
-                                            addSignal({
-                                                series: series[4],
-                                                //point: bresult[i],
-                                                point: jsonData.data[spoint],
-                                                // Scatter series
-                                                //point: jsonData.data[i], // Choose a point where you would like to append a triangle
-                                                direction: "down", // 'triangle' or 'triangle-down'
-                                                size: 8,
-                                                triangleOffset: 5, // Choose how far shoud a triangle be from candlestick
-                                            });
-                                            //console.log(i);
-                                        }
+
+                                for (let i = 0; i < FSindex.length; i += 1) {
+                                    if (FSindex[i] > 0) {
+                                        const spoint = FSindex[i]
+                                        addSignal({
+                                            series: series[3],
+                                            //point: bresult[i],
+                                            point: ohlc[spoint],
+                                            sginaldate: ohlc[spoint][0],
+                                            // Scatter series
+                                            //point: jsonData.data[i], // Choose a point where you would like to append a triangle
+                                            direction: "down", // 'triangle' or 'triangle-down'
+                                            size: 8,
+                                            triangleOffset: 0, // Choose how far shoud a triangle be from candlestick
+                                        });
+                                        // console.log(spoint);
+                                        // console.log(ohlc[spoint]);
                                     }
-                                    console.log("SResult done");
-                                
-                                
-                                },
-                            },
-                        },
-                        title: {
-                            text: "BN Historical",
-                        },
-                        subtitle: {
-                            text: "All indicators",
-                        },
-                        accessibility: {
-                            series: {
-                                descriptionFormat: "{seriesDescription}.",
-                            },
-                            description: "Use the dropdown menus above to display different indicator series on the chart.",
-                            screenReaderSection: {
-                                beforeChartFormat: "<{headingTagName}>{chartTitle}</{headingTagName}><div>{typeDescription}</div><div>{chartSubtitle}</div><div>{chartLongdesc}</div>",
-                            },
-                        },
-                        legend: {
-                            enabled: true,
-                        },
-                        rangeSelector: {
-                            selected: 2,
-                        },
-                        yAxis: [
-                            {
-                                height: "60%",
-                            },
-                            {
-                                top: "60%",
-                                height: "20%",
-                            },
-                            {
-                                top: "80%",
-                                height: "20%",
-                            },
-                        ],
-                        plotOptions: {
-                            series: {
-                                showInLegend: true,
-                                accessibility: {
-                                    exposeAsGroupOnly: true,
-                                },
-                            },
-                        },
-                        series: [
-                            {
-                                type: "candlestick",
-                                id: "aapl",
-                                name: "BN",
-                                data: jsonData.data,
-                            },
-                            {
-                                type: "column",
-                                id: "volume",
-                                name: "Volume",
-                                data: volume,
-                                yAxis: 1,
-                            },
-                            {
-                                type: "pc",
-                                id: "overlay",
-                                linkedTo: "aapl",
-                                yAxis: 0,
-                            },
-                            {
-                                type: "macd",
-                                id: "oscillator",
-                                linkedTo: "aapl",
-                                yAxis: 2,
-                            },
-                            {
-                                type: "scatter",
-                                name: "Signal",
-                                animation: false,
-                            },
-                            // {
-                            //   type: 'ohlc',
-                            //     id      : 'aapl',
-                            //     name    : 'AAPL Stock Price',
-                            //     data    : emaValues
-                            //   }, {
-                            //     type    : 'sma',
-                            //     linkedTo: 'aapl'
-                            //   }, {
-                            //     type    : 'sma',
-                            //     linkedTo: 'aapl',
-                            //     params  : {
-                            //       period: 50
-                            //     }
-                            // } 
-                            {
-                                type: 'sma',
-                                linkedTo: 'aapl',
-                                params: {
-                                    period: 70
                                 }
-                            }, 
-                                
-                            {
-                                type: 'sma',
-                                linkedTo: 'aapl',
-                                params: {
-                                    period: 280
-                                }
-                            }
-                            
+                                // console.log("SResult done");
+                                // console.log("FS Index is : ", FSindex);
+                                // console.log("FB Index is : ", FBindex);
+                                console.log("BResult SResult done");
 
-                            //, {
-                            //     type    : 'line',
-                            //     id      : 'bvla',
-                            //     name    : 'BVLP80Price',
-                            //     data    : bvla
-                            // }, 
-                            // {
-                            //     type    : 'line',
-                            //     id      : 'svla',
-                            //     name    : 'BVLS80Price',
-                            //     data    : svla
-                            // }       
 
-                        ]
-                    }, 
-                            
-                    //     ],
+                            },
+                        },
+                    },
+
+                    // tooltip: {
+                    //     formatter() {
+                    //         // const date = Highcharts.dateFormat('%b %e, %Y %I:%M %p', this.x),
+                    //         // close = this.points[0].point.close,
+                    //         // name = this.points[0].series.name;
+                    //         const date = Highcharts.dateFormat('%b %e, %Y %I:%M %p', (this.x + 19080) * 1000);
+                    //         //close = this.points[0].point.close;
+                    //         //name = this.points[0].series.name;    
+
+                    //         //return [date, `${name}: ${close}`]
+                    //         return [date]
+                    //     }
                     // },
-                    function (chart) {
-                        document.getElementById("overlays").addEventListener("change", function (e) {
-                            const series = chart.get("overlay");
+                    title: {
+                        text: "BN Historical",
+                    },
+                    subtitle: {
+                        text: "All indicators",
+                    },
+                    accessibility: {
+                        series: {
+                            descriptionFormat: "{seriesDescription}.",
+                        },
+                        description: "Use the dropdown menus above to display different indicator series on the chart.",
+                        screenReaderSection: {
+                            beforeChartFormat: "<{headingTagName}>{chartTitle}</{headingTagName}><div>{typeDescription}</div><div>{chartSubtitle}</div><div>{chartLongdesc}</div>",
+                        },
+                    },
+                    legend: {
+                        enabled: true,
+                    },
+                    rangeSelector: {
+                        //selected: 2,
+                        //selected: 2,
+                    },
+                    yAxis: [
+                        {
+                            height: "60%",
+                        },
+                        {
+                            top: "60%",
+                            height: "20%",
+                        },
+                        {
+                            top: "80%",
+                            height: "20%",
+                        },
+                    ],
+                    xAxis: {
+                        min: ohlc[dataLength - 250][0],
+                        max: ohlc[dataLength - 1][0],
 
-                            if (series) {
-                                series.remove(false);
-                                chart.addSeries({
-                                    type: e.target.value,
-                                    linkedTo: "aapl",
-                                    id: "overlay",
-                                });
-                            }
-                        });
+                    },
+                    plotOptions: {
+                        series: {
+                            //turboThreshold: 500, // Only render up to 500 points initially
+                            showInLegend: true,
+                            // accessibility: {
+                            //     exposeAsGroupOnly: false,
+                            // },
+                            // dataGrouping: {
+                            //     enabled: false,
+                            // },
+                        },
+                        candlestick: {
+                            color: 'pink',
+                            lineColor: 'red',
+                            upColor: 'lightgreen',
+                            upLineColor: 'green'
+                        }
+                    },
+                    series: [
+                        {
+                            type: "candlestick",
+                            id: "aapl",
+                            name: "BN",
+                            data: ohlc,
+                            dataGrouping: {
+                                groupPixelWidth: 0,
+                            },
+                            //minPointLength: 5 // Example value
+                        },
+                        // {
+                        //     type: "column",
+                        //     id: "volume",
+                        //     name: "Volume",
+                        //     data: volume,
+                        //     yAxis: 1,
+                        // },
+                        {
+                            type: "pc",
+                            id: "overlay",
+                            linkedTo: "aapl",
+                            yAxis: 0,
+                        },
+                        {
+                            type: "macd",
+                            id: "oscillator",
+                            linkedTo: "aapl",
+                            yAxis: 2,
+                        },
+                        {
+                            type: "scatter",
+                            name: "Signal",
+                            animation: false,
+                        }
+                        // {
+                        //   type: 'ohlc',
+                        //     id      : 'aapl',
+                        //     name    : 'AAPL Stock Price',
+                        //     data    : emaValues
+                        //   }, {
+                        //     type    : 'sma',
+                        //     linkedTo: 'aapl'
+                        //   }, {
+                        //     type    : 'sma',
+                        //     linkedTo: 'aapl',
+                        //     params  : {
+                        //       period: 50
+                        //     }
+                        // } 
+                        // ,{
+                        //     type: 'ema',
+                        //     linkedTo: 'aapl',
+                        //     params: {
+                        //         period: 70
+                        //     }
+                        // }, 
 
-                        document.getElementById("oscillators").addEventListener("change", function (e) {
-                            const series = chart.get("oscillator");
+                        // {
+                        //     type: 'ema',
+                        //     linkedTo: 'aapl',
+                        //     params: {
+                        //         period: 280
+                        //     }
+                        // }
 
-                            if (series) {
-                                series.remove(false);
-                                chart.addSeries({
-                                    type: e.target.value,
-                                    linkedTo: "aapl",
-                                    id: "oscillator",
-                                    yAxis: 2,
-                                });
-                            }
-                        });
+
+                        //, {
+                        //     type    : 'line',
+                        //     id      : 'bvla',
+                        //     name    : 'BVLP80Price',
+                        //     data    : bvla
+                        // }, 
+                        // {
+                        //     type    : 'line',
+                        //     id      : 'svla',
+                        //     name    : 'BVLS80Price',
+                        //     data    : svla
+                        // }       
+
+                    ]
+                },
+
+                //     ],
+                // },
+                function (chart) {
+                    document.getElementById("overlays").addEventListener("change", function (e) {
+                        const series = chart.get("overlay");
+
+                        if (series) {
+                            series.remove(false);
+                            chart.addSeries({
+                                type: e.target.value,
+                                linkedTo: "aapl",
+                                id: "overlay",
+                            });
+                        }
                     });
-            
-                
-            
-                })();           
-            // })();
-        </script>
-        <style>
-            .selectors-container {
-                background: #f2f2f2;
-                margin-bottom: 1rem;
-                font-size: 0;
-            }
-            .selectors-container .col {
-                font-size: 1.2rem;
-                width: calc(50% - 1em);
-                padding: 0.5em;
-                display: inline-block;
-            }
-            .selectors-container select {
-                width: 100%;
-                font-size: 16px; /* prevent page zoom in iOS */
-            }
-            @media (max-width: 768px) {
-                .selectors-container .col {
-                    display: block;
-                    width: calc(100% - 1em);
-                }
-            }
-        </style>
-        <style src="style.css" type="text/css"></style>
-    </head>
-    <body>
-        <div class="main-wrapper">
-            <div class="selectors-container">
-                <div class="col">
-                    <label for="overlays">Overlays:</label>
-                    <select class="left-select" id="overlays">
-                        <option value="abands">Acceleration Bands</option>
-                        <option value="bb">Bollinger Bands</option>
-                        <option value="dema">DEMA (Double Exponential Moving Average)</option>
-                        <option value="ema">EMA (Exponential Moving Average)</option>
-                        <option value="ikh">Ichimoku Kinko Hyo</option>
-                        <option value="keltnerchannels">Keltner Channels</option>
-                        <option value="linearRegression">Linear Regression</option>
-                        <option value="pivotpoints">Pivot Points</option>
-                        <option value="pc" selected="selected">Price Channel</option>
-                        <option value="priceenvelopes">Price Envelopes</option>
-                        <option value="psar">PSAR (Parabolic SAR)</option>
-                        <option value="sma">SMA (Simple Moving Average)</option>
-                        <option value="supertrend">Super Trend</option>
-                        <option value="tema">TEMA (Triple Exponential Moving Average)</option>
-                        <option value="vbp">VbP (Volume by Price)</option>
-                        <option value="vwap">WMA (Weighted Moving Average)</option>
-                        <option value="wma">VWAP (Volume Weighted Average Price)</option>
-                        <option value="zigzag">Zig Zag</option>
-                    </select>
-                </div>
-                <div class="col">
-                    <label for="oscillators">Oscillators:</label>
-                    <select class="right-select" id="oscillators">
-                        <option value="apo">Absolute price indicator</option>
-                        <option value="ad">A/D (Accumulation/Distribution)</option>
-                        <option value="aroon">Aroon</option>
-                        <option value="aroonoscillator">Aroon oscillator</option>
-                        <option value="atr">ATR (Average True Range)</option>
-                        <option value="ao">Awesome oscillator</option>
-                        <option value="cci">CCI (Commodity Channel Index)</option>
-                        <option value="chaikin">Chaikin</option>
-                        <option value="cmf">CMF (Chaikin Money Flow)</option>
-                        <option value="disparityindex">Disparity Index</option>
-                        <option value="cmo">CMO (Chande Momentum Oscillator)</option>
-                        <option value="dmi">DMI (Directional Movement Index)</option>
-                        <option value="dpo">Detrended price</option>
-                        <option value="linearRegressionAngle">Linear Regression Angle</option>
-                        <option value="linearRegressionIntercept">Linear Regression Intercept</option>
-                        <option value="linearRegressionSlope">Linear Regression Slope</option>
-                        <option value="klinger">Klinger Oscillator</option>
-                        <option value="macd" selected="selected">MACD (Moving Average Convergence Divergence)</option>
-                        <option value="mfi">MFI (Money Flow Index)</option>
-                        <option value="momentum">Momentum</option>
-                        <option value="natr">NATR (Normalized Average True Range)</option>
-                        <option value="obv">OBV (On-Balance Volume)</option>
-                        <option value="ppo">Percentage Price oscillator</option>
-                        <option value="roc">RoC (Rate of Change)</option>
-                        <option value="rsi">RSI (Relative Strength Index)</option>
-                        <option value="slowstochastic">Slow Stochastic</option>
-                        <option value="stochastic">Stochastic</option>
-                        <option value="trix">TRIX</option>
-                        <option value="williamsr">Williams %R</option>
-                    </select>
-                </div>
-            </div>
-            <div id="container"></div>
-        </div>
-        <div>
-            <h3>
-                Response :
 
-            </h3>
-            <label id="labelWithHTML">Initial Text</label>
+                    document.getElementById("oscillators").addEventListener("change", function (e) {
+                        const series = chart.get("oscillator");
+
+                        if (series) {
+                            series.remove(false);
+                            chart.addSeries({
+                                type: e.target.value,
+                                linkedTo: "aapl",
+                                id: "oscillator",
+                                yAxis: 2,
+                            });
+                        }
+                    });
+                });
+
+
+
+        })();
+        // })();
+    </script>
+    <style>
+        .selectors-container {
+            background: #f2f2f2;
+            margin-bottom: 1rem;
+            font-size: 0;
+        }
+
+        .selectors-container .col {
+            font-size: 1.2rem;
+            width: calc(50% - 1em);
+            padding: 0.5em;
+            display: inline-block;
+        }
+
+        .selectors-container select {
+            width: 100%;
+            font-size: 16px;
+            /* prevent page zoom in iOS */
+        }
+
+        @media (max-width: 768px) {
+            .selectors-container .col {
+                display: block;
+                width: calc(100% - 1em);
+            }
+        }
+    </style>
+    <style src="style.css" type="text/css"></style>
+</head>
+
+<body>
+    <div class="main-wrapper">
+        <div class="selectors-container">
+            <div class="col">
+                <label for="overlays">Overlays:</label>
+                <select class="left-select" id="overlays">
+                    <option value="abands">Acceleration Bands</option>
+                    <option value="bb">Bollinger Bands</option>
+                    <option value="dema">DEMA (Double Exponential Moving Average)</option>
+                    <option value="ema">EMA (Exponential Moving Average)</option>
+                    <option value="ikh">Ichimoku Kinko Hyo</option>
+                    <option value="keltnerchannels">Keltner Channels</option>
+                    <option value="linearRegression">Linear Regression</option>
+                    <option value="pivotpoints">Pivot Points</option>
+                    <option value="pc" selected="selected">Price Channel</option>
+                    <option value="priceenvelopes">Price Envelopes</option>
+                    <option value="psar">PSAR (Parabolic SAR)</option>
+                    <option value="sma">SMA (Simple Moving Average)</option>
+                    <option value="supertrend">Super Trend</option>
+                    <option value="tema">TEMA (Triple Exponential Moving Average)</option>
+                    <option value="vbp">VbP (Volume by Price)</option>
+                    <option value="vwap">WMA (Weighted Moving Average)</option>
+                    <option value="wma">VWAP (Volume Weighted Average Price)</option>
+                    <option value="zigzag">Zig Zag</option>
+                </select>
+            </div>
+            <div class="col">
+                <label for="oscillators">Oscillators:</label>
+                <select class="right-select" id="oscillators">
+                    <option value="apo">Absolute price indicator</option>
+                    <option value="ad">A/D (Accumulation/Distribution)</option>
+                    <option value="aroon">Aroon</option>
+                    <option value="aroonoscillator">Aroon oscillator</option>
+                    <option value="atr">ATR (Average True Range)</option>
+                    <option value="ao">Awesome oscillator</option>
+                    <option value="cci">CCI (Commodity Channel Index)</option>
+                    <option value="chaikin">Chaikin</option>
+                    <option value="cmf">CMF (Chaikin Money Flow)</option>
+                    <option value="disparityindex">Disparity Index</option>
+                    <option value="cmo">CMO (Chande Momentum Oscillator)</option>
+                    <option value="dmi">DMI (Directional Movement Index)</option>
+                    <option value="dpo">Detrended price</option>
+                    <option value="linearRegressionAngle">Linear Regression Angle</option>
+                    <option value="linearRegressionIntercept">Linear Regression Intercept</option>
+                    <option value="linearRegressionSlope">Linear Regression Slope</option>
+                    <option value="klinger">Klinger Oscillator</option>
+                    <option value="macd" selected="selected">MACD (Moving Average Convergence Divergence)</option>
+                    <option value="mfi">MFI (Money Flow Index)</option>
+                    <option value="momentum">Momentum</option>
+                    <option value="natr">NATR (Normalized Average True Range)</option>
+                    <option value="obv">OBV (On-Balance Volume)</option>
+                    <option value="ppo">Percentage Price oscillator</option>
+                    <option value="roc">RoC (Rate of Change)</option>
+                    <option value="rsi">RSI (Relative Strength Index)</option>
+                    <option value="slowstochastic">Slow Stochastic</option>
+                    <option value="stochastic">Stochastic</option>
+                    <option value="trix">TRIX</option>
+                    <option value="williamsr">Williams %R</option>
+                </select>
+            </div>
+
+            <select id="refreshIntervalSelect">
+                <option value="5">5 seconds</option>
+                <option value="10">10 seconds</option>
+                <option value="30">30 seconds</option>
+                <option value="60">1 minute</option>
+            </select>
+            <button id="toggleAutoRefresh">Enable Auto Refresh</button>
+            <script>
+                let refreshIntervalId = null; // Store the interval ID for clearing it later
+
+                const contentDiv = document.getElementById('content');
+                const toggleButton = document.getElementById('toggleAutoRefresh');
+
+                function refreshContent() {
+                    window.location.reload();
+                }
+
+                function startAutoRefresh() {
+                    const refreshInterval = parseInt(refreshIntervalSelect.value) * 1000;
+                    refreshIntervalId = setInterval(refreshContent, refreshInterval);
+                    toggleButton.textContent = 'Disable Auto Refresh';
+                }
+
+                function stopAutoRefresh() {
+                    clearInterval(refreshIntervalId);
+                    refreshIntervalId = null;
+                    toggleButton.textContent = 'Enable Auto Refresh';
+                }
+
+                toggleButton.addEventListener('click', () => {
+                    if (refreshIntervalId) {
+                        stopAutoRefresh();
+                    } else {
+                        startAutoRefresh();
+                    }
+                });
+
+            </script>
         </div>
-    </body>
+        <div id="container"></div>
+    </div>
+    <div>
+        <h3>
+            Response :
+
+        </h3>
+        <label id="labelWithHTML">Initial Text</label>
+    </div>
+</body>
+
 </html>
