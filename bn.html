@@ -777,16 +777,16 @@
                         BcrossAboveIndex.push(s);
                     }
                 }
-                console.log("BcrossAboveIndex");
-                console.log(BcrossAboveIndex);
+                // console.log("BcrossAboveIndex");
+                // console.log(BcrossAboveIndex);
 
                 for (var s = 0; s < ScrossBelow.length; s++) {
                     if (ScrossBelow[s] == 1) {
                         ScrossBelowIndex.push(s);
                     }
                 }
-                console.log("ScrossBelowIndex");
-                console.log(ScrossBelowIndex);
+                // console.log("ScrossBelowIndex");
+                // console.log(ScrossBelowIndex);
 
 
 
@@ -866,7 +866,7 @@
                         }
                     }
 
-                    console.log("Items to remove:", result);
+                    //console.log("Items to remove:", result);
 
 
                     return result;
@@ -874,8 +874,8 @@
 
 
                 var BRfilteredArray = removeExcessiveSignals(BcrossAboveIndex, ScrossBelowIndex);
-                console.log("BRfilteredArray");
-                console.log(BRfilteredArray);
+                // console.log("BRfilteredArray");
+                // console.log(BRfilteredArray);
 
                 function removeItems(array1, array2) {
                     // Filter array2 to remove items present in array1
@@ -886,17 +886,17 @@
                 
 
                 var BnewArray2 = removeItems(BRfilteredArray, BcrossAboveIndex);
-                console.log("BnewArray2");
-                console.log(BnewArray2); // Output: [6, 7]
+                // console.log("BnewArray2");
+                // console.log(BnewArray2); // Output: [6, 7]
 
 
                 var SRfilteredArray = removeExcessiveSignals(ScrossBelowIndex, BcrossAboveIndex);
-                console.log("SRfilteredArray");
-                console.log(SRfilteredArray);
+                // console.log("SRfilteredArray");
+                // console.log(SRfilteredArray);
 
                 var SnewArray2 = removeItems(SRfilteredArray, ScrossBelowIndex);
-                console.log("SnewArray2");
-                console.log(SnewArray2); // Output: [6, 7]
+                // console.log("SnewArray2");
+                // console.log(SnewArray2); // Output: [6, 7]
 
 
 
@@ -913,8 +913,8 @@
                 var sellSignals = ScrossBelowIndex;
                 var filteredBuySignals = exrem(buySignals, sellSignals);
                 var filteredSellSignals = exrem(sellSignals, buySignals);
-                console.log("Filtered Buy Signals:", filteredBuySignals);
-                console.log("Filtered Sell Signals:", filteredSellSignals);
+                // console.log("Filtered Buy Signals:", filteredBuySignals);
+                // console.log("Filtered Sell Signals:", filteredSellSignals);
 
                 bresult = BnewArray2;
                 sresult = SnewArray2;
@@ -968,6 +968,9 @@
                 var hours = ('0' + date.getHours()).slice(-2);
                 var minutes = ('0' + date.getMinutes()).slice(-2);
                 var seconds = ('0' + date.getSeconds()).slice(-2);
+
+
+                //var gmt = date.toISOString();
 
                 // Construct the datetime string in the desired format
                 var dateTimeString = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
@@ -1069,7 +1072,7 @@
                     //     }
                     // },
                     title: {
-                        text: "BN Historical",
+                        text: "BN Historical : LU @ " + timestampToDateTime((reposedata.candles[reposedata.candles.length-1][0]) * 1000) ,
                     },
                     subtitle: {
                         text: "All indicators",
@@ -1104,7 +1107,7 @@
                         },
                     ],
                     xAxis: {
-                        min: ohlc[dataLength - 250][0],
+                        min: ohlc[dataLength - 120][0],
                         max: ohlc[dataLength - 1][0],
 
                     },
@@ -1336,7 +1339,7 @@
                 </select>
             </div>
 
-            <select id="refreshIntervalSelect">
+            <!-- <select id="refreshIntervalSelect">
                 <option value="5">5 seconds</option>
                 <option value="10">10 seconds</option>
                 <option value="30">30 seconds</option>
@@ -1373,7 +1376,7 @@
                     }
                 });
 
-            </script>
+            </script> -->
         </div>
         <div id="container"></div>
     </div>
