@@ -1489,7 +1489,7 @@
           const combinelistLength = combinedList.length;
           const threeQuarters = Math.ceil((combinelistLength * 3) / 4);
 
-          for (let i = threeQuarters; i < combinedList.length - 1; i++) {
+          for (let i = threeQuarters; i < combinedList.length - 2; i++) {
             addBNDataToRealTimeDBIfNotExists(combinedList[i]);
             console.log("combinedList item sent");
             //console.log(combinedList[i]);
