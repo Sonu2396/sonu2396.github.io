@@ -131,6 +131,8 @@
     <script>
       FBindex = [];
       FSindex = [];
+      EMA20expChart = [];
+      
       // var firebaseConfig = {
 
       //         apiKey: "AIzaSyAGVsUrHSxhkT4-7LT8hIhOYRLuCTh9pfI",
@@ -607,6 +609,31 @@
           return ema;
         }
 
+        function calculateNewJsEMA(prices, period) {
+          const k = 2 / (period + 1);
+          const emaArray = new Array(prices.length);
+
+          // Calculate initial EMA (using SMA for the first period)
+          let sum = 0;
+          for (let i = 0; i < period; i++) {
+            sum += parseFloat(prices[i]);
+          }
+          let ema = sum / period;
+
+          // Fill initial elements of EMA array with the first EMA value
+          for (let i = 0; i < period; i++) {
+            emaArray[i] = ema;
+          }
+
+          // Calculate EMA for remaining prices
+          for (let i = period; i < prices.length; i++) {
+            ema = prices[i] * k + ema * (1 - k);
+            emaArray[i] = ema;
+          }
+
+          return emaArray;
+        }
+
         // function EMA(data) {
         //     // Implementation of Exponential Moving Average (EMA)
         //     var ema = 0;
@@ -715,6 +742,9 @@
 
           var EMA20 = [];
           EMA20 = EMA(CA, 20);
+          var EMA20exp = [];
+          EMA20exp = calculateNewJsEMA(CA, 20);
+          EMA20expChart = EMA20exp;
           // for (var j = 0; j < closeData.length; j++) {
           //     EMA20.push(EMA(closeData.slice(Math.max(0, j - 99), j + 1)));
           // }
@@ -764,8 +794,22 @@
             Sello.push(selloCondition);
           }
 
-          //console.log("Buyo is : ", Buyo);
-          //console.log("Sello is : ", Sello);
+          // console.log("Buyo is : ", Buyo);
+          // console.log("Sello is : ", Sello);
+          let BuyoIndexes = [];
+          for (var y = 0; y < Buyo.length; y++) {
+            if (Buyo[y] == true) {
+              BuyoIndexes.push(y);
+            }
+          }
+          let SelloIndexes = [];
+          for (var y = 0; y < Sello.length; y++) {
+            if (Sello[y] == true) {
+              SelloIndexes.push(y);
+            }
+          }
+          console.log("BuyoIndexes is : ", BuyoIndexes);
+          console.log("SelloIndexes is : ", SelloIndexes);
 
           let BuyoEma20 = [];
           for (var y = 0; y < Buyo.length; y++) {
@@ -780,7 +824,7 @@
             //   }
             // }
 
-            if (Buyo[y] == true && closeData[y] > EMA20[y]) {
+            if (Buyo[y] == true && closeData[y] > EMA20exp[y]) {
               BuyoEma20.push(y);
             }
           }
@@ -796,13 +840,13 @@
             //     SelloEma20.push(SelloIndexVal);
             //   }
             // }
-            if (Sello[y] == true && closeData[y] < EMA20[y]) {
+            if (Sello[y] == true && closeData[y] < EMA20exp[y]) {
               SelloEma20.push(y);
             }
           }
 
-          //console.log("BuyoEma20 is : ", BuyoEma20);
-          //console.log("SelloEma20 is : ", SelloEma20);
+          console.log("BuyoEma20 is : ", BuyoEma20);
+          console.log("SelloEma20 is : ", SelloEma20);
 
           const arr2 = BuyoEma20;
           const arr3 = SelloEma20;
@@ -896,9 +940,120 @@
           const [BuyOAfterExRem1stOnlyIndexes, SellOAfterExRem1stOnlyIndexes] =
             ExRemFinalworkingJswithIndexesOnly(BuyoEma20, SelloEma20);
 
-          //console.log("BuyOAfterExRem1stOnlyIndexes is : ", BuyOAfterExRem1stOnlyIndexes);
-          //console.log("SellOAfterExRem1stOnlyIndexes is : ", SellOAfterExRem1stOnlyIndexes);
-          //console.log("check");
+          console.log("FinalOutA1 :", BuyOAfterExRem1stOnlyIndexes);
+          console.log("FinalOutA2 :", SellOAfterExRem1stOnlyIndexes);
+
+          cp = parseFloat(CA[0]);
+          let BuyPlus80ValArray = [];
+          for (let i = 0; i < CA.length; i++) {
+            checkflag = true;
+            //cp = 0;
+            if (BuyOAfterExRem1stOnlyIndexes.includes(i)) {
+              cp = parseFloat(CA[i]) + 80;
+              BuyPlus80ValArray.push(cp);
+            } else {
+              BuyPlus80ValArray.push(cp);
+            }
+          }
+          console.log("check BuyPlus80ValArray : ", BuyPlus80ValArray);
+          console.log("check");
+
+          sp = parseFloat(CA[0]);
+          let SellMinus80ValArray = [];
+          for (let i = 0; i < CA.length; i++) {
+            checkflag = true;
+            //cp = 0;
+            if (SellOAfterExRem1stOnlyIndexes.includes(i)) {
+              sp = parseFloat(CA[i]) - 80;
+              SellMinus80ValArray.push(sp);
+            } else {
+              SellMinus80ValArray.push(sp);
+            }
+          }
+          console.log("check SellMinus80ValArrayv : ", SellMinus80ValArray);
+          console.log("check");
+
+          function crossCheck(type, CA, ValArray) {
+            const crossovers = [];
+
+            for (let i = 1; i < ValArray.length; i++) {
+              // const prevPrice = priceArray[i - 1];
+              // const currentPrice = priceArray[i];
+              // const prevEma = emaArray[i - 1];
+              // const currentEma = emaArray[i];
+              if (type == "Buy") {
+                // Check for upward crossover
+                //if (prevPrice <= prevEma && currentPrice > currentEma) {
+                  if ((CA[i - 1] <= ValArray[i - 1]) && (CA[i] > ValArray[i])) {
+                  //if (CA[i] > ValArray[i]) {  
+                  crossovers.push(1); // Or any other value to indicate upward crossover
+                } else {
+                  crossovers.push(0); // No crossover
+                }
+              }
+              if (type == "Sell") {
+                if ((CA[i - 1] >= ValArray[i - 1]) && (CA[i] < ValArray[i])) {
+                crossovers.push(1); // Or any other value to indicate downward crossover
+              } else {
+                crossovers.push(0);
+
+              }
+              // Check for downward crossover
+              // if (prevPrice >= prevEma && currentPrice < currentEma) {
+                //if (CA[i] < ValArray[i]) { 
+                // No crossover
+              }
+            }
+
+            return crossovers;
+          }
+
+         
+
+          let BuyCrossCheckArray = crossCheck("Buy", CA, BuyPlus80ValArray);
+          let SellCrossCheckArray = crossCheck("Sell", CA, SellMinus80ValArray);
+
+          console.log(
+            "BuyCrossCheckArray is : ",
+            BuyCrossCheckArray
+          );
+          console.log(
+            "SellCrossCheckArray is : ",
+            SellCrossCheckArray
+          );
+          console.log("check");
+
+          let BuyCrossCheckArrayOnlyIndexes = [];
+          for (let i = 0; i < BuyCrossCheckArray.length; i++) {
+            if (BuyCrossCheckArray[i] == 1) {
+              BuyCrossCheckArrayOnlyIndexes.push(i);
+            }
+          }
+
+          let SellCrossCheckArrayOnlyIndexes = [];
+          for (let i = 0; i < SellCrossCheckArray.length; i++) {
+            if (SellCrossCheckArray[i] == 1) {
+              SellCrossCheckArrayOnlyIndexes.push(i);
+            }
+          }
+
+          const [BuyOAfterExRemFinalIndexes, SellOAfterExRemFinalIndexes] =
+            ExRemFinalworkingJswithIndexesOnly(
+              BuyCrossCheckArrayOnlyIndexes,
+              SellCrossCheckArrayOnlyIndexes
+            );
+
+          console.log(
+            "BuyOAfterExRemFinalIndexes is : ",
+            BuyOAfterExRemFinalIndexes
+          );
+          console.log(
+            "SellOAfterExRemFinalIndexes is : ",
+            SellOAfterExRemFinalIndexes
+          );
+          console.log("check");
+
+
           // const BuyoEma20TF = [];
           // const SelloEma20TF = [];
 
@@ -1381,8 +1536,11 @@
           // console.log("FinalOutA1 :", FinalOutA1);
           // console.log("FinalOutA2 :", FinalOutA2);
 
-          FBindex = BuyOAfterExRem1stOnlyIndexes;
-          FSindex = SellOAfterExRem1stOnlyIndexes;
+          // FBindex = BuyOAfterExRem1stOnlyIndexes;
+          // FSindex = SellOAfterExRem1stOnlyIndexes;
+
+          FBindex = BuyOAfterExRemFinalIndexes;
+          FSindex = SellOAfterExRemFinalIndexes;
 
           console.log("FinalOutA1 :", FBindex);
           console.log("FinalOutA2 :", FSindex);
@@ -1430,27 +1588,27 @@
           for (let i = 0; i < combinedList.length; i++) {
             // Add city property to each object
 
-            reqdt = ohlc[combinedList[i].candleindex][0];
+            reqdt = (ohlc[combinedList[i].candleindex][0]);
             combinedList[i].datetime = reqdt;
 
             combinedList[i].mlalgoprediction = "NA";
 
             //combinedList[i].netprofitloss = netpl;
 
-            combinedList[i].closingprice = ohlc[combinedList[i].candleindex][4];
+            combinedList[i].closingprice = parseFloat(ohlc[combinedList[i].candleindex][4]);
 
             if (i == combinedList.length - 1) {
               combinedList[i].netprofitloss = 0;
             } else {
               if (combinedList[i].TradeType == "Buy") {
                 combinedList[i].netprofitloss =
-                  ohlc[combinedList[i + 1].candleindex][4] -
-                  ohlc[combinedList[i].candleindex][4];
+                parseFloat(ohlc[combinedList[i + 1].candleindex][4]) -
+                parseFloat(ohlc[combinedList[i].candleindex][4]);
               }
               if (combinedList[i].TradeType == "Sell") {
                 combinedList[i].netprofitloss =
-                  ohlc[combinedList[i].candleindex][4] -
-                  ohlc[combinedList[i + 1].candleindex][4];
+                parseFloat(ohlc[combinedList[i].candleindex][4]) -
+                  parseFloat(ohlc[combinedList[i + 1].candleindex][4]);
               }
             }
 
@@ -1458,8 +1616,8 @@
               combinedList[i].cummulativevalue = 105653;
             } else {
               combinedList[i].cummulativevalue =
-                combinedList[i - 1].cummulativevalue +
-                combinedList[i].netprofitloss;
+              parseFloat(combinedList[i - 1].cummulativevalue) +
+              parseFloat(combinedList[i].netprofitloss);
             }
 
             if (i == 0) {
@@ -1470,7 +1628,7 @@
                 combinedList[i].runningpercentportfolio = 0;
               } else {
                 rpp =
-                  ((combinedList[i].cummulativevalue - 105653) / 105653) * 100;
+                  (parseFloat((combinedList[i].cummulativevalue - 105653)) / 105653) * 100;
                 combinedList[i].runningpercentportfolio = rpp;
               }
             }
@@ -1478,7 +1636,7 @@
             if (i == 0) {
               combinedList[i].runningsince = 0;
             } else {
-              combinedList[i].runningsince = combinedList[i - 1].datetime;
+              combinedList[i].runningsince = (combinedList[i - 1].datetime);
             }
 
             combinedList[i].symbol = "BN";
@@ -1696,7 +1854,9 @@
               },
             ],
             xAxis: {
-              min: ohlc[dataLength - 120][0],
+
+              //for adjusting view for number of candles to display
+              min: ohlc[dataLength - 190][0],
               max: ohlc[dataLength - 1][0],
             },
             plotOptions: {
@@ -1729,14 +1889,15 @@
                 //minPointLength: 5 // Example value
               },
               // {
-              //     type: "column",
-              //     id: "volume",
-              //     name: "Volume",
-              //     data: volume,
-              //     yAxis: 1,
+              //     type: "line",
+              //     id: "overlay",
+              //     name: "Ema20",
+              //     data: EMA20expChart,
+              //     yAxis: 0,
+              //     color: 'blue'
               // },
               {
-                type: "pc",
+                type: "ema",
                 id: "overlay",
                 linkedTo: "aapl",
                 yAxis: 0,
@@ -1837,6 +1998,10 @@
       // })();
     </script>
     <style>
+      .column {
+        flex: 1;
+      }
+
       .selectors-container {
         background: #f2f2f2;
         margin-bottom: 1rem;
@@ -1877,12 +2042,13 @@
             <option value="dema">
               DEMA (Double Exponential Moving Average)
             </option>
-            <option value="ema">EMA (Exponential Moving Average)</option>
+            <option value="ema" selected="selected">EMA (Exponential Moving Average)</option>
             <option value="ikh">Ichimoku Kinko Hyo</option>
             <option value="keltnerchannels">Keltner Channels</option>
             <option value="linearRegression">Linear Regression</option>
             <option value="pivotpoints">Pivot Points</option>
-            <option value="pc" selected="selected">Price Channel</option>
+            <!-- <option value="pc" selected="selected">Price Channel</option> -->
+            <option value="pc" >Price Channel</option>
             <option value="priceenvelopes">Price Envelopes</option>
             <option value="psar">PSAR (Parabolic SAR)</option>
             <option value="sma">SMA (Simple Moving Average)</option>
@@ -2191,18 +2357,21 @@
     </div> -->
 
     <!-- <div class="navbar navbar-light bg-light"> -->
-      <!-- <div class="container"> -->
-        <table  id="tradetable" style="width: 100%; table-layout: fixed;text-align: center;" >
-          <thead class="thead-dark" style="height: 130px; white-space: nowrap;">
-            <!-- <tr>
+    <!-- <div class="container"> -->
+    <table
+      id="tradetable"
+      style="width: 100%; table-layout: fixed; text-align: center"
+    >
+      <thead class="thead-dark" style="height: 130px; white-space: nowrap">
+        <!-- <tr>
               <th>Number</th>
               <th>Amount</th>
               <th>Status</th>
             </tr> -->
-          </thead>
-          <tbody id="body-table"></tbody>
-        </table>
-      <!-- </div> -->
+      </thead>
+      <tbody id="body-table"></tbody>
+    </table>
+    <!-- </div> -->
     <!-- </div> -->
 
     <div class="navbar navbar-dark bg-dark">
@@ -2215,7 +2384,22 @@
       <script src="https://code.highcharts.com/modules/exporting.js"></script>
       <script src="https://code.highcharts.com/modules/export-data.js"></script>
       <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-
+      <div class="row">
+        <div class="col">
+          <figure class="highcharts-figure">
+            <div id="areachartcontainersub1"></div>
+            <p class="highcharts-description">
+              Total Cummulative portfolio * 100000.
+            </p>
+          </figure>
+        </div>
+        <div class="col">
+          <figure class="highcharts-figure">
+            <div id="areachartcontainersub2"></div>
+            <p class="highcharts-description">Portfolio percent up down.</p>
+          </figure>
+        </div>
+      </div>
       <figure class="highcharts-figure">
         <div id="areachartcontainer"></div>
         <p class="highcharts-description">
@@ -2296,8 +2480,15 @@
     ></script>
 
     <div class="container mt-4">
-      <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"
-        src="https://www.google.com/maps/ms?msid=204293175747830583907.0005022420ef3bca6a816&msa=0&ie=UTF8&t=m&ll=40.79042,-73.945541&spn=0.462677,1.056747&output=embed"></iframe>
+      <iframe
+        width="100%"
+        height="100%"
+        frameborder="0"
+        scrolling="no"
+        marginheight="0"
+        marginwidth="0"
+        src="https://www.google.com/maps/ms?msid=204293175747830583907.0005022420ef3bca6a816&msa=0&ie=UTF8&t=m&ll=40.79042,-73.945541&spn=0.462677,1.056747&output=embed"
+      ></iframe>
       <!-- <div id="map"></div> -->
     </div>
     <script>
@@ -2954,7 +3145,18 @@
 
         // Get the column names from the first object
         const columnNames = Object.keys(tradedataobjlist[0]);
-        const columnNamesNew = ['T.Type','Index','Close@','PortfoValue,','Date','AI Predict','Net','Portfolio%','PrevDate','Symbol'];
+        const columnNamesNew = [
+          "T.Type",
+          "Index",
+          "Close@",
+          "PortfoValue,",
+          "Date",
+          "AI Predict",
+          "Net",
+          "Portfolio%",
+          "PrevDate",
+          "Symbol",
+        ];
 
         // Create table header row
         const headerRow = document.createElement("tr");
@@ -3158,7 +3360,7 @@
             type: "area",
           },
           title: {
-            text: "Portfolio with time",
+            text: "Portfolio with time with P&L",
             align: "left",
           },
           subtitle: {
@@ -3217,6 +3419,136 @@
             },
           ],
         });
+
+        Highcharts.chart("areachartcontainersub1", {
+          chart: {
+            type: "area",
+          },
+          title: {
+            text: "Cummulative Portfolio with time",
+            align: "left",
+          },
+          subtitle: {
+            text:
+              "Source: <a " +
+              'href="https://www.ssb.no/energi-og-industri/energi/statistikk/elektrisitet/artikler/lavere-kraftproduksjon"' +
+              ' target="_blank">SSB</a>',
+            align: "left",
+          },
+          xAxis: {
+            // categories: [
+            //   "Q1 2019",
+            //   "Q2 2019",
+            //   "Q3 2019",
+            //   "Q4 2019",
+            //   "Q1 2020",
+            //   "Q2 2020",
+            //   "Q3 2020",
+            //   "Q4 2020",
+            //   "Q1 2021",
+            //   "Q2 2021",
+            //   "Q3 2021",
+            // ],
+            categories: portfoliochartdates,
+          },
+          yAxis: {
+            title: {
+              text: "Value",
+            },
+          },
+          credits: {
+            enabled: false,
+          },
+          series: [
+            {
+              name: "Total Cummulative Portfolio (in lakhs) * 100000",
+              // data: [
+              //   37.8, 29.3, 30.8, 36.8, -40.5, -35.3, -34.9, 43.6, 45.7, 35.9,
+              //   32.7,
+              // ],
+              data: cummulativevaluesportfoliochart,
+            },
+            // {
+            //   name: "Profit Loss at time",
+            //   // data: [
+            //   //   39.9, 29.9, 26.7, 38.1, 39.3, -30.2, -27.5, -36.7, 42.7, 31.4,
+            //   //   27.5,
+            //   // ],
+            //   data: portfoliochartpl,
+            // },
+            // {
+            //   name: "Running Percent Portfolio",
+            //   // data: [-2.2, -0.6, 4.1, -1.3, 1.2, 5.1, 7.4, 6.9, 2.9, 4.5, 5.2],
+
+            //   data: portfoliochartrunningpercentportfolio,
+            // },
+          ],
+        });
+
+        Highcharts.chart("areachartcontainersub2", {
+          chart: {
+            type: "area",
+          },
+          title: {
+            text: "Portfolio percent with time",
+            align: "left",
+          },
+          subtitle: {
+            text:
+              "Source: <a " +
+              'href="https://www.ssb.no/energi-og-industri/energi/statistikk/elektrisitet/artikler/lavere-kraftproduksjon"' +
+              ' target="_blank">SSB</a>',
+            align: "left",
+          },
+          xAxis: {
+            // categories: [
+            //   "Q1 2019",
+            //   "Q2 2019",
+            //   "Q3 2019",
+            //   "Q4 2019",
+            //   "Q1 2020",
+            //   "Q2 2020",
+            //   "Q3 2020",
+            //   "Q4 2020",
+            //   "Q1 2021",
+            //   "Q2 2021",
+            //   "Q3 2021",
+            // ],
+            categories: portfoliochartdates,
+          },
+          yAxis: {
+            title: {
+              text: "Value",
+            },
+          },
+          credits: {
+            enabled: false,
+          },
+          series: [
+            // {
+            //   name: "Total Cummulative Portfolio (in lakhs) * 100000",
+            //   // data: [
+            //   //   37.8, 29.3, 30.8, 36.8, -40.5, -35.3, -34.9, 43.6, 45.7, 35.9,
+            //   //   32.7,
+            //   // ],
+            //   data: cummulativevaluesportfoliochart,
+            // },
+            // {
+            //   name: "Profit Loss at time",
+            //   // data: [
+            //   //   39.9, 29.9, 26.7, 38.1, 39.3, -30.2, -27.5, -36.7, 42.7, 31.4,
+            //   //   27.5,
+            //   // ],
+            //   data: portfoliochartpl,
+            // },
+            {
+              name: "Running Percent Portfolio",
+              // data: [-2.2, -0.6, 4.1, -1.3, 1.2, 5.1, 7.4, 6.9, 2.9, 4.5, 5.2],
+
+              data: portfoliochartrunningpercentportfolio,
+            },
+          ],
+        });
       }
 
       // function getFilteredArraysForPortfolioChart(objectdatalist, property) {
@@ -3230,6 +3562,5 @@
       //   return objectdatalist.map((obj) => obj.property);
       // }
     </script>
-   
   </body>
 </html>
