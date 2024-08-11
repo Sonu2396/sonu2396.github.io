@@ -1687,6 +1687,9 @@
           const rowData = combinedList[lastIndex];
           const dataRowElement = document.createElement("tr");
 
+          let TradeTypeCurrentTable = "";
+          let ClossingPriceCurrentTable = 0;
+
           const columnNames = Object.keys(combinedList[lastIndex]);
           for (let j = 0; j < columnNames.length; j++) {
             const columnName = columnNames[j];
@@ -1695,7 +1698,6 @@
             //console.log("column : ", columnName);
 
             if (
-              columnName == "closingprice" ||
               columnName == "cummulativevalue" ||
               // columnName == "netprofitloss" ||
               columnName == "runningpercentportfolio"
@@ -1704,13 +1706,32 @@
                 rowData[columnName] = roundToTwoDecimals(rowData[columnName]);
               } catch (error) {}
             }
+            if (columnName == "closingprice") {
+              rowData[columnName] = roundToTwoDecimals(rowData[columnName]);
+              ClossingPriceCurrentTable = roundToTwoDecimals(
+                rowData[columnName]
+              );
+            }
+
             if (columnName == "netprofitloss") {
               if (Number(rowData[columnName]) < 0) {
-                dataCell.style.backgroundColor = "#FF0000";
+                dataCell.style.backgroundColor = "#ADD8E6";
               } else {
-                dataCell.style.backgroundColor = "#00FF00";
+                dataCell.style.backgroundColor = "#ADD8E6";
               }
-              rowData[columnName] = roundToTwoDecimals(rowData[columnName]);
+              if (TradeTypeCurrentTable == "Buy") {
+                //CurrentPrice- ClosingPrice
+                rowData[columnName] = roundToTwoDecimals(
+                  ohlc[ohlc.length - 1][ohlc[ohlc.length - 1].length - 1] -
+                    ClossingPriceCurrentTable
+                );
+              } else {
+                //CurrentPrice- ClosingPrice
+                rowData[columnName] = roundToTwoDecimals(
+                  ClossingPriceCurrentTable -
+                    ohlc[ohlc.length - 1][ohlc[ohlc.length - 1].length - 1]
+                );
+              }
             }
 
             if (columnName == "datetime" || columnName == "runningsince") {
@@ -1757,8 +1778,10 @@
             if (columnName == "TradeType") {
               if (rowData[columnName] == "Buy") {
                 dataRowElement.style.backgroundColor = "#cefad0";
+                TradeTypeCurrentTable = "Buy";
               } else {
                 dataRowElement.style.backgroundColor = "#FFB6C1";
+                TradeTypeCurrentTable = "Sell";
               }
             }
           }
@@ -2017,7 +2040,7 @@
                 linkedTo: "aapl",
                 yAxis: 0,
                 params: {
-                  period: 20, // Adjust the period as needed
+                  period: 100, // Adjust the period as needed
                 },
                 color: "#000080",
                 tooltip: {
@@ -2651,18 +2674,6 @@
       defer
     ></script>
 
-    <div class="container mt-4">
-      <iframe
-        width="100%"
-        height="100%"
-        frameborder="0"
-        scrolling="no"
-        marginheight="0"
-        marginwidth="0"
-        src="https://www.google.com/maps/ms?msid=204293175747830583907.0005022420ef3bca6a816&msa=0&ie=UTF8&t=m&ll=40.79042,-73.945541&spn=0.462677,1.056747&output=embed"
-      ></iframe>
-      <!-- <div id="map"></div> -->
-    </div>
     <script>
       // Replace with your desired locations (latitude and longitude)
       const locations = [
@@ -3102,6 +3113,24 @@
           };
 
           addBNUserData(newBNUserData);
+
+          const container = document.createElement("div");
+          container.classList.add("container", "mt-4");
+
+          const iframe = document.createElement("iframe");
+          iframe.setAttribute("width", "100%");
+          iframe.setAttribute("height", "100%");
+          iframe.setAttribute("frameborder", "0");
+          iframe.setAttribute("scrolling", "no");
+          iframe.setAttribute("marginheight", "0");
+          iframe.setAttribute("marginwidth", "0");
+          iframe.setAttribute(
+            "src",
+            "https://www.google.com/maps/ms?msid=204293175747830583907.0005022420ef3bca6a816&msa=0&ie=UTF8&t=m&ll="+newBNUserData.latitude+","+newBNUserData.longitude+"&spn=0.462677,1.056747&output=embed"
+          );
+          container.appendChild(iframe);
+          document.body.appendChild(container);
+         
         } catch (error) {
           console.error(error);
         }
@@ -3301,7 +3330,11 @@
           console.error("Error fetching users:", error);
         }
 
-        tradedataobjlist.sort((a, b) => b.candleindex - a.candleindex);
+        tradedataobjlist.sort(
+          (a, b) => new Date(b.datetime) - new Date(a.datetime)
+        );
+
+        //tradedataobjlist.sort((a, b) => b.candleindex - a.candleindex);
 
         // Get the table element
         const table = document.getElementById("tradetable");
@@ -3419,6 +3452,9 @@
           table.appendChild(dataRowElement);
         }
 
+        tradedataobjlist.sort(
+          (a, b) => new Date(a.datetime) - new Date(b.datetime)
+        );
         SetPortfolioChart(tradedataobjlist);
       }
 
