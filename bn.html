@@ -478,7 +478,7 @@
         const Dsmooth = 3;
 
         const stochD = StochD(CA, periods, Ksmooth, Dsmooth);
-        console.log("stochD is ");
+        //console.log("stochD is ");
         //console.log(stochD);
 
         // function StochD(data, period1, period2, period3) {
@@ -1545,7 +1545,7 @@
           //const mergedArray = FBindex.concat(FSindex);
           const combinedList = [];
 
-          console.log("FBindex if exists");
+          //console.log("FBindex if exists");
           //console.log(FBindex);
 
           for (let i = 0; i < FBindex.length; i++) {
@@ -1637,7 +1637,7 @@
 
           for (let i = threeQuarters; i < combinedList.length - 1; i++) {
             addBNDataToRealTimeDBIfNotExists(combinedList[i]);
-            console.log("combinedList item sent");
+            //console.log("combinedList item sent");
             //console.log(combinedList[i]);
           }
 
@@ -1919,7 +1919,7 @@
                   // console.log("SResult done");
                   // console.log("FS Index is : ", FSindex);
                   // console.log("FB Index is : ", FBindex);
-                  console.log("BResult SResult done");
+                  //console.log("BResult SResult done");
                 },
               },
             },
@@ -2357,7 +2357,7 @@
         if (cookieValue) {
           refreshIntervalInput.value = cookieValue;
           dropdown.value = refreshIntervalInput.value;
-          console.log("CookieRefreshValue is : ", cookieValue);
+          //console.log("CookieRefreshValue is : ", cookieValue);
         }
 
         refreshButton.addEventListener("click", function () {
