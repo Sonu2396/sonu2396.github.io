@@ -318,7 +318,7 @@
         //const data = jsonData.data;
         //const data = jsonData.data;
 
-        console.log("jsonData is : ", jsonData.candles.length);
+        //console.log("jsonData is : ", jsonData.candles.length);
 
         //console.log(output);
         //console.log("Output is : ", bvla);
@@ -808,8 +808,8 @@
               SelloIndexes.push(y);
             }
           }
-          console.log("BuyoIndexes is : ", BuyoIndexes);
-          console.log("SelloIndexes is : ", SelloIndexes);
+          //console.log("BuyoIndexes is : ", BuyoIndexes);
+          //console.log("SelloIndexes is : ", SelloIndexes);
 
           let BuyoEma20 = [];
           for (var y = 0; y < Buyo.length; y++) {
@@ -845,8 +845,8 @@
             }
           }
 
-          console.log("BuyoEma20 is : ", BuyoEma20);
-          console.log("SelloEma20 is : ", SelloEma20);
+          //console.log("BuyoEma20 is : ", BuyoEma20);
+          //console.log("SelloEma20 is : ", SelloEma20);
 
           const arr2 = BuyoEma20;
           const arr3 = SelloEma20;
@@ -940,8 +940,8 @@
           const [BuyOAfterExRem1stOnlyIndexes, SellOAfterExRem1stOnlyIndexes] =
             ExRemFinalworkingJswithIndexesOnly(BuyoEma20, SelloEma20);
 
-          console.log("FinalOutA1 :", BuyOAfterExRem1stOnlyIndexes);
-          console.log("FinalOutA2 :", SellOAfterExRem1stOnlyIndexes);
+          //console.log("FinalOutA1 :", BuyOAfterExRem1stOnlyIndexes);
+          //console.log("FinalOutA2 :", SellOAfterExRem1stOnlyIndexes);
 
           cp = parseFloat(CA[0]);
           let BuyPlus80ValArray = [];
@@ -955,8 +955,8 @@
               BuyPlus80ValArray.push(cp);
             }
           }
-          console.log("check BuyPlus80ValArray : ", BuyPlus80ValArray);
-          console.log("check");
+          //console.log("check BuyPlus80ValArray : ", BuyPlus80ValArray);
+          //console.log("check");
 
           sp = parseFloat(CA[0]);
           let SellMinus80ValArray = [];
@@ -970,8 +970,8 @@
               SellMinus80ValArray.push(sp);
             }
           }
-          console.log("check SellMinus80ValArrayv : ", SellMinus80ValArray);
-          console.log("check");
+          //console.log("check SellMinus80ValArrayv : ", SellMinus80ValArray);
+          //console.log("check");
 
           function crossCheck(type, CA, ValArray) {
             const crossovers = [];
@@ -1010,9 +1010,9 @@
           let BuyCrossCheckArray = crossCheck("Buy", CA, BuyPlus80ValArray);
           let SellCrossCheckArray = crossCheck("Sell", CA, SellMinus80ValArray);
 
-          console.log("BuyCrossCheckArray is : ", BuyCrossCheckArray);
-          console.log("SellCrossCheckArray is : ", SellCrossCheckArray);
-          console.log("check");
+          //console.log("BuyCrossCheckArray is : ", BuyCrossCheckArray);
+          //console.log("SellCrossCheckArray is : ", SellCrossCheckArray);
+          //console.log("check");
 
           let BuyCrossCheckArrayOnlyIndexes = [];
           for (let i = 0; i < BuyCrossCheckArray.length; i++) {
@@ -1034,15 +1034,9 @@
               SellCrossCheckArrayOnlyIndexes
             );
 
-          console.log(
-            "BuyOAfterExRemFinalIndexes is : ",
-            BuyOAfterExRemFinalIndexes
-          );
-          console.log(
-            "SellOAfterExRemFinalIndexes is : ",
-            SellOAfterExRemFinalIndexes
-          );
-          console.log("check");
+          // console.log("BuyOAfterExRemFinalIndexes is : ",BuyOAfterExRemFinalIndexes);
+          // console.log("SellOAfterExRemFinalIndexes is : ",SellOAfterExRemFinalIndexes);
+          // console.log("check");
 
           // const BuyoEma20TF = [];
           // const SelloEma20TF = [];
@@ -1635,7 +1629,7 @@
 
             combinedList[i].symbol = "BN";
           }
-          console.log("combinedList");
+          //console.log("combinedList");
           //console.log(combinedList);
 
           const combinelistLength = combinedList.length;
