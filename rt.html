@@ -110,6 +110,532 @@
       FBindex = [];
       FSindex = [];
       EMA20expChart = [];
+      fdata = [];
+
+      let bresult = [];
+      let sresult = [];
+      var FBindex = [];
+      var bvlindex = [];
+      var svlindex = [];
+      var FSindex = [];
+
+      function allCalculationAtOnce(latestAPIdata) {
+        fdata = latestAPIdata;
+        //*****************************************
+        const ohlc = [],
+          volume = [],
+          dataLength = fdata.length;
+
+        for (let i = 0; i < dataLength; i += 1) {
+          ohlc.push([
+            (fdata[i][0] + 19800) * 1000, // the date
+            //data[i][0],
+            fdata[i][1], // open
+            fdata[i][2], // high
+            fdata[i][3], // low
+            fdata[i][4], // close
+          ]);
+
+          volume.push([
+            (fdata[i][0] + 19800) * 1000,
+            //data[i][0], // the date
+            fdata[i][5], // the volume
+          ]);
+        }
+
+        let CA = [];
+        for (let i = 0; i < dataLength; i += 1) {
+          CA.push([
+            fdata[i][4], // close
+          ]);
+        }
+
+        let OA = [];
+        for (let i = 0; i < dataLength; i += 1) {
+          OA.push([
+            // the date
+            fdata[i][1], // open
+          ]);
+        }
+
+        function StochD(data, periods = 14, Ksmooth = 3, Dsmooth = 3) {
+          // Calculate %K
+          function calculateK(data, periods) {
+            let k = [];
+            for (let i = periods - 1; i < data.length; i++) {
+              const periodData = data.slice(i - periods + 1, i + 1);
+              const high = Math.max(...periodData);
+              const low = Math.min(...periodData);
+              const currentClose = data[i];
+              const kValue = ((currentClose - low) / (high - low)) * 100;
+              k.push(kValue);
+            }
+            return k;
+          }
+
+          // Calculate smoothed %K
+          function calculateSmoothedK(k, periods) {
+            let smoothedK = [];
+            for (let i = periods - 1; i < k.length; i++) {
+              const smoothedValue =
+                k
+                  .slice(i - periods + 1, i + 1)
+                  .reduce((sum, val) => sum + val, 0) / periods;
+              smoothedK.push(smoothedValue);
+            }
+            return smoothedK;
+          }
+
+          // Calculate smoothed %D
+          function calculateSmoothedD(smoothedK, periods) {
+            let smoothedD = [];
+            for (let i = periods - 1; i < smoothedK.length; i++) {
+              const smoothedValue =
+                smoothedK
+                  .slice(i - periods + 1, i + 1)
+                  .reduce((sum, val) => sum + val, 0) / periods;
+              smoothedD.push(smoothedValue);
+            }
+            return smoothedD;
+          }
+
+          const k = calculateK(data, periods);
+          const smoothedK = calculateSmoothedK(k, Ksmooth);
+          const smoothedD = calculateSmoothedD(smoothedK, Dsmooth);
+
+          return smoothedD;
+        }
+
+        const periods = 8;
+        const Ksmooth = 3;
+        const Dsmooth = 3;
+
+        const stochD = StochD(CA, periods, Ksmooth, Dsmooth);
+        console.log("stochD is ");
+
+        function calculateMACD(
+          data,
+          fastPeriod = 8,
+          slowPeriod = 21,
+          signalPeriod = 5
+        ) {
+          // Calculate EMA (Exponential Moving Average)
+
+          // Calculate MACD line
+          let emaFast = EMA(data, fastPeriod);
+          let emaSlow = EMA(data, slowPeriod);
+          let macdLine = [];
+          for (let i = 0; i < data.length; i++) {
+            macdLine.push(emaFast[i] - emaSlow[i]);
+          }
+
+          // Calculate Signal line
+          let signalLine = EMA(macdLine, signalPeriod);
+
+          return { macdLine: macdLine, signalLine: signalLine };
+        }
+
+        const { macdLine, signalLine } = calculateMACD(CA);
+
+        function EMA(data, period) {
+          const multiplier = 2 / (period + 1);
+          let ema = [];
+          var sum = 0;
+
+          // Calculate SMA for the first period
+          for (let i = 0; i < period; i++) {
+            if (i == 0) {
+              ema.push(data[i]);
+            } else {
+              sum = parseFloat(sum) + parseFloat(data[i]);
+              //sum = sum + data[i];
+              const sma = sum / i;
+              ema.push(sma);
+            }
+          }
+          //let sma = sum / period;
+
+          // Calculate EMA for the remaining data points
+          for (let i = period; i < data.length; i++) {
+            let currentPrice = data[i];
+            let prevEMA = ema[i - period];
+            //let currentEMA = (currentPrice - prevEMA) * multiplier + prevEMA;
+
+            let currentEMA =
+              (parseFloat(currentPrice) - parseFloat(prevEMA)) *
+                parseFloat(multiplier) +
+              parseFloat(prevEMA);
+
+            ema.push(currentEMA);
+          }
+
+          return ema;
+        }
+
+        function calculateNewJsEMA(prices, period) {
+          const k = 2 / (period + 1);
+          const emaArray = new Array(prices.length);
+
+          // Calculate initial EMA (using SMA for the first period)
+          let sum = 0;
+          for (let i = 0; i < period; i++) {
+            sum += parseFloat(prices[i]);
+          }
+          let ema = sum / period;
+
+          // Fill initial elements of EMA array with the first EMA value
+          for (let i = 0; i < period; i++) {
+            emaArray[i] = ema;
+          }
+
+          // Calculate EMA for remaining prices
+          for (let i = period; i < prices.length; i++) {
+            ema = prices[i] * k + ema * (1 - k);
+            emaArray[i] = ema;
+          }
+
+          return emaArray;
+        }
+
+        function RSI(data, period) {
+          // Implementation of Relative Strength Index (RSI)
+          var rsi = [];
+          for (var i = 0; i < data.length; i++) {
+            if (i >= period) {
+              var gains = 0;
+              var losses = 0;
+              for (var j = i - period; j < i; j++) {
+                var diff = data[j + 1] - data[j];
+                if (diff > 0) {
+                  gains += diff;
+                } else {
+                  losses += Math.abs(diff);
+                }
+              }
+              var avgGain = gains / period;
+              var avgLoss = losses / period;
+              rsi.push(100 - 100 / (1 + avgGain / avgLoss));
+            } else {
+              rsi.push(null);
+            }
+          }
+          return rsi;
+        }
+
+        function valueWhen(expression, array, n = 1) {
+          let result = [];
+          let count = 0;
+
+          // Iterate over the array and check the expression
+          for (let i = array.length - 1; i >= 0; i--) {
+            if (expression(array[i])) {
+              count++;
+              if (count === n) {
+                result.push(array[i]);
+                return result;
+              }
+            }
+          }
+
+          // If the expression was not met 'n' times, return undefined
+          return undefined;
+        }
+
+        // Example usage:
+        const closePrices = CA;
+        const openPrices = OA;
+
+        const result = valueWhen(
+          (close) => close.open < close.close,
+          openPrices
+        );
+        //console.log(result); // Output: array of open prices when close price is greater than open price
+
+        // Main function
+        var closeData = CA;
+
+        var SD = StochD(closeData, 8, 3, 3);
+        var MJ = calculateMACD(closeData, 8, 21);
+        //var signalLine = Signal(closeData, 8, 21, 5);
+
+        var signalLineFinal = signalLine;
+
+        var MH = [];
+        for (var c = 0; c < closeData.length; c++) {
+          var MHdiff = MJ.macdLine[c] - signalLineFinal[c];
+
+          MH.push(MHdiff);
+        }
+        //console.log("MH cal is : ", MH);
+
+        var RSI3 = RSI(closeData, 3);
+
+        var trendup = [];
+        var trendcolor = [];
+
+        var RSI50p = [];
+        for (var b = 0; b < RSI3.length; b++) {
+          if (RSI3[b] > 50) {
+            RSI50p.push(b);
+          }
+        }
+
+        var EMA20 = [];
+        EMA20 = EMA(CA, 100);
+        var EMA20exp = [];
+        EMA20exp = calculateNewJsEMA(CA, 100);
+        EMA20expChart = EMA20exp;
+
+        var Buyo = [];
+        var Sello = [];
+        for (var i = 0; i < closeData.length; i++) {
+          var buyoCondition =
+            MH[i] > 0 ||
+            (MH[i] > 0 &&
+              MH[i] > MH[i - 1] &&
+              RSI3[i] > 50 &&
+              stochD[i] < 80 &&
+              stochD[i] > stochD[i - 1] &&
+              ohlc[i][1] < ohlc[i][4]);
+          var selloCondition =
+            MH[i] < 0 ||
+            (MH[i] < 0 &&
+              MH[i] < MH[i - 1] &&
+              RSI3[i] < 50 &&
+              stochD[i] > 20 &&
+              stochD[i] < stochD[i - 1] &&
+              ohlc[i][1] < ohlc[i][4]);
+
+          Buyo.push(buyoCondition);
+          Sello.push(selloCondition);
+        }
+
+        let BuyoIndexes = [];
+        for (var y = 0; y < Buyo.length; y++) {
+          if (Buyo[y] == true) {
+            BuyoIndexes.push(y);
+          }
+        }
+        let SelloIndexes = [];
+        for (var y = 0; y < Sello.length; y++) {
+          if (Sello[y] == true) {
+            SelloIndexes.push(y);
+          }
+        }
+        console.log("BuyoIndexes is : ", BuyoIndexes);
+        console.log("SelloIndexes is : ", SelloIndexes);
+
+        let BuyoEma20 = [];
+        for (var y = 0; y < Buyo.length; y++) {
+          if (Buyo[y] == true && closeData[y] > EMA20exp[y]) {
+            BuyoEma20.push(y);
+          }
+        }
+        let SelloEma20 = [];
+        for (var y = 0; y < Sello.length; y++) {
+          if (Sello[y] == true && closeData[y] < EMA20exp[y]) {
+            SelloEma20.push(y);
+          }
+        }
+
+        console.log("BuyoEma20 is : ", BuyoEma20);
+        console.log("SelloEma20 is : ", SelloEma20);
+
+        const arr2 = BuyoEma20;
+        const arr3 = SelloEma20;
+
+        function ExRemFinalworkingJswithIndexesOnly(arr1, arr2) {
+          const biggestLength = Math.max(arr1.length, arr2.length);
+          // Use a ternary operator to determine the biggest array name
+          const biggestArrayName =
+            arr1.length === biggestLength ? "arr1" : "arr2";
+
+          let biggestArray = [];
+          if (biggestArrayName == "arr1") {
+            biggestArray = arr1;
+          } else {
+            biggestArray = arr2;
+          }
+
+          ArrayIn1 = arr1;
+          ArrayIn2 = arr2;
+          //console.log("Getting all final signals");
+          var CurrentReadArray = "ArrayIn2";
+
+          var CurrentReadIndexA1 = 0;
+          var CurrentReadValueA1 = ArrayIn1[0];
+          var NextBigReadIndexA1 = 0;
+          var FinalOutA1 = [];
+
+          var CurrentReadIndexA2 = 0;
+          var NextBigReadIndexA2 = ArrayIn2[0];
+          var CurrentReadValueA2 = 0;
+          var FinalOutA2 = [];
+
+          for (let i = 1; i <= biggestArray.length; i++) {
+            //console.log("Current loop value", i);
+            //console.log("CurrentElementIndex", i);
+            if (CurrentReadArray == "ArrayIn1") {
+              // CurrentReadIndexA1 = i;
+              // CurrentReadValueA1 = ArrayIn1[i];
+              for (let j = CurrentReadIndexA2 + 1; j <= ArrayIn2.length; j++) {
+                if (ArrayIn2[j] > CurrentReadValueA1) {
+                  FinalOutA2.push(ArrayIn2[j]);
+                  CurrentReadIndexA2 = j;
+                  CurrentReadValueA2 = ArrayIn2[j];
+                  CurrentReadArray = "ArrayIn2";
+
+                  //console.log("CurrentReadIndexA2 :", CurrentReadIndexA2);
+                  //console.log("CurrentReadValueA2 :", CurrentReadValueA2);
+                  //console.log("CurrentReadArray :", CurrentReadArray);
+
+                  //console.log("Current Status of OutA2 : ", FinalOutA2);
+                  break;
+                }
+              }
+            }
+            if (CurrentReadArray == "ArrayIn2") {
+              // CurrentReadIndexA2 = i;
+              // CurrentReadValueA2 = ArrayIn2[i];
+              for (let k = CurrentReadIndexA1 + 1; k <= ArrayIn1.length; k++) {
+                if (ArrayIn1[k] > CurrentReadValueA2) {
+                  FinalOutA1.push(ArrayIn1[k]);
+                  CurrentReadIndexA1 = k;
+                  CurrentReadValueA1 = ArrayIn1[k];
+                  CurrentReadArray = "ArrayIn1";
+
+                  //console.log("CurrentReadIndexA1 :", CurrentReadIndexA1);
+                  //console.log("CurrentReadValueA1 :", CurrentReadValueA1);
+                  //console.log("CurrentReadArray :", CurrentReadArray);
+
+                  //console.log("Current Status of OutA1 : ", FinalOutA1);
+                  break;
+                }
+              }
+            }
+          }
+
+          //console.log("FinalOutA1 :", FinalOutA1);
+          //console.log("FinalOutA2 :", FinalOutA2);
+
+          return [FinalOutA1, FinalOutA2];
+        }
+
+        const [BuyOAfterExRem1stOnlyIndexes, SellOAfterExRem1stOnlyIndexes] =
+          ExRemFinalworkingJswithIndexesOnly(BuyoEma20, SelloEma20);
+
+        console.log("FinalOutA1 :", BuyOAfterExRem1stOnlyIndexes);
+        console.log("FinalOutA2 :", SellOAfterExRem1stOnlyIndexes);
+
+        cp = parseFloat(CA[0]);
+        let BuyPlus80ValArray = [];
+        for (let i = 0; i < CA.length; i++) {
+          checkflag = true;
+          //cp = 0;
+          if (BuyOAfterExRem1stOnlyIndexes.includes(i)) {
+            cp = parseFloat(CA[i]) + 80;
+            BuyPlus80ValArray.push(cp);
+          } else {
+            BuyPlus80ValArray.push(cp);
+          }
+        }
+        console.log("check BuyPlus80ValArray : ", BuyPlus80ValArray);
+        console.log("check");
+
+        sp = parseFloat(CA[0]);
+        let SellMinus80ValArray = [];
+        for (let i = 0; i < CA.length; i++) {
+          checkflag = true;
+          //cp = 0;
+          if (SellOAfterExRem1stOnlyIndexes.includes(i)) {
+            sp = parseFloat(CA[i]) - 80;
+            SellMinus80ValArray.push(sp);
+          } else {
+            SellMinus80ValArray.push(sp);
+          }
+        }
+        console.log("check SellMinus80ValArrayv : ", SellMinus80ValArray);
+        console.log("check");
+
+        function crossCheck(type, CA, ValArray) {
+          const crossovers = [];
+
+          for (let i = 1; i < ValArray.length; i++) {
+            // const prevPrice = priceArray[i - 1];
+            // const currentPrice = priceArray[i];
+            // const prevEma = emaArray[i - 1];
+            // const currentEma = emaArray[i];
+            if (type == "Buy") {
+              // Check for upward crossover
+              //if (prevPrice <= prevEma && currentPrice > currentEma) {
+              if (CA[i - 1] <= ValArray[i - 1] && CA[i] > ValArray[i]) {
+                //if (CA[i] > ValArray[i]) {
+                crossovers.push(1); // Or any other value to indicate upward crossover
+              } else {
+                crossovers.push(0); // No crossover
+              }
+            }
+            if (type == "Sell") {
+              if (CA[i - 1] >= ValArray[i - 1] && CA[i] < ValArray[i]) {
+                crossovers.push(1); // Or any other value to indicate downward crossover
+              } else {
+                crossovers.push(0);
+              }
+              // Check for downward crossover
+              // if (prevPrice >= prevEma && currentPrice < currentEma) {
+              //if (CA[i] < ValArray[i]) {
+              // No crossover
+            }
+          }
+
+          return crossovers;
+        }
+
+        let BuyCrossCheckArray = crossCheck("Buy", CA, BuyPlus80ValArray);
+        let SellCrossCheckArray = crossCheck("Sell", CA, SellMinus80ValArray);
+
+        console.log("BuyCrossCheckArray is : ", BuyCrossCheckArray);
+        console.log("SellCrossCheckArray is : ", SellCrossCheckArray);
+        console.log("check");
+
+        let BuyCrossCheckArrayOnlyIndexes = [];
+        for (let i = 0; i < BuyCrossCheckArray.length; i++) {
+          if (BuyCrossCheckArray[i] == 1) {
+            BuyCrossCheckArrayOnlyIndexes.push(i);
+          }
+        }
+
+        let SellCrossCheckArrayOnlyIndexes = [];
+        for (let i = 0; i < SellCrossCheckArray.length; i++) {
+          if (SellCrossCheckArray[i] == 1) {
+            SellCrossCheckArrayOnlyIndexes.push(i);
+          }
+        }
+
+        const [BuyOAfterExRemFinalIndexes, SellOAfterExRemFinalIndexes] =
+          ExRemFinalworkingJswithIndexesOnly(
+            BuyCrossCheckArrayOnlyIndexes,
+            SellCrossCheckArrayOnlyIndexes
+          );
+
+        console.log(
+          "BuyOAfterExRemFinalIndexes is : ",
+          BuyOAfterExRemFinalIndexes
+        );
+        console.log(
+          "SellOAfterExRemFinalIndexes is : ",
+          SellOAfterExRemFinalIndexes
+        );
+        console.log("check");
+
+        FBindex = BuyOAfterExRemFinalIndexes;
+        FSindex = SellOAfterExRemFinalIndexes;
+
+        console.log("FinalOutA1 :", FBindex);
+        console.log("FinalOutA2 :", FSindex);
+        //*****************************************
+      }
+
       // firstdata = getBNCandleDataFirst();
       // const fdata = firstdata;
 
@@ -124,542 +650,8 @@
             //const fdata = firstdata;
 
             var latestAPIdata = await getDataFromAPI();
-            const fdata = latestAPIdata;
-            //*****************************************
-            const ohlc = [],
-              volume = [],
-              dataLength = fdata.length;
+            allCalculationAtOnce(latestAPIdata);
 
-            for (let i = 0; i < dataLength; i += 1) {
-              ohlc.push([
-                (fdata[i][0] + 19800) * 1000, // the date
-                //data[i][0],
-                fdata[i][1], // open
-                fdata[i][2], // high
-                fdata[i][3], // low
-                fdata[i][4], // close
-              ]);
-
-              volume.push([
-                (fdata[i][0] + 19800) * 1000,
-                //data[i][0], // the date
-                fdata[i][5], // the volume
-              ]);
-            }
-
-            let CA = [];
-            for (let i = 0; i < dataLength; i += 1) {
-              CA.push([
-                fdata[i][4], // close
-              ]);
-            }
-
-            let OA = [];
-            for (let i = 0; i < dataLength; i += 1) {
-              OA.push([
-                // the date
-                fdata[i][1], // open
-              ]);
-            }
-
-            function StochD(data, periods = 14, Ksmooth = 3, Dsmooth = 3) {
-              // Calculate %K
-              function calculateK(data, periods) {
-                let k = [];
-                for (let i = periods - 1; i < data.length; i++) {
-                  const periodData = data.slice(i - periods + 1, i + 1);
-                  const high = Math.max(...periodData);
-                  const low = Math.min(...periodData);
-                  const currentClose = data[i];
-                  const kValue = ((currentClose - low) / (high - low)) * 100;
-                  k.push(kValue);
-                }
-                return k;
-              }
-
-              // Calculate smoothed %K
-              function calculateSmoothedK(k, periods) {
-                let smoothedK = [];
-                for (let i = periods - 1; i < k.length; i++) {
-                  const smoothedValue =
-                    k
-                      .slice(i - periods + 1, i + 1)
-                      .reduce((sum, val) => sum + val, 0) / periods;
-                  smoothedK.push(smoothedValue);
-                }
-                return smoothedK;
-              }
-
-              // Calculate smoothed %D
-              function calculateSmoothedD(smoothedK, periods) {
-                let smoothedD = [];
-                for (let i = periods - 1; i < smoothedK.length; i++) {
-                  const smoothedValue =
-                    smoothedK
-                      .slice(i - periods + 1, i + 1)
-                      .reduce((sum, val) => sum + val, 0) / periods;
-                  smoothedD.push(smoothedValue);
-                }
-                return smoothedD;
-              }
-
-              const k = calculateK(data, periods);
-              const smoothedK = calculateSmoothedK(k, Ksmooth);
-              const smoothedD = calculateSmoothedD(smoothedK, Dsmooth);
-
-              return smoothedD;
-            }
-
-            const periods = 8;
-            const Ksmooth = 3;
-            const Dsmooth = 3;
-
-            const stochD = StochD(CA, periods, Ksmooth, Dsmooth);
-            console.log("stochD is ");
-
-            function calculateMACD(
-              data,
-              fastPeriod = 8,
-              slowPeriod = 21,
-              signalPeriod = 5
-            ) {
-              // Calculate EMA (Exponential Moving Average)
-
-              // Calculate MACD line
-              let emaFast = EMA(data, fastPeriod);
-              let emaSlow = EMA(data, slowPeriod);
-              let macdLine = [];
-              for (let i = 0; i < data.length; i++) {
-                macdLine.push(emaFast[i] - emaSlow[i]);
-              }
-
-              // Calculate Signal line
-              let signalLine = EMA(macdLine, signalPeriod);
-
-              return { macdLine: macdLine, signalLine: signalLine };
-            }
-
-            const { macdLine, signalLine } = calculateMACD(CA);
-
-            function EMA(data, period) {
-              const multiplier = 2 / (period + 1);
-              let ema = [];
-              var sum = 0;
-
-              // Calculate SMA for the first period
-              for (let i = 0; i < period; i++) {
-                if (i == 0) {
-                  ema.push(data[i]);
-                } else {
-                  sum = parseFloat(sum) + parseFloat(data[i]);
-                  //sum = sum + data[i];
-                  const sma = sum / i;
-                  ema.push(sma);
-                }
-              }
-              //let sma = sum / period;
-
-              // Calculate EMA for the remaining data points
-              for (let i = period; i < data.length; i++) {
-                let currentPrice = data[i];
-                let prevEMA = ema[i - period];
-                //let currentEMA = (currentPrice - prevEMA) * multiplier + prevEMA;
-
-                let currentEMA =
-                  (parseFloat(currentPrice) - parseFloat(prevEMA)) *
-                    parseFloat(multiplier) +
-                  parseFloat(prevEMA);
-
-                ema.push(currentEMA);
-              }
-
-              return ema;
-            }
-
-            function calculateNewJsEMA(prices, period) {
-              const k = 2 / (period + 1);
-              const emaArray = new Array(prices.length);
-
-              // Calculate initial EMA (using SMA for the first period)
-              let sum = 0;
-              for (let i = 0; i < period; i++) {
-                sum += parseFloat(prices[i]);
-              }
-              let ema = sum / period;
-
-              // Fill initial elements of EMA array with the first EMA value
-              for (let i = 0; i < period; i++) {
-                emaArray[i] = ema;
-              }
-
-              // Calculate EMA for remaining prices
-              for (let i = period; i < prices.length; i++) {
-                ema = prices[i] * k + ema * (1 - k);
-                emaArray[i] = ema;
-              }
-
-              return emaArray;
-            }
-
-            function RSI(data, period) {
-              // Implementation of Relative Strength Index (RSI)
-              var rsi = [];
-              for (var i = 0; i < data.length; i++) {
-                if (i >= period) {
-                  var gains = 0;
-                  var losses = 0;
-                  for (var j = i - period; j < i; j++) {
-                    var diff = data[j + 1] - data[j];
-                    if (diff > 0) {
-                      gains += diff;
-                    } else {
-                      losses += Math.abs(diff);
-                    }
-                  }
-                  var avgGain = gains / period;
-                  var avgLoss = losses / period;
-                  rsi.push(100 - 100 / (1 + avgGain / avgLoss));
-                } else {
-                  rsi.push(null);
-                }
-              }
-              return rsi;
-            }
-
-            function valueWhen(expression, array, n = 1) {
-              let result = [];
-              let count = 0;
-
-              // Iterate over the array and check the expression
-              for (let i = array.length - 1; i >= 0; i--) {
-                if (expression(array[i])) {
-                  count++;
-                  if (count === n) {
-                    result.push(array[i]);
-                    return result;
-                  }
-                }
-              }
-
-              // If the expression was not met 'n' times, return undefined
-              return undefined;
-            }
-
-            // Example usage:
-            const closePrices = CA;
-            const openPrices = OA;
-
-            const result = valueWhen(
-              (close) => close.open < close.close,
-              openPrices
-            );
-            //console.log(result); // Output: array of open prices when close price is greater than open price
-
-            let bresult = [];
-            let sresult = [];
-            var FBindex = [];
-            var bvlindex = [];
-            var svlindex = [];
-            var FSindex = [];
-
-            // Main function
-            var closeData = CA;
-
-            var SD = StochD(closeData, 8, 3, 3);
-            var MJ = calculateMACD(closeData, 8, 21);
-            //var signalLine = Signal(closeData, 8, 21, 5);
-
-            var signalLineFinal = signalLine;
-
-            var MH = [];
-            for (var c = 0; c < closeData.length; c++) {
-              var MHdiff = MJ.macdLine[c] - signalLineFinal[c];
-
-              MH.push(MHdiff);
-            }
-            //console.log("MH cal is : ", MH);
-
-            var RSI3 = RSI(closeData, 3);
-
-            var trendup = [];
-            var trendcolor = [];
-
-            var RSI50p = [];
-            for (var b = 0; b < RSI3.length; b++) {
-              if (RSI3[b] > 50) {
-                RSI50p.push(b);
-              }
-            }
-
-            var EMA20 = [];
-            EMA20 = EMA(CA, 100);
-            var EMA20exp = [];
-            EMA20exp = calculateNewJsEMA(CA, 100);
-            EMA20expChart = EMA20exp;
-
-            var Buyo = [];
-            var Sello = [];
-            for (var i = 0; i < closeData.length; i++) {
-              var buyoCondition =
-                MH[i] > 0 ||
-                (MH[i] > 0 &&
-                  MH[i] > MH[i - 1] &&
-                  RSI3[i] > 50 &&
-                  stochD[i] < 80 &&
-                  stochD[i] > stochD[i - 1] &&
-                  ohlc[i][1] < ohlc[i][4]);
-              var selloCondition =
-                MH[i] < 0 ||
-                (MH[i] < 0 &&
-                  MH[i] < MH[i - 1] &&
-                  RSI3[i] < 50 &&
-                  stochD[i] > 20 &&
-                  stochD[i] < stochD[i - 1] &&
-                  ohlc[i][1] < ohlc[i][4]);
-
-              Buyo.push(buyoCondition);
-              Sello.push(selloCondition);
-            }
-
-            let BuyoIndexes = [];
-            for (var y = 0; y < Buyo.length; y++) {
-              if (Buyo[y] == true) {
-                BuyoIndexes.push(y);
-              }
-            }
-            let SelloIndexes = [];
-            for (var y = 0; y < Sello.length; y++) {
-              if (Sello[y] == true) {
-                SelloIndexes.push(y);
-              }
-            }
-            console.log("BuyoIndexes is : ", BuyoIndexes);
-            console.log("SelloIndexes is : ", SelloIndexes);
-
-            let BuyoEma20 = [];
-            for (var y = 0; y < Buyo.length; y++) {
-              if (Buyo[y] == true && closeData[y] > EMA20exp[y]) {
-                BuyoEma20.push(y);
-              }
-            }
-            let SelloEma20 = [];
-            for (var y = 0; y < Sello.length; y++) {
-              if (Sello[y] == true && closeData[y] < EMA20exp[y]) {
-                SelloEma20.push(y);
-              }
-            }
-
-            console.log("BuyoEma20 is : ", BuyoEma20);
-            console.log("SelloEma20 is : ", SelloEma20);
-
-            const arr2 = BuyoEma20;
-            const arr3 = SelloEma20;
-
-            function ExRemFinalworkingJswithIndexesOnly(arr1, arr2) {
-              const biggestLength = Math.max(arr1.length, arr2.length);
-              // Use a ternary operator to determine the biggest array name
-              const biggestArrayName =
-                arr1.length === biggestLength ? "arr1" : "arr2";
-
-              let biggestArray = [];
-              if (biggestArrayName == "arr1") {
-                biggestArray = arr1;
-              } else {
-                biggestArray = arr2;
-              }
-
-              ArrayIn1 = arr1;
-              ArrayIn2 = arr2;
-              //console.log("Getting all final signals");
-              var CurrentReadArray = "ArrayIn2";
-
-              var CurrentReadIndexA1 = 0;
-              var CurrentReadValueA1 = ArrayIn1[0];
-              var NextBigReadIndexA1 = 0;
-              var FinalOutA1 = [];
-
-              var CurrentReadIndexA2 = 0;
-              var NextBigReadIndexA2 = ArrayIn2[0];
-              var CurrentReadValueA2 = 0;
-              var FinalOutA2 = [];
-
-              for (let i = 1; i <= biggestArray.length; i++) {
-                //console.log("Current loop value", i);
-                //console.log("CurrentElementIndex", i);
-                if (CurrentReadArray == "ArrayIn1") {
-                  // CurrentReadIndexA1 = i;
-                  // CurrentReadValueA1 = ArrayIn1[i];
-                  for (
-                    let j = CurrentReadIndexA2 + 1;
-                    j <= ArrayIn2.length;
-                    j++
-                  ) {
-                    if (ArrayIn2[j] > CurrentReadValueA1) {
-                      FinalOutA2.push(ArrayIn2[j]);
-                      CurrentReadIndexA2 = j;
-                      CurrentReadValueA2 = ArrayIn2[j];
-                      CurrentReadArray = "ArrayIn2";
-
-                      //console.log("CurrentReadIndexA2 :", CurrentReadIndexA2);
-                      //console.log("CurrentReadValueA2 :", CurrentReadValueA2);
-                      //console.log("CurrentReadArray :", CurrentReadArray);
-
-                      //console.log("Current Status of OutA2 : ", FinalOutA2);
-                      break;
-                    }
-                  }
-                }
-                if (CurrentReadArray == "ArrayIn2") {
-                  // CurrentReadIndexA2 = i;
-                  // CurrentReadValueA2 = ArrayIn2[i];
-                  for (
-                    let k = CurrentReadIndexA1 + 1;
-                    k <= ArrayIn1.length;
-                    k++
-                  ) {
-                    if (ArrayIn1[k] > CurrentReadValueA2) {
-                      FinalOutA1.push(ArrayIn1[k]);
-                      CurrentReadIndexA1 = k;
-                      CurrentReadValueA1 = ArrayIn1[k];
-                      CurrentReadArray = "ArrayIn1";
-
-                      //console.log("CurrentReadIndexA1 :", CurrentReadIndexA1);
-                      //console.log("CurrentReadValueA1 :", CurrentReadValueA1);
-                      //console.log("CurrentReadArray :", CurrentReadArray);
-
-                      //console.log("Current Status of OutA1 : ", FinalOutA1);
-                      break;
-                    }
-                  }
-                }
-              }
-
-              //console.log("FinalOutA1 :", FinalOutA1);
-              //console.log("FinalOutA2 :", FinalOutA2);
-
-              return [FinalOutA1, FinalOutA2];
-            }
-
-            const [
-              BuyOAfterExRem1stOnlyIndexes,
-              SellOAfterExRem1stOnlyIndexes,
-            ] = ExRemFinalworkingJswithIndexesOnly(BuyoEma20, SelloEma20);
-
-            console.log("FinalOutA1 :", BuyOAfterExRem1stOnlyIndexes);
-            console.log("FinalOutA2 :", SellOAfterExRem1stOnlyIndexes);
-
-            cp = parseFloat(CA[0]);
-            let BuyPlus80ValArray = [];
-            for (let i = 0; i < CA.length; i++) {
-              checkflag = true;
-              //cp = 0;
-              if (BuyOAfterExRem1stOnlyIndexes.includes(i)) {
-                cp = parseFloat(CA[i]) + 80;
-                BuyPlus80ValArray.push(cp);
-              } else {
-                BuyPlus80ValArray.push(cp);
-              }
-            }
-            console.log("check BuyPlus80ValArray : ", BuyPlus80ValArray);
-            console.log("check");
-
-            sp = parseFloat(CA[0]);
-            let SellMinus80ValArray = [];
-            for (let i = 0; i < CA.length; i++) {
-              checkflag = true;
-              //cp = 0;
-              if (SellOAfterExRem1stOnlyIndexes.includes(i)) {
-                sp = parseFloat(CA[i]) - 80;
-                SellMinus80ValArray.push(sp);
-              } else {
-                SellMinus80ValArray.push(sp);
-              }
-            }
-            console.log("check SellMinus80ValArrayv : ", SellMinus80ValArray);
-            console.log("check");
-
-            function crossCheck(type, CA, ValArray) {
-              const crossovers = [];
-
-              for (let i = 1; i < ValArray.length; i++) {
-                // const prevPrice = priceArray[i - 1];
-                // const currentPrice = priceArray[i];
-                // const prevEma = emaArray[i - 1];
-                // const currentEma = emaArray[i];
-                if (type == "Buy") {
-                  // Check for upward crossover
-                  //if (prevPrice <= prevEma && currentPrice > currentEma) {
-                  if (CA[i - 1] <= ValArray[i - 1] && CA[i] > ValArray[i]) {
-                    //if (CA[i] > ValArray[i]) {
-                    crossovers.push(1); // Or any other value to indicate upward crossover
-                  } else {
-                    crossovers.push(0); // No crossover
-                  }
-                }
-                if (type == "Sell") {
-                  if (CA[i - 1] >= ValArray[i - 1] && CA[i] < ValArray[i]) {
-                    crossovers.push(1); // Or any other value to indicate downward crossover
-                  } else {
-                    crossovers.push(0);
-                  }
-                  // Check for downward crossover
-                  // if (prevPrice >= prevEma && currentPrice < currentEma) {
-                  //if (CA[i] < ValArray[i]) {
-                  // No crossover
-                }
-              }
-
-              return crossovers;
-            }
-
-            let BuyCrossCheckArray = crossCheck("Buy", CA, BuyPlus80ValArray);
-            let SellCrossCheckArray = crossCheck(
-              "Sell",
-              CA,
-              SellMinus80ValArray
-            );
-
-            console.log("BuyCrossCheckArray is : ", BuyCrossCheckArray);
-            console.log("SellCrossCheckArray is : ", SellCrossCheckArray);
-            console.log("check");
-
-            let BuyCrossCheckArrayOnlyIndexes = [];
-            for (let i = 0; i < BuyCrossCheckArray.length; i++) {
-              if (BuyCrossCheckArray[i] == 1) {
-                BuyCrossCheckArrayOnlyIndexes.push(i);
-              }
-            }
-
-            let SellCrossCheckArrayOnlyIndexes = [];
-            for (let i = 0; i < SellCrossCheckArray.length; i++) {
-              if (SellCrossCheckArray[i] == 1) {
-                SellCrossCheckArrayOnlyIndexes.push(i);
-              }
-            }
-
-            const [BuyOAfterExRemFinalIndexes, SellOAfterExRemFinalIndexes] =
-              ExRemFinalworkingJswithIndexesOnly(
-                BuyCrossCheckArrayOnlyIndexes,
-                SellCrossCheckArrayOnlyIndexes
-              );
-
-            console.log(
-              "BuyOAfterExRemFinalIndexes is : ",
-              BuyOAfterExRemFinalIndexes
-            );
-            console.log(
-              "SellOAfterExRemFinalIndexes is : ",
-              SellOAfterExRemFinalIndexes
-            );
-            console.log("check");
-
-            FBindex = BuyOAfterExRemFinalIndexes;
-            FSindex = SellOAfterExRemFinalIndexes;
-
-            console.log("FinalOutA1 :", FBindex);
-            console.log("FinalOutA2 :", FSindex);
-
-            //*****************************************
 
             const options = {
               title: {
@@ -830,8 +822,10 @@
                     const rv = dtapi;
                     //const rv = fdata;
                     const data = series.options.data,
+                    
                       // newPoint = getNewPoint(i, data),
                       lastPoint = data[data.length - 1];
+                      allCalculationAtOnce(data);
 
                     lpdt = lastPoint[0];
 
@@ -903,9 +897,9 @@
                     dtapi = getDataFromAPI();
 
                     i++;
-                  }, 30000);
+                  }, 60000);
                   // (async () => {
-                  //   let i = 0;
+                  //   let i = 0;a
 
                   //   const intervalId = setInterval(async () => {
                   //     try {
