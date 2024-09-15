@@ -758,9 +758,10 @@
 
                 {
                   type: "ema",
-                  linkedTo: "rt", // Link to the series by name
+                  linkedTo: "rt",
+                  color: "blue", // Link to the series by name
                   params: {
-                    period: 20,
+                    period: 70,
                   },
                 },
                 {
@@ -791,11 +792,18 @@
                   type: "spline",
                   name: "SellCrossLine",
                   data: GlobalSellMinus80ValArray,
-                  color: "#800000",
+                  color: "orange",
                   yAxis: 0,
                   //step: true,
                 },
-
+                {
+                  type: "ema",
+                  linkedTo: "rt",
+                  color: "yellow", // Link to the series by name
+                  params: {
+                    period: 280,
+                  },
+                },
 
               ],
             };
