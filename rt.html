@@ -119,6 +119,10 @@
       var svlindex = [];
       var FSindex = [];
 
+      var GlobalBuyPlus80ValArray = [];
+      var GlobalSellMinus80ValArray = [];
+
+
       function allCalculationAtOnce(latestAPIdata) {
         fdata = latestAPIdata;
         //*****************************************
@@ -422,8 +426,8 @@
             SelloIndexes.push(y);
           }
         }
-        console.log("BuyoIndexes is : ", BuyoIndexes);
-        console.log("SelloIndexes is : ", SelloIndexes);
+        //console.log("BuyoIndexes is : ", BuyoIndexes);
+        //console.log("SelloIndexes is : ", SelloIndexes);
 
         let BuyoEma20 = [];
         for (var y = 0; y < Buyo.length; y++) {
@@ -438,8 +442,8 @@
           }
         }
 
-        console.log("BuyoEma20 is : ", BuyoEma20);
-        console.log("SelloEma20 is : ", SelloEma20);
+        //console.log("BuyoEma20 is : ", BuyoEma20);
+        //console.log("SelloEma20 is : ", SelloEma20);
 
         const arr2 = BuyoEma20;
         const arr3 = SelloEma20;
@@ -524,8 +528,8 @@
         const [BuyOAfterExRem1stOnlyIndexes, SellOAfterExRem1stOnlyIndexes] =
           ExRemFinalworkingJswithIndexesOnly(BuyoEma20, SelloEma20);
 
-        console.log("FinalOutA1 :", BuyOAfterExRem1stOnlyIndexes);
-        console.log("FinalOutA2 :", SellOAfterExRem1stOnlyIndexes);
+        //console.log("FinalOutA1 :", BuyOAfterExRem1stOnlyIndexes);
+        //console.log("FinalOutA2 :", SellOAfterExRem1stOnlyIndexes);
 
         cp = parseFloat(CA[0]);
         let BuyPlus80ValArray = [];
@@ -539,8 +543,8 @@
             BuyPlus80ValArray.push(cp);
           }
         }
-        console.log("check BuyPlus80ValArray : ", BuyPlus80ValArray);
-        console.log("check");
+        //console.log("check BuyPlus80ValArray : ", BuyPlus80ValArray);
+        //console.log("check");
 
         sp = parseFloat(CA[0]);
         let SellMinus80ValArray = [];
@@ -554,8 +558,24 @@
             SellMinus80ValArray.push(sp);
           }
         }
-        console.log("check SellMinus80ValArrayv : ", SellMinus80ValArray);
-        console.log("check");
+        //console.log("check SellMinus80ValArrayv : ", SellMinus80ValArray);
+        //console.log("check");
+
+        GlobalBuyPlus80ValArray = [];
+        for (let i = 0; i < CA.length; i++) {
+          GlobalBuyPlus80ValArray.push([
+            parseFloat(fdata[i][0]),
+            parseFloat(BuyPlus80ValArray[i]),
+          ]);
+        }
+
+        GlobalSellMinus80ValArray = [];
+        for (let i = 0; i < CA.length; i++) {
+          GlobalSellMinus80ValArray.push([
+            parseFloat(fdata[i][0]),
+            parseFloat(SellMinus80ValArray[i]),
+          ]);
+        }
 
         function crossCheck(type, CA, ValArray) {
           const crossovers = [];
@@ -594,9 +614,9 @@
         let BuyCrossCheckArray = crossCheck("Buy", CA, BuyPlus80ValArray);
         let SellCrossCheckArray = crossCheck("Sell", CA, SellMinus80ValArray);
 
-        console.log("BuyCrossCheckArray is : ", BuyCrossCheckArray);
-        console.log("SellCrossCheckArray is : ", SellCrossCheckArray);
-        console.log("check");
+        //console.log("BuyCrossCheckArray is : ", BuyCrossCheckArray);
+        //console.log("SellCrossCheckArray is : ", SellCrossCheckArray);
+        //console.log("check");
 
         let BuyCrossCheckArrayOnlyIndexes = [];
         for (let i = 0; i < BuyCrossCheckArray.length; i++) {
@@ -695,12 +715,22 @@
                     text: "1h",
                   },
                   {
+                    type: "day",
+                    count: 2,
+                    text: "2d",
+                  },
+                  {
+                    type: "minute",
+                    count: 3125,
+                    text: "Custom",
+                  },
+                  {
                     type: "all",
                     count: 1,
                     text: "All",
                   },
                 ],
-                selected: 1,
+                selected: 3,
                 inputEnabled: false,
               },
 
@@ -746,6 +776,27 @@
                   animation: false,
                   //yAxis: 3,
                 },
+
+                {
+                  type: "spline",
+                  name: "BuyCrossLine",
+                  data: GlobalBuyPlus80ValArray,
+                  //color: "#03470f",
+                  color: "cyan",
+                  yAxis: 0,
+                  //step: true,
+                },
+
+                {
+                  type: "spline",
+                  name: "SellCrossLine",
+                  data: GlobalSellMinus80ValArray,
+                  color: "#800000",
+                  yAxis: 0,
+                  //step: true,
+                },
+
+
               ],
             };
 
