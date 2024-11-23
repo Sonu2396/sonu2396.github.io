@@ -540,7 +540,7 @@
           checkflag = true;
           //cp = 0;
           if (BuyOAfterExRem1stOnlyIndexes.includes(i)) {
-            cp = parseFloat(CA[i]) + 80;
+            cp = parseFloat(CA[i]) + 100;
             BuyPlus80ValArray.push(cp);
           } else {
             BuyPlus80ValArray.push(cp);
@@ -555,7 +555,7 @@
           checkflag = true;
           //cp = 0;
           if (SellOAfterExRem1stOnlyIndexes.includes(i)) {
-            sp = parseFloat(CA[i]) - 80;
+            sp = parseFloat(CA[i]) - 100;
             SellMinus80ValArray.push(sp);
           } else {
             SellMinus80ValArray.push(sp);
@@ -784,7 +784,7 @@
                 {
                   type: "spline",
                   name: "BuyCrossLine",
-                  data: GlobalBuyPlus80ValArray,
+                  data: c,
                   //color: "#03470f",
                   color: "cyan",
                   yAxis: 0,
