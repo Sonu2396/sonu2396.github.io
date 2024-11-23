@@ -400,7 +400,8 @@
               RSI3[i] > 50 &&
               stochD[i] < 80 &&
               stochD[i] > stochD[i - 1] &&
-              ohlc[i][1] < ohlc[i][4]);
+              ohlc[i][1] < ohlc[i][4] &&
+            ohlc[i][4] > EMA20[i]);
           var selloCondition =
             MH[i] < 0 ||
             (MH[i] < 0 &&
@@ -408,7 +409,9 @@
               RSI3[i] < 50 &&
               stochD[i] > 20 &&
               stochD[i] < stochD[i - 1] &&
-              ohlc[i][1] < ohlc[i][4]);
+              ohlc[i][1] < ohlc[i][4]&&
+            ohlc[i][4] < EMA20[i]);
+        
 
           Buyo.push(buyoCondition);
           Sello.push(selloCondition);
