@@ -141,11 +141,11 @@
             fdata[i][4], // close
           ]);
 
-          volume.push([
-            (fdata[i][0] + 19800) * 1000,
-            //data[i][0], // the date
-            fdata[i][5], // the volume
-          ]);
+          // volume.push([
+          //   (fdata[i][0] + 19800) * 1000,
+          //   //data[i][0], // the date
+          //   fdata[i][5], // the volume
+          // ]);
         }
 
         let CA = [];
@@ -395,23 +395,39 @@
         var Sello = [];
         for (var i = 0; i < closeData.length; i++) {
           var buyoCondition =
-            (MH[i] > 0 ||
+            // (MH[i] > 0 ||
+            // (MH[i] > 0 &&
+            //   MH[i] > MH[i - 1]) )&&
+            //   RSI3[i] > 50 &&
+            //   stochD[i] < 80 &&
+            //   stochD[i] > stochD[i - 1] &&
+            //   ohlc[i][1] < ohlc[i][4] &&
+            // (ohlc[i][4] > EMA20[i]);
+            MH[i] > 0 ||
             (MH[i] > 0 &&
-              MH[i] > MH[i - 1]) )&&
+              MH[i] > MH[i - 1]) &&
               RSI3[i] > 50 &&
               stochD[i] < 80 &&
               stochD[i] > stochD[i - 1] &&
               ohlc[i][1] < ohlc[i][4] &&
-            (ohlc[i][4] > EMA20[i]);
+            ohlc[i][4] > EMA20[i];
           var selloCondition =
-            (MH[i] < 0 ||
+            // (MH[i] < 0 ||
+            // (MH[i] < 0 &&
+            //   MH[i] < MH[i - 1])) &&
+            //   RSI3[i] < 50 &&
+            //   stochD[i] > 20 &&
+            //   stochD[i] < stochD[i - 1] &&
+            //   ohlc[i][1] < ohlc[i][4]&&
+            // (ohlc[i][4] < EMA20[i]);
+            MH[i] < 0 ||
             (MH[i] < 0 &&
-              MH[i] < MH[i - 1])) &&
+              MH[i] < MH[i - 1]) &&
               RSI3[i] < 50 &&
               stochD[i] > 20 &&
               stochD[i] < stochD[i - 1] &&
               ohlc[i][1] < ohlc[i][4]&&
-            (ohlc[i][4] < EMA20[i]);
+            ohlc[i][4] < EMA20[i];
         
 
           Buyo.push(buyoCondition);
@@ -894,7 +910,7 @@
 
                     //rvlastdt = rv[rv.length - 1][0];
 
-                    for (let k = 0; k < rv.length; k += 1) {
+                    for (let k = rv.length-50; k < rv.length; k += 1) {
                       rvdt = rv[k][0];
                       if (parseFloat(rv[k][0]) > parseFloat(lpdt)) {
                         series.addPoint(rv[k]);
@@ -914,8 +930,13 @@
                         newBNCandleData.close = rv[k][4];
 
                         addBNCandleDataToRealTimeDBIfNotExists(newBNCandleData);
-                      } else {
+                      } 
+                      else 
+                      {
                       }
+
+
+
                     }
 
                     //*****************************************
@@ -960,7 +981,7 @@
                     dtapi = getDataFromAPI();
 
                     i++;
-                  }, 30000);
+                  }, 120000);
                   // (async () => {
                   //   let i = 0;a
 
