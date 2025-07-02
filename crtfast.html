@@ -1,0 +1,2447 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      #container {
+        height: 600px;
+        min-width: 310px;
+      }
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      .spinner {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #3498db;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+        z-index: 1000;
+      }
+      @keyframes spin {
+        0% {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        100% {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+      .loading #container {
+        opacity: 0.3;
+      }
+      .loading .spinner {
+        display: block;
+      }
+    </style>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/modules/price-indicator.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/stock/indicators/indicators-all.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/accessibility.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/data.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
+
+    <script>
+      // Your web app's Firebase configurations
+
+      //https://groww.in/v1/api/charting_service/v2/chart/delayed/exchange/NSE/segment/CASH/BANKNIFTY?endTimeInMillis=1725366039463&intervalInMinutes=5&startTimeInMillis=1723660200000
+
+      var firebaseConfig = {
+        apiKey: "AIzaSyAGVsUrHSxhkT4-7LT8hIhOYRLuCTh9pfI",
+        authDomain: "amiimagedata.firebaseapp.com",
+        databaseURL: "https://amiimagedata.firebaseio.com",
+        projectId: "amiimagedata",
+        storageBucket: "amiimagedata.appspot.com",
+        messagingSenderId: "929519622718",
+        appId: "1:929519622718:web:132220401071b92f55cf6f",
+        measurementId: "G-HVX6MSX12X",
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
+
+      const database = firebase.database();
+      console.log("FirebaseInitializeWorkerCode: Initialized successfully.");
+    </script>
+
+    <script>
+      async function getBNCandleDataFirst() {
+        const database = firebase.database();
+        const usersRef = database.ref("crudecandledata");
+        var processedCandleObjectDdata = [];
+        const processedCandleDdataArray = [];
+        try {
+          //const snapshot = await usersRef.once("value");
+          const snapshot = await usersRef
+            .orderByChild("datetime")
+            .limitToFirst(1050)
+            .once("value");
+
+          const usersval = snapshot.val();
+
+          if (usersval) {
+            if (typeof usersval === "object" && !Array.isArray(usersval)) {
+              // Process users using Object.entries for compatibility
+              //Object.entries(usersval).forEach(([key, userObject]) => {
+              Object.keys(usersval).forEach((key) => {
+                // Use Object.keys for property names
+                const userObject = usersval[key]; // Access user object using key
+                // const newCandleobject = {
+                //   datetime: userObject.datetime,
+                //   open: userObject.open,
+                //   high: userObject.high,
+                //   low: userObject.low,
+                //   close: userObject.close,
+                // };
+                var localarray = [];
+                //processedCandleObjectDdata.push(newCandleobject);
+                localarray.push(
+                  parseFloat(userObject.datetime),
+                  parseFloat(userObject.open),
+                  parseFloat(userObject.high),
+                  parseFloat(userObject.low),
+                  parseFloat(userObject.close)
+                );
+                processedCandleDdataArray.push(localarray);
+              });
+
+              //console.log(latlongarray);
+              //initMap(latlongarray);
+            } else {
+              console.log(
+                "Data retrieved is not an object (might be an array or null)."
+              );
+            }
+          } else {
+            console.log("No users found in the database.");
+          }
+        } catch (error) {
+          console.error("Error fetching users:", error);
+        }
+
+        return processedCandleDdataArray;
+      }
+
+      //var firstdata = [];
+    </script>
+  </head>
+  <body>
+    <div id="spinner" class="spinner"></div>
+    <div id="container"></div>
+    <script type="module">
+      console.log("Script started at:", new Date().toISOString());
+
+      function showSpinner(show) {
+        const container = document.getElementById("container");
+        const spinner = document.getElementById("spinner");
+        if (show) {
+          container.classList.add("loading");
+          spinner.style.display = "block";
+        } else {
+          container.classList.remove("loading");
+          spinner.style.display = "none";
+        }
+      }
+
+      if (!window.firebase || !window.Highcharts) {
+        console.error(
+          "Required libraries not loaded: Firebase:",
+          !!window.firebase,
+          "Highcharts:",
+          !!window.Highcharts
+        );
+        document.getElementById("spinner").style.display = "none";
+      }
+
+      // --- Web Worker Code as Strings ---
+
+      // apiWorker.js content as a string
+      const getBNCandleDataFirstWorkerCode = `
+                self.onmessage = async (event) => {
+                const usersval = event.data;
+                    if (event.data) {
+                        console.log('getBNCandleDataFirst Worker: Starting ...');
+                        
+        //                const database = firebase.database();
+        // const usersRef = database.ref("crudecandledata");
+        var processedCandleObjectDdata = [];
+        const processedCandleDdataArray = [];
+        try {
+          //const snapshot = await usersRef.once("value");
+          // const snapshot = await usersRef
+          //   .orderByChild("datetime")
+          //   .limitToFirst(1050)
+          //   .once("value");
+
+          // const usersval = snapshot.val();
+
+          if (usersval) {
+            if (typeof usersval === "object" && !Array.isArray(usersval)) {
+              // Process users using Object.entries for compatibility
+              //Object.entries(usersval).forEach(([key, userObject]) => {
+              Object.keys(usersval).forEach((key) => {
+                // Use Object.keys for property names
+                const userObject = usersval[key]; // Access user object using key
+                // const newCandleobject = {
+                //   datetime: userObject.datetime,
+                //   open: userObject.open,
+                //   high: userObject.high,
+                //   low: userObject.low,
+                //   close: userObject.close,
+                // };
+                var localarray = [];
+                //processedCandleObjectDdata.push(newCandleobject);
+                localarray.push(
+                  parseFloat(userObject.datetime),
+                  parseFloat(userObject.open),
+                  parseFloat(userObject.high),
+                  parseFloat(userObject.low),
+                  parseFloat(userObject.close)
+                );
+                processedCandleDdataArray.push(localarray);
+                self.postMessage(processedCandleDdataArray);
+              });
+
+              //console.log(latlongarray);
+              //initMap(latlongarray);
+            } else {
+              console.log(
+                "Data retrieved is not an object (might be an array or null)."
+              );
+            }
+          } else {
+            console.log("No users found in the database.");
+          }
+        } catch (error) {
+          console.error("Error fetching users:", error);
+          showSpinner(false);
+                        // Post an error message back to the main thread
+                        self.postMessage({ error: error.message });
+        }
+                    }
+                };
+
+                // Optional: Error handling for the worker itself
+                self.onerror = (error) => {
+                    console.error('getBNCandleDataFirst Worker: Uncaught error:', error);
+                    showSpinner(false);
+                    // You can also post this error back to the main thread if needed
+                    self.postMessage({ error: 'An uncaught error occurred in getBNCandleDataFirst Worker.' });
+                };
+            `;
+
+      // apiWorker.js content as a string
+      const apiWorkerCode = `
+                self.onmessage = async (event) => {
+                    if (event.data === 'fetchData') {
+                        console.log('API Worker: Starting API data fetch...');
+                        //showSpinner(true);
+                        
+                        let reposedata; // Declare outside for wider scope
+
+              try {
+                const response = await fetch(
+                  "https://inservice.onrender.com/cscrape"
+                );
+                if (!response.ok) {
+                  console.error("Error fetching data !response block:");
+                }
+                reposedata = await response.json();
+              } catch (error) {
+                console.error("Error fetching data:", error);
+                alert(error);
+                // Handle the error gracefully, e.g., display an error message, provide retry options, etc.
+              }
+              if (reposedata) {
+                // Process the fetched data using reposedata
+                console.log(reposedata.t.length);
+              } else {
+                // Handle the case where data fetching failed
+                console.warn("Data could not be fetched successfully.");
+              }
+
+              const jsonData = reposedata;
+              console.log("jsonData is : ", jsonData.t.length);
+
+              console.log("Data Js done");
+
+              let inrValue = 84;
+              //fetching currency value : 
+              try {
+                const response = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json'); // Replace with actual API endpoint
+                const data = await response.json();
+
+                // Access the INR value
+                const inrValue = data.usd.inr;
+                console.log("INR value:", inrValue);
+
+              } catch (error) {
+                console.error('Error fetching data:', error);
+              }
+
+
+              // split the data set into ohlc and volume
+              const ohlc = [],
+                volume = [],
+                dataLength = reposedata.t.length;
+
+              for (let i = 0; i < dataLength; i += 1) {
+                ohlc.push([
+                  (reposedata.t[i] + 19800) * 1000, // the date
+                  //data[i][0],
+                  inrValue*reposedata.o[i], // open
+                  inrValue*reposedata.h[i], // high
+                  inrValue*reposedata.l[i], // low
+                  inrValue*reposedata.c[i], // close
+                ]);
+
+                // volume.push([
+                //   (reposedata.candles[i][0] + 19800) * 1000,
+                //   //data[i][0], // the date
+                //   reposedata.candles[i][5], // the volume
+                // ]);
+              }
+              let minR = ohlc[dataLength - 100][0];
+              let maxR = ohlc[dataLength - 1][0];
+
+              
+              let CA = [];
+              for (let i = 0; i < dataLength; i += 1) {
+                CA.push([
+                  reposedata.c[i], // close
+                ]);
+              }
+
+              let OA = [];
+              for (let i = 0; i < dataLength; i += 1) {
+                OA.push([
+                  // the date
+                  reposedata.o[i], // open
+                ]);
+              }
+
+              //const rv = ohlc.pop();
+              dtapi = ohlc;
+              const rv = ohlc;
+              //console.log(rv);
+              //return rv;
+              self.postMessage(rv);
+                    }
+                };
+
+                // Optional: Error handling for the worker itself
+                self.onerror = (error) => {
+                    console.error('API Worker: Uncaught error:', error);
+                    // You can also post this error back to the main thread if needed
+                    self.postMessage({ error: 'An uncaught error occurred in API Worker.' });
+                };
+            `;
+
+      // calcWorker.js content as a string
+      const calcWorkerCode = `
+                self.onmessage = (event) => {
+                    const latestAPIdata = event.data;
+
+                    if (latestAPIdata && !latestAPIdata.error) {
+                        console.log('Calc Worker: Received data for calculation.');
+                        try {
+                            // Simulate a heavy calculation:
+                            // For each item, sum its 'id' and 'userId' and then perform a CPU-intensive loop.
+                            
+        var fdata = latestAPIdata;
+        //*****************************************
+        const ohlc = [],
+          volume = [],
+          dataLength = fdata.length;
+
+        for (let i = 0; i < dataLength; i += 1) {
+          ohlc.push([
+            (fdata[i][0] + 19800) * 1000, // the date
+            //data[i][0],
+            fdata[i][1], // open
+            fdata[i][2], // high
+            fdata[i][3], // low
+            fdata[i][4], // close
+          ]);
+
+          // volume.push([
+          //   (fdata[i][0] + 19800) * 1000,
+          //   //data[i][0], // the date
+          //   fdata[i][5], // the volume
+          // ]);
+        }
+
+        let CA = [];
+        for (let i = 0; i < dataLength; i += 1) {
+          CA.push([
+            fdata[i][4], // close
+          ]);
+        }
+
+        let OA = [];
+        for (let i = 0; i < dataLength; i += 1) {
+          OA.push([
+            // the date
+            fdata[i][1], // open
+          ]);
+        }
+
+        function StochD(data, periods = 14, Ksmooth = 3, Dsmooth = 3) {
+          // Calculate %K
+          function calculateK(data, periods) {
+            let k = [];
+            for (let i = periods - 1; i < data.length; i++) {
+              const periodData = data.slice(i - periods + 1, i + 1);
+              const high = Math.max(...periodData);
+              const low = Math.min(...periodData);
+              const currentClose = data[i];
+              const kValue = ((currentClose - low) / (high - low)) * 100;
+              k.push(kValue);
+            }
+            return k;
+          }
+
+          // Calculate smoothed %K
+          function calculateSmoothedK(k, periods) {
+            let smoothedK = [];
+            for (let i = periods - 1; i < k.length; i++) {
+              const smoothedValue =
+                k
+                  .slice(i - periods + 1, i + 1)
+                  .reduce((sum, val) => sum + val, 0) / periods;
+              smoothedK.push(smoothedValue);
+            }
+            return smoothedK;
+          }
+
+          // Calculate smoothed %D
+          function calculateSmoothedD(smoothedK, periods) {
+            let smoothedD = [];
+            for (let i = periods - 1; i < smoothedK.length; i++) {
+              const smoothedValue =
+                smoothedK
+                  .slice(i - periods + 1, i + 1)
+                  .reduce((sum, val) => sum + val, 0) / periods;
+              smoothedD.push(smoothedValue);
+            }
+            return smoothedD;
+          }
+
+          const k = calculateK(data, periods);
+          const smoothedK = calculateSmoothedK(k, Ksmooth);
+          const smoothedD = calculateSmoothedD(smoothedK, Dsmooth);
+
+          return smoothedD;
+        }
+
+        const periods = 8;
+        const Ksmooth = 3;
+        const Dsmooth = 3;
+
+        const stochD = StochD(CA, periods, Ksmooth, Dsmooth);
+        console.log("stochD is ");
+
+        function calculateMACD(
+          data,
+          fastPeriod = 8,
+          slowPeriod = 21,
+          signalPeriod = 5
+        ) {
+          // Calculate EMA (Exponential Moving Average)
+
+          // Calculate MACD line
+          let emaFast = EMA(data, fastPeriod);
+          let emaSlow = EMA(data, slowPeriod);
+          let macdLine = [];
+          for (let i = 0; i < data.length; i++) {
+            macdLine.push(emaFast[i] - emaSlow[i]);
+          }
+
+          // Calculate Signal line
+          let signalLine = EMA(macdLine, signalPeriod);
+
+          return { macdLine: macdLine, signalLine: signalLine };
+        }
+
+        const { macdLine, signalLine } = calculateMACD(CA);
+
+        function EMA(data, period) {
+          const multiplier = 2 / (period + 1);
+          let ema = [];
+          var sum = 0;
+
+          // Calculate SMA for the first period
+          for (let i = 0; i < period; i++) {
+            if (i == 0) {
+              ema.push(data[i]);
+            } else {
+              sum = parseFloat(sum) + parseFloat(data[i]);
+              //sum = sum + data[i];
+              const sma = sum / i;
+              ema.push(sma);
+            }
+          }
+          //let sma = sum / period;
+
+          // Calculate EMA for the remaining data points
+          for (let i = period; i < data.length; i++) {
+            let currentPrice = data[i];
+            let prevEMA = ema[i - period];
+            //let currentEMA = (currentPrice - prevEMA) * multiplier + prevEMA;
+
+            let currentEMA =
+              (parseFloat(currentPrice) - parseFloat(prevEMA)) *
+                parseFloat(multiplier) +
+              parseFloat(prevEMA);
+
+            ema.push(currentEMA);
+          }
+
+          return ema;
+        }
+
+        function calculateNewJsEMA(prices, period) {
+          const k = 2 / (period + 1);
+          const emaArray = new Array(prices.length);
+
+          // Calculate initial EMA (using SMA for the first period)
+          let sum = 0;
+          for (let i = 0; i < period; i++) {
+            sum += parseFloat(prices[i]);
+          }
+          let ema = sum / period;
+
+          // Fill initial elements of EMA array with the first EMA value
+          for (let i = 0; i < period; i++) {
+            emaArray[i] = ema;
+          }
+
+          // Calculate EMA for remaining prices
+          for (let i = period; i < prices.length; i++) {
+            ema = prices[i] * k + ema * (1 - k);
+            emaArray[i] = ema;
+          }
+
+          return emaArray;
+        }
+
+        function RSI(data, period) {
+          // Implementation of Relative Strength Index (RSI)
+          var rsi = [];
+          for (var i = 0; i < data.length; i++) {
+            if (i >= period) {
+              var gains = 0;
+              var losses = 0;
+              for (var j = i - period; j < i; j++) {
+                var diff = data[j + 1] - data[j];
+                if (diff > 0) {
+                  gains += diff;
+                } else {
+                  losses += Math.abs(diff);
+                }
+              }
+              var avgGain = gains / period;
+              var avgLoss = losses / period;
+              rsi.push(100 - 100 / (1 + avgGain / avgLoss));
+            } else {
+              rsi.push(null);
+            }
+          }
+          return rsi;
+        }
+
+        function valueWhen(expression, array, n = 1) {
+          let result = [];
+          let count = 0;
+
+          // Iterate over the array and check the expression
+          for (let i = array.length - 1; i >= 0; i--) {
+            if (expression(array[i])) {
+              count++;
+              if (count === n) {
+                result.push(array[i]);
+                return result;
+              }
+            }
+          }
+
+          // If the expression was not met 'n' times, return undefined
+          return undefined;
+        }
+
+        // Example usage:
+        const closePrices = CA;
+        const openPrices = OA;
+
+        const result = valueWhen(
+          (close) => close.open < close.close,
+          openPrices
+        );
+        //console.log(result); // Output: array of open prices when close price is greater than open price
+
+        // Main function
+        var closeData = CA;
+
+        var SD = StochD(closeData, 8, 3, 3);
+        var MJ = calculateMACD(closeData, 8, 21);
+        //var signalLine = Signal(closeData, 8, 21, 5);
+
+        var signalLineFinal = signalLine;
+
+        var MH = [];
+        for (var c = 0; c < closeData.length; c++) {
+          var MHdiff = MJ.macdLine[c] - signalLineFinal[c];
+
+          MH.push(MHdiff);
+        }
+        //console.log("MH cal is : ", MH);
+
+        var RSI3 = RSI(closeData, 3);
+
+        var trendup = [];
+        var trendcolor = [];
+
+        var RSI50p = [];
+        for (var b = 0; b < RSI3.length; b++) {
+          if (RSI3[b] > 50) {
+            RSI50p.push(b);
+          }
+        }
+
+        var EMA20 = [];
+        EMA20 = EMA(CA, 240);
+        var EMA20exp = [];
+        EMA20exp = calculateNewJsEMA(CA, 240);
+        EMA20expChart = EMA20exp;
+
+        var Buyo = [];
+        var Sello = [];
+        for (var i = 0; i < closeData.length; i++) {
+          var buyoCondition =
+            MH[i] > 0 ||
+            (MH[i] > 0 &&
+              MH[i] > MH[i - 1] &&
+              RSI3[i] > 50 &&
+              stochD[i] < 80 &&
+              stochD[i] > stochD[i - 1] &&
+              ohlc[i][1] < ohlc[i][4]);
+          var selloCondition =
+            MH[i] < 0 ||
+            (MH[i] < 0 &&
+              MH[i] < MH[i - 1] &&
+              RSI3[i] < 50 &&
+              stochD[i] > 20 &&
+              stochD[i] < stochD[i - 1] &&
+              ohlc[i][1] < ohlc[i][4]);
+
+          Buyo.push(buyoCondition);
+          Sello.push(selloCondition);
+        }
+
+        let BuyoIndexes = [];
+        for (var y = 0; y < Buyo.length; y++) {
+          if (Buyo[y] == true) {
+            BuyoIndexes.push(y);
+          }
+        }
+        let SelloIndexes = [];
+        for (var y = 0; y < Sello.length; y++) {
+          if (Sello[y] == true) {
+            SelloIndexes.push(y);
+          }
+        }
+        //console.log("BuyoIndexes is : ", BuyoIndexes);
+        //console.log("SelloIndexes is : ", SelloIndexes);
+
+        let BuyoEma20 = [];
+        for (var y = 0; y < Buyo.length; y++) {
+          if (Buyo[y] == true && closeData[y] > EMA20exp[y]) {
+            BuyoEma20.push(y);
+          }
+        }
+        let SelloEma20 = [];
+        for (var y = 0; y < Sello.length; y++) {
+          if (Sello[y] == true && closeData[y] < EMA20exp[y]) {
+            SelloEma20.push(y);
+          }
+        }
+
+        //console.log("BuyoEma20 is : ", BuyoEma20);
+        //console.log("SelloEma20 is : ", SelloEma20);
+
+        const arr2 = BuyoEma20;
+        const arr3 = SelloEma20;
+
+        function ExRemFinalworkingJswithIndexesOnly(arr1, arr2) {
+          const biggestLength = Math.max(arr1.length, arr2.length);
+          // Use a ternary operator to determine the biggest array name
+          const biggestArrayName =
+            arr1.length === biggestLength ? "arr1" : "arr2";
+
+          let biggestArray = [];
+          if (biggestArrayName == "arr1") {
+            biggestArray = arr1;
+          } else {
+            biggestArray = arr2;
+          }
+
+          ArrayIn1 = arr1;
+          ArrayIn2 = arr2;
+          //console.log("Getting all final signals");
+          var CurrentReadArray = "ArrayIn2";
+
+          var CurrentReadIndexA1 = 0;
+          var CurrentReadValueA1 = ArrayIn1[0];
+          var NextBigReadIndexA1 = 0;
+          var FinalOutA1 = [];
+
+          var CurrentReadIndexA2 = 0;
+          var NextBigReadIndexA2 = ArrayIn2[0];
+          var CurrentReadValueA2 = 0;
+          var FinalOutA2 = [];
+
+          for (let i = 1; i <= biggestArray.length; i++) {
+            //console.log("Current loop value", i);
+            //console.log("CurrentElementIndex", i);
+            if (CurrentReadArray == "ArrayIn1") {
+              // CurrentReadIndexA1 = i;
+              // CurrentReadValueA1 = ArrayIn1[i];
+              for (let j = CurrentReadIndexA2 + 1; j <= ArrayIn2.length; j++) {
+                if (ArrayIn2[j] > CurrentReadValueA1) {
+                  FinalOutA2.push(ArrayIn2[j]);
+                  CurrentReadIndexA2 = j;
+                  CurrentReadValueA2 = ArrayIn2[j];
+                  CurrentReadArray = "ArrayIn2";
+
+                  //console.log("CurrentReadIndexA2 :", CurrentReadIndexA2);
+                  //console.log("CurrentReadValueA2 :", CurrentReadValueA2);
+                  //console.log("CurrentReadArray :", CurrentReadArray);
+
+                  //console.log("Current Status of OutA2 : ", FinalOutA2);
+                  break;
+                }
+              }
+            }
+            if (CurrentReadArray == "ArrayIn2") {
+              // CurrentReadIndexA2 = i;
+              // CurrentReadValueA2 = ArrayIn2[i];
+              for (let k = CurrentReadIndexA1 + 1; k <= ArrayIn1.length; k++) {
+                if (ArrayIn1[k] > CurrentReadValueA2) {
+                  FinalOutA1.push(ArrayIn1[k]);
+                  CurrentReadIndexA1 = k;
+                  CurrentReadValueA1 = ArrayIn1[k];
+                  CurrentReadArray = "ArrayIn1";
+
+                  //console.log("CurrentReadIndexA1 :", CurrentReadIndexA1);
+                  //console.log("CurrentReadValueA1 :", CurrentReadValueA1);
+                  //console.log("CurrentReadArray :", CurrentReadArray);
+
+                  //console.log("Current Status of OutA1 : ", FinalOutA1);
+                  break;
+                }
+              }
+            }
+          }
+
+          //console.log("FinalOutA1 :", FinalOutA1);
+          //console.log("FinalOutA2 :", FinalOutA2);
+
+          return [FinalOutA1, FinalOutA2];
+        }
+
+        const [BuyOAfterExRem1stOnlyIndexes, SellOAfterExRem1stOnlyIndexes] =
+          ExRemFinalworkingJswithIndexesOnly(BuyoEma20, SelloEma20);
+
+        //console.log("FinalOutA1 :", BuyOAfterExRem1stOnlyIndexes);
+        //console.log("FinalOutA2 :", SellOAfterExRem1stOnlyIndexes);
+
+        cp = parseFloat(CA[0]);
+        let BuyPlus80ValArray = [];
+        for (let i = 0; i < CA.length; i++) {
+          checkflag = true;
+          //cp = 0;
+          if (BuyOAfterExRem1stOnlyIndexes.includes(i)) {
+            cp = parseFloat(CA[i]) + 22;
+            BuyPlus80ValArray.push(cp);
+          } else {
+            BuyPlus80ValArray.push(cp);
+          }
+        }
+        //console.log("check BuyPlus80ValArray : ", BuyPlus80ValArray);
+        //console.log("check");
+
+        sp = parseFloat(CA[0]);
+        let SellMinus80ValArray = [];
+        for (let i = 0; i < CA.length; i++) {
+          checkflag = true;
+          //cp = 0;
+          if (SellOAfterExRem1stOnlyIndexes.includes(i)) {
+            sp = parseFloat(CA[i]) - 22;
+            SellMinus80ValArray.push(sp);
+          } else {
+            SellMinus80ValArray.push(sp);
+          }
+        }
+        //console.log("check SellMinus80ValArrayv : ", SellMinus80ValArray);
+        //console.log("check");
+
+        GlobalBuyPlus80ValArray = [];
+        for (let i = 0; i < CA.length; i++) {
+          GlobalBuyPlus80ValArray.push([
+            parseFloat(fdata[i][0]),
+            parseFloat(BuyPlus80ValArray[i]),
+          ]);
+        }
+
+        GlobalSellMinus80ValArray = [];
+        for (let i = 0; i < CA.length; i++) {
+          GlobalSellMinus80ValArray.push([
+            parseFloat(fdata[i][0]),
+            parseFloat(SellMinus80ValArray[i]),
+          ]);
+        }
+
+        function crossCheck(type, CA, ValArray) {
+          const crossovers = [];
+
+          for (let i = 1; i < ValArray.length; i++) {
+            // const prevPrice = priceArray[i - 1];
+            // const currentPrice = priceArray[i];
+            // const prevEma = emaArray[i - 1];
+            // const currentEma = emaArray[i];
+            if (type == "Buy") {
+              // Check for upward crossover
+              //if (prevPrice <= prevEma && currentPrice > currentEma) {
+              if (CA[i - 1] <= ValArray[i - 1] && CA[i] > ValArray[i]) {
+                //if (CA[i] > ValArray[i]) {
+                crossovers.push(1); // Or any other value to indicate upward crossover
+              } else {
+                crossovers.push(0); // No crossover
+              }
+            }
+            if (type == "Sell") {
+              if (CA[i - 1] >= ValArray[i - 1] && CA[i] < ValArray[i]) {
+                crossovers.push(1); // Or any other value to indicate downward crossover
+              } else {
+                crossovers.push(0);
+              }
+              // Check for downward crossover
+              // if (prevPrice >= prevEma && currentPrice < currentEma) {
+              //if (CA[i] < ValArray[i]) {
+              // No crossover
+            }
+          }
+
+          return crossovers;
+        }
+
+        let BuyCrossCheckArray = crossCheck("Buy", CA, BuyPlus80ValArray);
+        let SellCrossCheckArray = crossCheck("Sell", CA, SellMinus80ValArray);
+
+        //console.log("BuyCrossCheckArray is : ", BuyCrossCheckArray);
+        //console.log("SellCrossCheckArray is : ", SellCrossCheckArray);
+        //console.log("check");
+
+        let BuyCrossCheckArrayOnlyIndexes = [];
+        for (let i = 0; i < BuyCrossCheckArray.length; i++) {
+          if (BuyCrossCheckArray[i] == 1) {
+            BuyCrossCheckArrayOnlyIndexes.push(i);
+          }
+        }
+
+        let SellCrossCheckArrayOnlyIndexes = [];
+        for (let i = 0; i < SellCrossCheckArray.length; i++) {
+          if (SellCrossCheckArray[i] == 1) {
+            SellCrossCheckArrayOnlyIndexes.push(i);
+          }
+        }
+
+        const [BuyOAfterExRemFinalIndexes, SellOAfterExRemFinalIndexes] =
+          ExRemFinalworkingJswithIndexesOnly(
+            BuyCrossCheckArrayOnlyIndexes,
+            SellCrossCheckArrayOnlyIndexes
+          );
+
+        console.log(
+          "BuyOAfterExRemFinalIndexes is : ",
+          BuyOAfterExRemFinalIndexes
+        );
+        console.log(
+          "SellOAfterExRemFinalIndexes is : ",
+          SellOAfterExRemFinalIndexes
+        );
+        console.log("check");
+
+        FBindex = BuyOAfterExRemFinalIndexes;
+        FSindex = SellOAfterExRemFinalIndexes;
+
+        console.log("FinalOutA1 :", FBindex);
+        console.log("FinalOutA2 :", FSindex);
+        //*****************************************
+
+
+
+
+
+
+
+                            console.log('Calc Worker: Calculation complete.');
+                            // Post the processed data back to the main thread
+                            //self.postMessage(FBindex,FSindex);
+
+                            self.postMessage({
+                                    FBindex: FBindex,
+                                    FSindex: FSindex ,
+                                    BPlusValArray: GlobalBuyPlus80ValArray, 
+                                    SMinusValArray: GlobalSellMinus80ValArray 
+                                    // Sending the original data as the second piece
+                                });
+
+                        } catch (error) {
+                            console.error('Calc Worker: Error during calculation:', error);
+                            // Post an error message back to the main thread
+                            self.postMessage({ error: error.message });
+                        }
+                    } else if (apiData && apiData.error) {
+                        console.error('Calc Worker: Received error from API Worker:', apiData.error);
+                        self.postMessage({ error: \`Error from API Worker: \${apiData.error}\` });
+                    } else {
+                        console.warn('Calc Worker: No data received or invalid data.');
+                        self.postMessage({ error: 'No data received for calculation.' });
+                    }
+                };
+
+                // Optional: Error handling for the worker itself
+                self.onerror = (error) => {
+                    console.error('Calc Worker: Uncaught error:', error);
+                    // You can also post this error back to the main thread if needed
+                    self.postMessage({ error: 'An uncaught error occurred in Calculation Worker.' });
+                };
+            `;
+
+      const getBNCandleDataFirstWorkerBlob = new Blob(
+        [getBNCandleDataFirstWorkerCode],
+        {
+          type: "application/javascript",
+        }
+      );
+      const getBNCandleDataFirstWorkerBlobUrl = URL.createObjectURL(
+        getBNCandleDataFirstWorkerBlob
+      );
+
+      const apiWorkerBlob = new Blob([apiWorkerCode], {
+        type: "application/javascript",
+      });
+      const apiWorkerBlobUrl = URL.createObjectURL(apiWorkerBlob);
+      const calcWorkerBlob = new Blob([calcWorkerCode], {
+        type: "application/javascript",
+      });
+      const calcWorkerBlobUrl = URL.createObjectURL(calcWorkerBlob);
+
+      // --- Web Worker Setup using Blob URLs ---
+
+      const getBNCandleDataFirstWorker = new Worker(
+        getBNCandleDataFirstWorkerBlobUrl
+      );
+      const apiWorker = new Worker(apiWorkerBlobUrl);
+      const calcWorker = new Worker(calcWorkerBlobUrl);
+
+      // const firebaseConfig = {
+      //   apiKey: "AIzaSyAGVsUrHSxhkT4-7LT8hIhOYRLuCTh9pfI",
+      //   authDomain: "amiimagedata.firebaseapp.com",
+      //   databaseURL: "https://amiimagedata.firebaseio.com",
+      //   projectId: "amiimagedata",
+      //   storageBucket: "amiimagedata.appspot.com",
+      //   messagingSenderId: "929519622718",
+      //   appId: "1:929519622718:web:132220401071b92f55cf6f",
+      //   measurementId: "G-HVX6MSX12X",
+      // };
+      // try {
+      //   console.log("Initializing Firebase...");
+      //   firebase.initializeApp(firebaseConfig);
+      //   firebase.analytics();
+      // } catch (error) {
+      //   console.error("Firebase initialization failed:", error.message);
+      //   document.getElementById("spinner").style.display = "none";
+      // }
+
+      var dtapi = [];
+      //FBindex = [];
+      //FSindex = [];
+      var EMA20expChart = [];
+      var fdata = [];
+
+      let bresult = [];
+      let sresult = [];
+      var FBindex = [];
+      var bvlindex = [];
+      var svlindex = [];
+      var FSindex = [];
+
+      var GlobalBuyPlus80ValArray = [];
+      var GlobalSellMinus80ValArray = [];
+
+      function allCalculationAtOnce(latestAPIdata) {
+        fdata = latestAPIdata;
+        //*****************************************
+        const ohlc = [],
+          volume = [],
+          dataLength = fdata.length;
+
+        for (let i = 0; i < dataLength; i += 1) {
+          ohlc.push([
+            (fdata[i][0] + 19800) * 1000, // the date
+            //data[i][0],
+            fdata[i][1], // open
+            fdata[i][2], // high
+            fdata[i][3], // low
+            fdata[i][4], // close
+          ]);
+
+          volume.push([
+            (fdata[i][0] + 19800) * 1000,
+            //data[i][0], // the date
+            fdata[i][5], // the volume
+          ]);
+        }
+
+        let CA = [];
+        for (let i = 0; i < dataLength; i += 1) {
+          CA.push([
+            fdata[i][4], // close
+          ]);
+        }
+
+        let OA = [];
+        for (let i = 0; i < dataLength; i += 1) {
+          OA.push([
+            // the date
+            fdata[i][1], // open
+          ]);
+        }
+
+        function StochD(data, periods = 14, Ksmooth = 3, Dsmooth = 3) {
+          // Calculate %K
+          function calculateK(data, periods) {
+            let k = [];
+            for (let i = periods - 1; i < data.length; i++) {
+              const periodData = data.slice(i - periods + 1, i + 1);
+              const high = Math.max(...periodData);
+              const low = Math.min(...periodData);
+              const currentClose = data[i];
+              const kValue = ((currentClose - low) / (high - low)) * 100;
+              k.push(kValue);
+            }
+            return k;
+          }
+
+          // Calculate smoothed %K
+          function calculateSmoothedK(k, periods) {
+            let smoothedK = [];
+            for (let i = periods - 1; i < k.length; i++) {
+              const smoothedValue =
+                k
+                  .slice(i - periods + 1, i + 1)
+                  .reduce((sum, val) => sum + val, 0) / periods;
+              smoothedK.push(smoothedValue);
+            }
+            return smoothedK;
+          }
+
+          // Calculate smoothed %D
+          function calculateSmoothedD(smoothedK, periods) {
+            let smoothedD = [];
+            for (let i = periods - 1; i < smoothedK.length; i++) {
+              const smoothedValue =
+                smoothedK
+                  .slice(i - periods + 1, i + 1)
+                  .reduce((sum, val) => sum + val, 0) / periods;
+              smoothedD.push(smoothedValue);
+            }
+            return smoothedD;
+          }
+
+          const k = calculateK(data, periods);
+          const smoothedK = calculateSmoothedK(k, Ksmooth);
+          const smoothedD = calculateSmoothedD(smoothedK, Dsmooth);
+
+          return smoothedD;
+        }
+
+        const periods = 8;
+        const Ksmooth = 3;
+        const Dsmooth = 3;
+
+        const stochD = StochD(CA, periods, Ksmooth, Dsmooth);
+        console.log("stochD is ");
+
+        function calculateMACD(
+          data,
+          fastPeriod = 8,
+          slowPeriod = 21,
+          signalPeriod = 5
+        ) {
+          // Calculate EMA (Exponential Moving Average)
+
+          // Calculate MACD line
+          let emaFast = EMA(data, fastPeriod);
+          let emaSlow = EMA(data, slowPeriod);
+          let macdLine = [];
+          for (let i = 0; i < data.length; i++) {
+            macdLine.push(emaFast[i] - emaSlow[i]);
+          }
+
+          // Calculate Signal line
+          let signalLine = EMA(macdLine, signalPeriod);
+
+          return { macdLine: macdLine, signalLine: signalLine };
+        }
+
+        const { macdLine, signalLine } = calculateMACD(CA);
+
+        function EMA(data, period) {
+          const multiplier = 2 / (period + 1);
+          let ema = [];
+          var sum = 0;
+
+          // Calculate SMA for the first period
+          for (let i = 0; i < period; i++) {
+            if (i == 0) {
+              ema.push(data[i]);
+            } else {
+              sum = parseFloat(sum) + parseFloat(data[i]);
+              //sum = sum + data[i];
+              const sma = sum / i;
+              ema.push(sma);
+            }
+          }
+          //let sma = sum / period;
+
+          // Calculate EMA for the remaining data points
+          for (let i = period; i < data.length; i++) {
+            let currentPrice = data[i];
+            let prevEMA = ema[i - period];
+            //let currentEMA = (currentPrice - prevEMA) * multiplier + prevEMA;
+
+            let currentEMA =
+              (parseFloat(currentPrice) - parseFloat(prevEMA)) *
+                parseFloat(multiplier) +
+              parseFloat(prevEMA);
+
+            ema.push(currentEMA);
+          }
+
+          return ema;
+        }
+
+        function calculateNewJsEMA(prices, period) {
+          const k = 2 / (period + 1);
+          const emaArray = new Array(prices.length);
+
+          // Calculate initial EMA (using SMA for the first period)
+          let sum = 0;
+          for (let i = 0; i < period; i++) {
+            sum += parseFloat(prices[i]);
+          }
+          let ema = sum / period;
+
+          // Fill initial elements of EMA array with the first EMA value
+          for (let i = 0; i < period; i++) {
+            emaArray[i] = ema;
+          }
+
+          // Calculate EMA for remaining prices
+          for (let i = period; i < prices.length; i++) {
+            ema = prices[i] * k + ema * (1 - k);
+            emaArray[i] = ema;
+          }
+
+          return emaArray;
+        }
+
+        function RSI(data, period) {
+          // Implementation of Relative Strength Index (RSI)
+          var rsi = [];
+          for (var i = 0; i < data.length; i++) {
+            if (i >= period) {
+              var gains = 0;
+              var losses = 0;
+              for (var j = i - period; j < i; j++) {
+                var diff = data[j + 1] - data[j];
+                if (diff > 0) {
+                  gains += diff;
+                } else {
+                  losses += Math.abs(diff);
+                }
+              }
+              var avgGain = gains / period;
+              var avgLoss = losses / period;
+              rsi.push(100 - 100 / (1 + avgGain / avgLoss));
+            } else {
+              rsi.push(null);
+            }
+          }
+          return rsi;
+        }
+
+        function valueWhen(expression, array, n = 1) {
+          let result = [];
+          let count = 0;
+
+          // Iterate over the array and check the expression
+          for (let i = array.length - 1; i >= 0; i--) {
+            if (expression(array[i])) {
+              count++;
+              if (count === n) {
+                result.push(array[i]);
+                return result;
+              }
+            }
+          }
+
+          // If the expression was not met 'n' times, return undefined
+          return undefined;
+        }
+
+        // Example usage:
+        const closePrices = CA;
+        const openPrices = OA;
+
+        const result = valueWhen(
+          (close) => close.open < close.close,
+          openPrices
+        );
+        //console.log(result); // Output: array of open prices when close price is greater than open price
+
+        // Main function
+        var closeData = CA;
+
+        var SD = StochD(closeData, 8, 3, 3);
+        var MJ = calculateMACD(closeData, 8, 21);
+        //var signalLine = Signal(closeData, 8, 21, 5);
+
+        var signalLineFinal = signalLine;
+
+        var MH = [];
+        for (var c = 0; c < closeData.length; c++) {
+          var MHdiff = MJ.macdLine[c] - signalLineFinal[c];
+
+          MH.push(MHdiff);
+        }
+        //console.log("MH cal is : ", MH);
+
+        var RSI3 = RSI(closeData, 3);
+
+        var trendup = [];
+        var trendcolor = [];
+
+        var RSI50p = [];
+        for (var b = 0; b < RSI3.length; b++) {
+          if (RSI3[b] > 50) {
+            RSI50p.push(b);
+          }
+        }
+
+        var EMA20 = [];
+        EMA20 = EMA(CA, 220);
+        var EMA20exp = [];
+        EMA20exp = calculateNewJsEMA(CA, 220);
+        EMA20expChart = EMA20exp;
+
+        var Buyo = [];
+        var Sello = [];
+        for (var i = 0; i < closeData.length; i++) {
+          var buyoCondition =
+            MH[i] > 0 ||
+            (MH[i] > 0 &&
+              MH[i] > MH[i - 1] &&
+              RSI3[i] > 50 &&
+              stochD[i] < 80 &&
+              stochD[i] > stochD[i - 1] &&
+              ohlc[i][1] < ohlc[i][4]);
+          var selloCondition =
+            MH[i] < 0 ||
+            (MH[i] < 0 &&
+              MH[i] < MH[i - 1] &&
+              RSI3[i] < 50 &&
+              stochD[i] > 20 &&
+              stochD[i] < stochD[i - 1] &&
+              ohlc[i][1] < ohlc[i][4]);
+
+          Buyo.push(buyoCondition);
+          Sello.push(selloCondition);
+        }
+
+        let BuyoIndexes = [];
+        for (var y = 0; y < Buyo.length; y++) {
+          if (Buyo[y] == true) {
+            BuyoIndexes.push(y);
+          }
+        }
+        let SelloIndexes = [];
+        for (var y = 0; y < Sello.length; y++) {
+          if (Sello[y] == true) {
+            SelloIndexes.push(y);
+          }
+        }
+        //console.log("BuyoIndexes is : ", BuyoIndexes);
+        //console.log("SelloIndexes is : ", SelloIndexes);
+
+        let BuyoEma20 = [];
+        for (var y = 0; y < Buyo.length; y++) {
+          if (Buyo[y] == true && closeData[y] > EMA20exp[y]) {
+            BuyoEma20.push(y);
+          }
+        }
+        let SelloEma20 = [];
+        for (var y = 0; y < Sello.length; y++) {
+          if (Sello[y] == true && closeData[y] < EMA20exp[y]) {
+            SelloEma20.push(y);
+          }
+        }
+
+        //console.log("BuyoEma20 is : ", BuyoEma20);
+        //console.log("SelloEma20 is : ", SelloEma20);
+
+        const arr2 = BuyoEma20;
+        const arr3 = SelloEma20;
+
+        function ExRemFinalworkingJswithIndexesOnly(arr1, arr2) {
+          const biggestLength = Math.max(arr1.length, arr2.length);
+          // Use a ternary operator to determine the biggest array name
+          const biggestArrayName =
+            arr1.length === biggestLength ? "arr1" : "arr2";
+
+          let biggestArray = [];
+          if (biggestArrayName == "arr1") {
+            biggestArray = arr1;
+          } else {
+            biggestArray = arr2;
+          }
+
+          var ArrayIn1 = arr1;
+          var ArrayIn2 = arr2;
+          //console.log("Getting all final signals");
+          var CurrentReadArray = "ArrayIn2";
+
+          var CurrentReadIndexA1 = 0;
+          var CurrentReadValueA1 = ArrayIn1[0];
+          var NextBigReadIndexA1 = 0;
+          var FinalOutA1 = [];
+
+          var CurrentReadIndexA2 = 0;
+          var NextBigReadIndexA2 = ArrayIn2[0];
+          var CurrentReadValueA2 = 0;
+          var FinalOutA2 = [];
+
+          for (let i = 1; i <= biggestArray.length; i++) {
+            //console.log("Current loop value", i);
+            //console.log("CurrentElementIndex", i);
+            if (CurrentReadArray == "ArrayIn1") {
+              // CurrentReadIndexA1 = i;
+              // CurrentReadValueA1 = ArrayIn1[i];
+              for (let j = CurrentReadIndexA2 + 1; j <= ArrayIn2.length; j++) {
+                if (ArrayIn2[j] > CurrentReadValueA1) {
+                  FinalOutA2.push(ArrayIn2[j]);
+                  CurrentReadIndexA2 = j;
+                  CurrentReadValueA2 = ArrayIn2[j];
+                  CurrentReadArray = "ArrayIn2";
+
+                  //console.log("CurrentReadIndexA2 :", CurrentReadIndexA2);
+                  //console.log("CurrentReadValueA2 :", CurrentReadValueA2);
+                  //console.log("CurrentReadArray :", CurrentReadArray);
+
+                  //console.log("Current Status of OutA2 : ", FinalOutA2);
+                  break;
+                }
+              }
+            }
+            if (CurrentReadArray == "ArrayIn2") {
+              // CurrentReadIndexA2 = i;
+              // CurrentReadValueA2 = ArrayIn2[i];
+              for (let k = CurrentReadIndexA1 + 1; k <= ArrayIn1.length; k++) {
+                if (ArrayIn1[k] > CurrentReadValueA2) {
+                  FinalOutA1.push(ArrayIn1[k]);
+                  CurrentReadIndexA1 = k;
+                  CurrentReadValueA1 = ArrayIn1[k];
+                  CurrentReadArray = "ArrayIn1";
+
+                  //console.log("CurrentReadIndexA1 :", CurrentReadIndexA1);
+                  //console.log("CurrentReadValueA1 :", CurrentReadValueA1);
+                  //console.log("CurrentReadArray :", CurrentReadArray);
+
+                  //console.log("Current Status of OutA1 : ", FinalOutA1);
+                  break;
+                }
+              }
+            }
+          }
+
+          //console.log("FinalOutA1 :", FinalOutA1);
+          //console.log("FinalOutA2 :", FinalOutA2);
+
+          return [FinalOutA1, FinalOutA2];
+        }
+
+        const [BuyOAfterExRem1stOnlyIndexes, SellOAfterExRem1stOnlyIndexes] =
+          ExRemFinalworkingJswithIndexesOnly(BuyoEma20, SelloEma20);
+
+        //console.log("FinalOutA1 :", BuyOAfterExRem1stOnlyIndexes);
+        //console.log("FinalOutA2 :", SellOAfterExRem1stOnlyIndexes);
+
+        var cp = parseFloat(CA[0]);
+        let BuyPlus80ValArray = [];
+        for (let i = 0; i < CA.length; i++) {
+          var checkflag = true;
+          //cp = 0;
+          if (BuyOAfterExRem1stOnlyIndexes.includes(i)) {
+            cp = parseFloat(CA[i]) + 100;
+            BuyPlus80ValArray.push(cp);
+          } else {
+            BuyPlus80ValArray.push(cp);
+          }
+        }
+        //console.log("check BuyPlus80ValArray : ", BuyPlus80ValArray);
+        //console.log("check");
+
+        var sp = parseFloat(CA[0]);
+        let SellMinus80ValArray = [];
+        for (let i = 0; i < CA.length; i++) {
+          var checkflag = true;
+          //cp = 0;
+          if (SellOAfterExRem1stOnlyIndexes.includes(i)) {
+            sp = parseFloat(CA[i]) - 100;
+            SellMinus80ValArray.push(sp);
+          } else {
+            SellMinus80ValArray.push(sp);
+          }
+        }
+        //console.log("check SellMinus80ValArrayv : ", SellMinus80ValArray);
+        //console.log("check");
+
+        var GlobalBuyPlus80ValArray = [];
+        for (let i = 0; i < CA.length; i++) {
+          GlobalBuyPlus80ValArray.push([
+            parseFloat(fdata[i][0]),
+            parseFloat(BuyPlus80ValArray[i]),
+          ]);
+        }
+
+        var GlobalSellMinus80ValArray = [];
+        for (let i = 0; i < CA.length; i++) {
+          GlobalSellMinus80ValArray.push([
+            parseFloat(fdata[i][0]),
+            parseFloat(SellMinus80ValArray[i]),
+          ]);
+        }
+
+        function crossCheck(type, CA, ValArray) {
+          const crossovers = [];
+
+          for (let i = 1; i < ValArray.length; i++) {
+            // const prevPrice = priceArray[i - 1];
+            // const currentPrice = priceArray[i];
+            // const prevEma = emaArray[i - 1];
+            // const currentEma = emaArray[i];
+            if (type == "Buy") {
+              // Check for upward crossover
+              //if (prevPrice <= prevEma && currentPrice > currentEma) {
+              if (CA[i - 1] <= ValArray[i - 1] && CA[i] > ValArray[i]) {
+                //if (CA[i] > ValArray[i]) {
+                crossovers.push(1); // Or any other value to indicate upward crossover
+              } else {
+                crossovers.push(0); // No crossover
+              }
+            }
+            if (type == "Sell") {
+              if (CA[i - 1] >= ValArray[i - 1] && CA[i] < ValArray[i]) {
+                crossovers.push(1); // Or any other value to indicate downward crossover
+              } else {
+                crossovers.push(0);
+              }
+              // Check for downward crossover
+              // if (prevPrice >= prevEma && currentPrice < currentEma) {
+              //if (CA[i] < ValArray[i]) {
+              // No crossover
+            }
+          }
+
+          return crossovers;
+        }
+
+        let BuyCrossCheckArray = crossCheck("Buy", CA, BuyPlus80ValArray);
+        let SellCrossCheckArray = crossCheck("Sell", CA, SellMinus80ValArray);
+
+        //console.log("BuyCrossCheckArray is : ", BuyCrossCheckArray);
+        //console.log("SellCrossCheckArray is : ", SellCrossCheckArray);
+        //console.log("check");
+
+        let BuyCrossCheckArrayOnlyIndexes = [];
+        for (let i = 0; i < BuyCrossCheckArray.length; i++) {
+          if (BuyCrossCheckArray[i] == 1) {
+            BuyCrossCheckArrayOnlyIndexes.push(i);
+          }
+        }
+
+        let SellCrossCheckArrayOnlyIndexes = [];
+        for (let i = 0; i < SellCrossCheckArray.length; i++) {
+          if (SellCrossCheckArray[i] == 1) {
+            SellCrossCheckArrayOnlyIndexes.push(i);
+          }
+        }
+
+        const [BuyOAfterExRemFinalIndexes, SellOAfterExRemFinalIndexes] =
+          ExRemFinalworkingJswithIndexesOnly(
+            BuyCrossCheckArrayOnlyIndexes,
+            SellCrossCheckArrayOnlyIndexes
+          );
+
+        console.log(
+          "BuyOAfterExRemFinalIndexes is : ",
+          BuyOAfterExRemFinalIndexes
+        );
+        console.log(
+          "SellOAfterExRemFinalIndexes is : ",
+          SellOAfterExRemFinalIndexes
+        );
+        console.log("check");
+
+        FBindex = BuyOAfterExRemFinalIndexes;
+        FSindex = SellOAfterExRemFinalIndexes;
+
+        console.log("FinalOutA1 :", FBindex);
+        console.log("FinalOutA2 :", FSindex);
+        //*****************************************
+      }
+
+      // firstdata = getBNCandleDataFirst();
+      // const fdata = firstdata;
+
+      // Usage:
+      (async () => {
+        const startTime = performance.now();
+        console.log("Async Code Script started at:", new Date().toISOString());
+        showSpinner(true);
+        console.log("Entering main async block...");
+        const database = firebase.database();
+        const bncandleDataRef = database.ref("crudecandledata");
+        const snapshot = await bncandleDataRef
+          .orderByChild("datetime")
+          .limitToFirst(1050)
+          .once("value");
+
+        const rawFirebaseData = snapshot.val();
+
+        try {
+          const firstdata = await new Promise((resolve, reject) => {
+            // Temporarily assign onmessage/onerror to this specific Promise
+            getBNCandleDataFirstWorker.onmessage = (event) => {
+              getBNCandleDataFirstWorker.onmessage = null; // Clear handler after response
+              getBNCandleDataFirstWorker.onerror = null; // Clear error handler too
+              if (event.data && event.data.error) {
+                reject(new Error(event.data.error));
+              } else {
+                resolve(event.data);
+              }
+            };
+            getBNCandleDataFirstWorker.onerror = (error) => {
+              getBNCandleDataFirstWorker.onmessage = null; // Clear handler
+              getBNCandleDataFirstWorker.onerror = null; // Clear handler
+              reject(error);
+            };
+            getBNCandleDataFirstWorker.postMessage(rawFirebaseData);
+          });
+          console.log(
+            "Main thread: Received data from getBNCandleDataFirst Worker:",
+            firstdata
+          );
+          console.log("First Data at:", new Date().toISOString());
+          // console.log(
+          //   "Main thread: Received data from getBNCandleDataFirst Worker:"
+          // );
+
+          //const firstdata = await getBNCandleDataFirst();
+          if (!firstdata || !firstdata.length) {
+            console.warn("Firebase data empty or invalid, using fallback.");
+          }
+          if (firstdata) {
+            // Check if data retrieval was successful
+
+            firstdata.sort((a, b) => a[0] - b[0]);
+            //const fdata = firstdata;
+
+            var latestAPIdata = await new Promise((resolve, reject) => {
+              // Temporarily assign onmessage/onerror to this specific Promise
+              apiWorker.onmessage = (event) => {
+                apiWorker.onmessage = null; // Clear handler after response
+                apiWorker.onerror = null; // Clear error handler too
+                if (event.data && event.data.error) {
+                  reject(new Error(event.data.error));
+                } else {
+                  resolve(event.data);
+                }
+              };
+              apiWorker.onerror = (error) => {
+                apiWorker.onmessage = null; // Clear handler
+                apiWorker.onerror = null; // Clear handler
+                reject(error);
+              };
+              apiWorker.postMessage("fetchData");
+            });
+            console.log("Main thread: Received data from apiworker Worker:");
+            //var latestAPIdata = await getDataFromAPI();
+
+            fdata = latestAPIdata;
+
+            console.log("Api Data at:", new Date().toISOString());
+
+            let newBNCandleData = {
+              datetime: "",
+              open: "",
+              high: "",
+              low: "",
+              close: "",
+            };
+
+            const combinedList = [];
+
+            for (let i = 500; i < latestAPIdata.length; i++) {
+              let newBNCandleData = {
+                datetime: "",
+                open: "",
+                high: "",
+                low: "",
+                close: "",
+              };
+
+              newBNCandleData.datetime = latestAPIdata[i][0];
+              newBNCandleData.open = latestAPIdata[i][1];
+              newBNCandleData.high = latestAPIdata[i][2];
+              newBNCandleData.low = latestAPIdata[i][3];
+              newBNCandleData.close = latestAPIdata[i][4];
+
+              addBNCandleDataToRealTimeDBIfNotExists(newBNCandleData);
+
+              //console.log(combinedList[i]);
+            }
+
+            console.log(
+              "combinedList item sent to addBNCandleDataToRealTimeDBIfNotExists"
+            );
+            console.log(
+              "combinedList item sent to addBNCandleDataToRealTimeDBIfNotExists"
+            );
+
+            const { FBindex, FSindex, BPlusValArray, SMinusValArray } =
+              await new Promise((resolve, reject) => {
+                // Temporarily assign onmessage/onerror to this specific Promise
+                calcWorker.onmessage = (event) => {
+                  calcWorker.onmessage = null; // Clear handler after response
+                  calcWorker.onerror = null; // Clear error handler too
+                  if (event.data && event.data.error) {
+                    reject(new Error(event.data.error));
+                  } else {
+                    resolve(event.data);
+                  }
+                };
+                calcWorker.onerror = (error) => {
+                  calcWorker.onmessage = null; // Clear handler
+                  calcWorker.onerror = null; // Clear handler
+                  reject(error);
+                };
+                calcWorker.postMessage(latestAPIdata);
+              });
+            console.log(
+              "Main thread: Received data from calcWorker Worker:",
+              FBindex,
+              FSindex
+            );
+
+            GlobalBuyPlus80ValArray = BPlusValArray;
+            GlobalSellMinus80ValArray = SMinusValArray;
+            console.log("CalcWorker Data at:", new Date().toISOString());
+            //allCalculationAtOnce(latestAPIdata);
+
+            const options = {
+              title: {
+                text: "Dynamic data in Highcharts Stock",
+              },
+              yAxis: [
+                {
+                  height: "60%",
+                },
+                {
+                  top: "60%",
+                  height: "20%",
+                },
+                {
+                  top: "80%",
+                  height: "20%",
+                },
+                // {
+                //   height: "60%",
+                // },
+                // {
+                //   height: "60%",
+                // },
+              ],
+              xAxis: {
+                overscroll: 500000,
+                range: 4 * 200000,
+                gridLineWidth: 1,
+              },
+
+              rangeSelector: {
+                buttons: [
+                  {
+                    type: "minute",
+                    count: 15,
+                    text: "15m",
+                  },
+                  {
+                    type: "hour",
+                    count: 1,
+                    text: "1h",
+                  },
+                  {
+                    type: "day",
+                    count: 2,
+                    text: "2d",
+                  },
+                  {
+                    type: "minute",
+                    count: 3125,
+                    text: "Custom",
+                  },
+                  {
+                    type: "all",
+                    count: 1,
+                    text: "All",
+                  },
+                ],
+                selected: 3,
+                inputEnabled: false,
+              },
+
+              navigator: {
+                series: {
+                  color: "#000000",
+                  name: "rt",
+                },
+              },
+
+              series: [
+                {
+                  type: "candlestick",
+                  id: "rt",
+                  color: "#FF7F7F",
+                  upColor: "#90EE90",
+                  lastPrice: {
+                    enabled: true,
+                    label: {
+                      enabled: true,
+                      //backgroundColor: "#FF7F7F",
+                    },
+                  },
+
+                  dataGrouping: {
+                    enabled: false, // Prevent grouping
+                  },
+                },
+
+                {
+                  type: "ema",
+                  linkedTo: "rt",
+                  color: "blue", // Link to the series by name
+                  params: {
+                    period: 70,
+                  },
+                },
+                {
+                  type: "macd",
+                  id: "oscillator",
+                  linkedTo: "rt",
+                  yAxis: 2,
+                },
+
+                {
+                  type: "scatter",
+                  name: "Signal",
+                  animation: false,
+                  //yAxis: 3,
+                },
+
+                {
+                  type: "spline",
+                  name: "BuyCrossLine",
+                  data: GlobalBuyPlus80ValArray,
+                  //color: "#03470f",
+                  color: "cyan",
+                  yAxis: 0,
+                  //step: true,
+                },
+
+                {
+                  type: "spline",
+                  name: "SellCrossLine",
+                  data: GlobalSellMinus80ValArray,
+                  color: "orange",
+                  yAxis: 0,
+                  //step: true,
+                },
+                {
+                  type: "ema",
+                  linkedTo: "rt",
+                  color: "yellow", // Link to the series by name
+                  params: {
+                    period: 280,
+                  },
+                },
+              ],
+            };
+
+            async function loadChart() {
+              var tabc = await getBNCandleData();
+              //var gdata = await GetGDdataAPI();
+              options.series[0].data = tabc;
+              //Highcharts.chart("container", options);
+            }
+
+            loadChart();
+            // Imitate getting point from backend
+            async function getNewPoint(i, data) {
+              const lastPoint = data[data.length - 1];
+
+              // Add new point
+              if (i === 0 || i % 10 === 0) {
+                return [
+                  lastPoint[0] + 60000,
+                  lastPoint[4],
+                  lastPoint[4],
+                  lastPoint[4],
+                  lastPoint[4],
+                ];
+              }
+              const updatedLastPoint = data[data.length - 1],
+                newClose = Highcharts.correctFloat(
+                  lastPoint[4] +
+                    Highcharts.correctFloat(Math.random() - 0.5, 2),
+                  4
+                );
+
+              // Modify last data point
+              return [
+                updatedLastPoint[0],
+                data[data.length - 2][4],
+                newClose >= updatedLastPoint[2]
+                  ? newClose
+                  : updatedLastPoint[2],
+                newClose <= updatedLastPoint[3]
+                  ? newClose
+                  : updatedLastPoint[3],
+                newClose,
+              ];
+            }
+
+            function addSignal(arg) {
+              arg.series.addPoint({
+                // x: arg.point[0],
+                x: arg.sginaldate,
+
+                y:
+                  arg.direction == "up"
+                    ? arg.point[3] - arg.triangleOffset
+                    : arg.point[2] + arg.triangleOffset,
+                marker: {
+                  symbol: arg.direction === "up" ? "triangle" : "triangle-down",
+                  fillColor: arg.direction === "up" ? "green" : "red",
+                  radius: arg.size,
+                },
+              });
+            }
+
+            showSpinner(false);
+            // On load, start the interval that adds points
+            options.chart = {
+              events: {
+                load() {
+                  console.log(
+                    "Options chart & spin start at:",
+                    new Date().toISOString()
+                  );
+                  showSpinner(true);
+
+                  const chart = this,
+                    series = chart.series[0];
+
+                  let i = 0;
+
+                  setInterval(async () => {
+                    const rv = dtapi;
+                    //const rv = fdata;
+                    const data = series.options.data,
+                      // newPoint = getNewPoint(i, data),
+                      lastPoint = data[data.length - 1];
+                    console.log("lastPoint:", lastPoint);
+                    //allCalculationAtOnce(data);
+                    const { FBindex, FSindex } = await new Promise(
+                      (resolve, reject) => {
+                        // Temporarily assign onmessage/onerror to this specific Promise
+                        calcWorker.onmessage = (event) => {
+                          calcWorker.onmessage = null; // Clear handler after response
+                          calcWorker.onerror = null; // Clear error handler too
+                          if (event.data && event.data.error) {
+                            reject(new Error(event.data.error));
+                          } else {
+                            resolve(event.data);
+                          }
+                        };
+                        calcWorker.onerror = (error) => {
+                          calcWorker.onmessage = null; // Clear handler
+                          calcWorker.onerror = null; // Clear handler
+                          reject(error);
+                        };
+                        calcWorker.postMessage(data);
+                      }
+                    );
+                    console.log(
+                      "Chart options thread: Received data from calcWorker Worker:",
+                      FBindex,
+                      FSindex
+                    );
+
+                    var lpdt = lastPoint[0];
+
+                    //rvlastdt = rv[rv.length - 1][0];
+
+                    for (let k = 0; k < rv.length; k += 1) {
+                      var rvdt = rv[k][0];
+                      if (parseFloat(rv[k][0]) > parseFloat(lpdt)) {
+                        series.addPoint(rv[k]);
+
+                        let newBNCandleData = {
+                          datetime: "",
+                          open: "",
+                          high: "",
+                          low: "",
+                          close: "",
+                        };
+
+                        newBNCandleData.datetime = rv[k][0];
+                        newBNCandleData.open = rv[k][1];
+                        newBNCandleData.high = rv[k][2];
+                        newBNCandleData.low = rv[k][3];
+                        newBNCandleData.close = rv[k][4];
+
+                        addBNCandleDataToRealTimeDBIfNotExists(newBNCandleData);
+                      } else {
+                      }
+                    }
+
+                    //*****************************************
+                    for (let i = 0; i < FBindex.length; i += 1) {
+                      if (FBindex[i] > 0) {
+                        const bpoint = FBindex[i];
+                        addSignal({
+                          series: chart.series[3], // Scatter series
+                          //point: jsonData.data[i], // Choose a point where you would like to append a triangle
+                          point: fdata[bpoint],
+                          sginaldate: fdata[bpoint][0],
+
+                          //point: bresult[i],
+                          direction: "up", // 'triangle' or 'triangle-down'
+                          size: 8,
+                          triangleOffset: 0, // Choose how far shoud a triangle be from candlestick
+                        });
+                      }
+                    }
+
+                    for (let i = 0; i < FSindex.length; i += 1) {
+                      if (FSindex[i] > 0) {
+                        const spoint = FSindex[i];
+                        addSignal({
+                          series: chart.series[3],
+                          //point: bresult[i],
+                          point: fdata[spoint],
+                          sginaldate: fdata[spoint][0],
+                          // Scatter series
+                          //point: jsonData.data[i], // Choose a point where you would like to append a triangle
+                          direction: "down", // 'triangle' or 'triangle-down'
+                          size: 8,
+                          triangleOffset: 0, // Choose how far shoud a triangle be from candlestick
+                        });
+                        // console.log(spoint);
+                        // console.log(ohlc[spoint]);
+                      }
+                    }
+                    // console.log("SResult done");
+                    //*****************************************
+
+                    //dtapi = getDataFromAPI();
+
+                    var latestAPIdata = await new Promise((resolve, reject) => {
+                      // Temporarily assign onmessage/onerror to this specific Promise
+                      apiWorker.onmessage = (event) => {
+                        apiWorker.onmessage = null; // Clear handler after response
+                        apiWorker.onerror = null; // Clear error handler too
+                        if (event.data && event.data.error) {
+                          reject(new Error(event.data.error));
+                        } else {
+                          resolve(event.data);
+                        }
+                      };
+                      apiWorker.onerror = (error) => {
+                        apiWorker.onmessage = null; // Clear handler
+                        apiWorker.onerror = null; // Clear handler
+                        reject(error);
+                      };
+                      apiWorker.postMessage("fetchData");
+                    });
+                    console.log(
+                      "Chart options thread: Received data from apiworker Worker:"
+                    );
+                    //var latestAPIdata = await getDataFromAPI();
+
+                    dtapi = latestAPIdata;
+
+                    showSpinner(false);
+                    console.log("Spin false at:", new Date().toISOString());
+
+                    i++;
+                  }, 30000);
+                  // (async () => {
+                  //   let i = 0;a
+
+                  //   const intervalId = setInterval(async () => {
+                  //     try {
+                  //       const rv = await getDataFromAPI(); // Await the data from the API call
+                  //       //series.options.data = firstdata;
+
+                  //       //const data = series.options.data;
+
+                  //       const data = series.options.data
+                  //       //var newPoint = getNewPoint(i, data);
+
+                  //       var newPoint = getNewPoint(i, rv);
+
+                  //       const lastPoint = data[data.length - 1];
+
+                  //       // Different x-value, we need to add a new point
+                  //       if (lastPoint[0] !== newPoint[0]) {
+                  //         series.addPoint(newPoint);
+                  //       } else {
+                  //         // Existing point, update it
+                  //         series.options.data[data.length - 1] = newPoint;
+                  //         series.setData(data);
+                  //       }
+                  //       i++;
+                  //     } catch (error) {
+                  //       console.error("Error fetching data:", error);
+                  //       // Handle the error appropriately, e.g., retry the request or stop the interval
+                  //     }
+                  //   }, 30000);
+
+                  //   // Optionally, add logic to clear the interval when needed
+                  //   // ...
+                  // })();
+                },
+              },
+            };
+
+            options.series[0].data = fdata;
+
+            // Apply the data to the options
+            // options.series[0].data = [
+            //   [1317888000000, 372.5101, 375, 372.2, 372.52],
+            //   [1317888060000, 372.4, 373, 372.01, 372.16],
+            //   [1317888120000, 372.16, 372.4, 371.39, 371.62],
+            //   [1317888180000, 371.62, 372.16, 371.55, 371.75],
+            //   [1317888240000, 371.75, 372.4, 371.57, 372],
+            //   [1317888300000, 372, 372.3, 371.8, 372.24],
+            //   [1317888360000, 372.22, 372.45, 372.22, 372.3],
+            //   [1317888420000, 372.3, 373.25, 372.3, 373.15],
+            //   [1317888480000, 373.01, 373.5, 373, 373.24],
+            //   [1317888540000, 373.36, 373.88, 373.19, 373.88],
+            //   [1317888600000, 373.8, 374.34, 373.75, 374.29],
+            //   [1317888660000, 374.29, 374.43, 374, 374.01],
+            //   [1317888720000, 374.05, 374.35, 373.76, 374.35],
+            //   [1317888780000, 374.41, 375.24, 374.37, 374.9],
+            //   [1317888840000, 374.83, 375.73, 374.81, 374.96],
+            //   [1317888900000, 374.81, 375.4, 374.81, 375.25],
+            //   [1317888960000, 375.2, 375.7, 375.14, 375.19],
+            //   [1317889020000, 375.43, 375.43, 374.75, 374.76],
+            //   [1317889080000, 374.94, 375.5, 374.81, 375.13],
+            //   [1317889140000, 375.12, 375.48, 375, 375.04],
+            //   [1317889200000, 375.24, 375.24, 375, 375.08],
+            //   [1317889260000, 375.16, 375.16, 374.51, 374.51],
+            //   [1317889320000, 374.51, 374.75, 374.2, 374.27],
+            //   [1317889380000, 374.22, 374.55, 373.83, 374.55],
+            //   [1317889440000, 374.69, 374.86, 374.01, 374.2],
+            //   [1317889500000, 374.32, 374.65, 374.31, 374.51],
+            //   [1317889560000, 374.65, 375.12, 374.51, 375.12],
+            //   [1317889620000, 375.13, 375.25, 374.83, 375.22],
+            //   [1317889680000, 375.16, 375.22, 375, 375],
+            //   [1317889740000, 375, 375, 374.66, 374.8],
+            //   [1317889800000, 374.88, 375, 374.5, 374.85],
+            //   [1317889860000, 374.41, 374.67, 374.25, 374.67],
+            //   [1317889920000, 374.5, 374.75, 374.27, 374.42],
+            //   [1317889980000, 374.4, 374.93, 374.38, 374.85],
+            //   [1317890040000, 374.86, 375.3, 374.8, 375.09],
+            //   [1317890100000, 375, 375.18, 374.9, 375.02],
+            //   [1317890160000, 375.02, 375.08, 374.86, 374.87],
+            //   [1317890220000, 374.93, 375.75, 374.93, 375.75],
+            //   [1317890280000, 375.75, 376.5, 375.75, 376.31],
+            //   [1317890340000, 376.31, 377.2, 376.19, 377.04],
+            //   [1317890400000, 377.2, 377.33, 376.45, 376.47],
+            //   [1317890460000, 376.75, 376.99, 376.53, 376.54],
+            //   [1317890520000, 376.54, 376.67, 376.08, 376.35],
+            //   [1317890580000, 376.41, 376.94, 376.2, 376.5],
+            //   [1317890640000, 376.46, 376.51, 376.06, 376.09],
+            //   [1317890700000, 376.38, 376.84, 376.09, 376.78],
+            //   [1317890760000, 376.55, 376.6, 376.41, 376.44],
+            //   [1317890820000, 376.45, 376.87, 376.31, 376.87],
+            //   [1317890880000, 376.83, 377, 376.63, 376.95],
+            //   [1317890940000, 376.95, 377, 376.1, 376.1],
+            //   [1317891000000, 376.1, 376.17, 375.64, 375.65],
+            //   [1317891060000, 375.68, 376.05, 375.32, 376.05],
+            //   [1317891120000, 376.03, 376.04, 375.5, 375.72],
+            //   [1317891180000, 375.83, 376.195, 375.7, 376],
+            //   [1317891240000, 376.01, 376.6, 376, 376.5],
+            //   [1317891300000, 376.5, 376.53, 376.11, 376.21],
+            //   [1317891360000, 376.17, 376.3, 376.1, 376.25],
+            //   [1317891420000, 376.4, 376.4, 376.13, 376.29],
+            //   [1317891480000, 376.15, 376.39, 376.1, 376.39],
+            //   [1317891540000, 376.4, 377.11, 376.4, 377],
+            //   [1317891600000, 377.01, 377.15, 376.79, 377.15],
+            //   [1317891660000, 377.02, 377.15, 376.55, 376.88],
+            //   [1317891720000, 376.67, 376.76, 376.52, 376.53],
+            //   [1317891780000, 376.78, 376.91, 376.53, 376.82],
+            //   [1317891840000, 376.73, 376.86, 376.7, 376.75],
+            //   [1317891900000, 376.7, 376.71, 376.5, 376.57],
+            //   [1317891960000, 376.53, 376.74, 376.2, 376.2],
+            //   [1317892020000, 376.17, 376.17, 375.91, 376],
+            //   [1317892080000, 376, 376, 375.77, 375.77],
+            //   [1317892140000, 375.78, 375.88, 375.51, 375.57],
+            //   [1317892200000, 375.57, 375.79, 375.34, 375.63],
+            //   [1317892260000, 375.63, 375.78, 375.35, 375.41],
+            //   [1317892320000, 375.38, 375.61, 375.35, 375.58],
+            //   [1317892380000, 375.55, 375.57, 375.34, 375.48],
+            //   [1317892440000, 375.43, 375.57, 375.12, 375.13],
+            //   [1317892500000, 375.15, 375.3, 374.86, 375],
+            //   [1317892560000, 374.9, 375.31, 374.72, 375.14],
+            //   [1317892620000, 375, 375.2, 374.9, 375.06],
+            //   [1317892680000, 375.18, 375.6, 375.12, 375.6],
+            //   [1317892740000, 375.6, 375.87, 375.5, 375.5],
+            //   [1317892800000, 375.49, 375.49, 375.04, 375.25],
+            //   [1317892860000, 375.25, 375.46, 375, 375.24],
+            //   [1317892920000, 375.38, 375.45, 375, 375.1],
+            //   [1317892980000, 375.09, 375.24, 374.83, 374.97],
+            //   [1317893040000, 375.01, 375.01, 374.8, 374.87],
+            //   [1317893100000, 374.98, 375.12, 374.98, 375],
+            //   [1317893160000, 374.9, 374.95, 374.75, 374.87],
+            //   [1317893220000, 374.89, 375.44, 374.87, 375.12],
+            //   [1317893280000, 375.06, 375.12, 373.56, 374.05],
+            //   [1317893340000, 374.1, 374.3, 373.16, 373.21],
+            //   [1317893400000, 373.39, 375, 372.58, 374.8],
+            //   [1317893460000, 374.899, 375.23, 374.33, 374.75],
+            //   [1317893520000, 374.79, 376.71, 374.69, 376.31],
+            //   [1317893580000, 376.32, 376.37, 375.27, 375.331],
+            //   [1317893640000, 375.3301, 377.44, 375.33, 377.43],
+            //   [1317893700000, 377.43, 378.14, 376.83, 377.08],
+            //   [1317893760000, 377.18, 378, 376.5, 376.7],
+            //   [1317893820000, 376.83, 377, 375.51, 375.79],
+            //   [1317893880000, 375.6501, 376.74, 375.23, 376.39],
+            //   [1317893940000, 376.38, 378.75, 376.25, 378.5],
+            //   [1317894000000, 378.54, 378.63, 376.75, 376.87],
+            //   [1317894060000, 376.8664, 377.62, 376.64, 376.908],
+            //   [1317894120000, 376.8336, 377.88, 376.8289, 377.55],
+            //   [1317894180000, 377.36, 377.9, 376.52, 376.75],
+            //   [1317894240000, 376.83, 377.73, 376.71, 376.98],
+            //   [1317894300000, 377, 377.69, 376.87, 377.1212],
+            //   [1317894360000, 377.225, 377.33, 376.01, 376.26],
+            //   [1317894420000, 376.42, 376.64, 375.55, 375.5534],
+            //   [1317894480000, 375.74, 375.94, 374.77, 375.3],
+            //   [1317894540000, 375.3313, 376, 374.92, 375.06],
+            //   [1317894600000, 375.11, 375.46, 374.82, 374.92],
+            //   [1317894660000, 374.82, 375.68, 374.64, 375.668],
+            //   [1317894720000, 375.62, 376.13, 375.46, 376.13],
+            //   [1317894780000, 376.14, 376.6, 375.89, 376.34],
+            //   [1317894840000, 376.39, 376.39, 375.55, 375.99],
+            //   [1317894900000, 376, 376.28, 375.42, 376.21],
+            //   [1317894960000, 376, 377.38, 375.7, 376.591],
+            //   [1317895020000, 376.59, 377.46, 376.57, 376.9348],
+            //   [1317895080000, 376.9481, 377.749, 376.84, 377.563],
+            //   [1317895140000, 377.452, 377.65, 376.43, 376.78],
+            //   [1317895200000, 376.94, 377.01, 375.75, 375.98],
+            //   [1317895260000, 376.27, 377.29, 375.95, 376.98],
+            //   [1317895320000, 376.9962, 377.3, 376.69, 376.71],
+            //   [1317895380000, 376.75, 377.5, 376.75, 377.41],
+            //   [1317895440000, 377.26, 377.49, 376.89, 377.368],
+            //   [1317895500000, 377.345, 378, 377.17, 378],
+            //   [1317895560000, 377.97, 378.3199, 377.68, 377.97],
+            //   [1317895620000, 378.01, 378.07, 377.25, 377.37],
+            //   [1317895680000, 377.37, 377.75, 377.05, 377.12],
+            //   [1317895740000, 377.16, 377.79, 377.01, 377.4512],
+            // ];
+
+            // Create the chart
+            Highcharts.stockChart("container", options);
+
+            async function getDataFromAPI() {
+              let reposedata; // Declare outside for wider scope
+
+              try {
+                const response = await fetch(
+                  "https://inservice.onrender.com/scrape"
+                );
+                if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                reposedata = await response.json();
+              } catch (error) {
+                console.error("Error fetching data:", error);
+                alert(error);
+                // Handle the error gracefully, e.g., display an error message, provide retry options, etc.
+              }
+              if (reposedata) {
+                // Process the fetched data using reposedata
+                console.log(reposedata.candles.length);
+              } else {
+                // Handle the case where data fetching failed
+                console.warn("Data could not be fetched successfully.");
+              }
+
+              const jsonData = reposedata;
+              console.log("jsonData is : ", jsonData.candles.length);
+
+              console.log("Data Js done");
+
+              // split the data set into ohlc and volume
+              const ohlc = [],
+                volume = [],
+                dataLength = reposedata.candles.length;
+
+              for (let i = 0; i < dataLength; i += 1) {
+                ohlc.push([
+                  (reposedata.candles[i][0] + 19800) * 1000, // the date
+                  //data[i][0],
+                  reposedata.candles[i][1], // open
+                  reposedata.candles[i][2], // high
+                  reposedata.candles[i][3], // low
+                  reposedata.candles[i][4], // close
+                ]);
+
+                volume.push([
+                  (reposedata.candles[i][0] + 19800) * 1000,
+                  //data[i][0], // the date
+                  reposedata.candles[i][5], // the volume
+                ]);
+              }
+              let minR = ohlc[dataLength - 100][0];
+              let maxR = ohlc[dataLength - 1][0];
+
+              let newBNCandleData = {
+                datetime: "",
+                open: "",
+                high: "",
+                low: "",
+                close: "",
+              };
+
+              const combinedList = [];
+
+              for (let i = 500; i < ohlc.length; i++) {
+                let newBNCandleData = {
+                  datetime: "",
+                  open: "",
+                  high: "",
+                  low: "",
+                  close: "",
+                };
+
+                newBNCandleData.datetime = ohlc[i][0];
+                newBNCandleData.open = ohlc[i][1];
+                newBNCandleData.high = ohlc[i][2];
+                newBNCandleData.low = ohlc[i][3];
+                newBNCandleData.close = ohlc[i][4];
+
+                addBNCandleDataToRealTimeDBIfNotExists(newBNCandleData);
+                //console.log("combinedList item sent");
+                //console.log(combinedList[i]);
+              }
+
+              let CA = [];
+              for (let i = 0; i < dataLength; i += 1) {
+                CA.push([
+                  reposedata.candles[i][4], // close
+                ]);
+              }
+
+              let OA = [];
+              for (let i = 0; i < dataLength; i += 1) {
+                OA.push([
+                  // the date
+                  reposedata.candles[i][1], // open
+                ]);
+              }
+
+              //const rv = ohlc.pop();
+              dtapi = ohlc;
+              const rv = ohlc;
+              //console.log(rv);
+              return rv;
+            }
+
+            async function getBNCandleData() {
+              const database = firebase.database();
+              const usersRef = database.ref("crudecandledata");
+              const processedCandleObjectDdata = [];
+              const processedCandleDdataArray = [];
+
+              // firebase
+              //   .database()
+              //   .ref("bncandledata")
+              //   .orderByChild("datetime")
+              //   .limitToFirst(130)
+              //   .once("value", (snapshot) => {
+              //     if (snapshot.exists()) {
+              //       const topCandlesData = [];
+              //       snapshot.forEach((childSnapshot) => {
+              //         const scoreData = childSnapshot.val();
+              //         topCandlesData.push(scoreData);
+              //       });
+              //       // Process the top 100 scores
+              //       return topCandlesData;
+              //     } else {
+              //       console.log("No highscores found.");
+              //     }
+              //   })
+              //   .catch((error) => {
+              //     console.error("Error fetching top scores:", error);
+              //   });
+
+              try {
+                //const snapshot = await usersRef.once("value");
+                const snapshot = await usersRef
+                  .orderByChild("datetime")
+                  .limitToFirst(130)
+                  .once("value");
+
+                const usersval = snapshot.val();
+
+                if (usersval) {
+                  if (
+                    typeof usersval === "object" &&
+                    !Array.isArray(usersval)
+                  ) {
+                    // Process users using Object.entries for compatibility
+                    //Object.entries(usersval).forEach(([key, userObject]) => {
+                    Object.keys(usersval).forEach((key) => {
+                      // Use Object.keys for property names
+                      const userObject = usersval[key]; // Access user object using key
+                      // const newCandleobject = {
+                      //   datetime: userObject.datetime,
+                      //   open: userObject.open,
+                      //   high: userObject.high,
+                      //   low: userObject.low,
+                      //   close: userObject.close,
+                      // };
+                      var localarray = [];
+                      //processedCandleObjectDdata.push(newCandleobject);
+                      localarray.push(
+                        parseFloat(userObject.datetime),
+                        parseFloat(userObject.open),
+                        parseFloat(userObject.high),
+                        parseFloat(userObject.low),
+                        parseFloat(userObject.close)
+                      );
+                      processedCandleDdataArray.push(localarray);
+                    });
+                    return processedCandleDdataArray;
+                    //console.log(latlongarray);
+                    //initMap(latlongarray);
+                  } else {
+                    console.log(
+                      "Data retrieved is not an object (might be an array or null)."
+                    );
+                  }
+                } else {
+                  console.log("No users found in the database.");
+                }
+              } catch (error) {
+                console.error("Error fetching users:", error);
+              }
+            }
+
+            async function addBNCandleDataToRealTimeDBIfNotExists(newBNData) {
+              const database = firebase.database();
+              const crudeCandleDataRef = database.ref("crudecandledata");
+
+
+              const usersRef = database.ref("crudecandledata");
+              const processedUsers = [];
+              var users = [];
+              let bndataflag = false;
+              try {
+                const snapshot = await usersRef.once("value");
+                const usersval = snapshot.val();
+
+                if (usersval) {
+                  if (
+                    typeof usersval === "object" &&
+                    !Array.isArray(usersval)
+                  ) {
+                    Object.keys(usersval).forEach((key) => {
+                      const userObject = usersval[key]; // Access user object using key
+
+                      if (userObject.datetime == newBNData.datetime) {
+                        bndataflag = true;
+                      }
+                    });
+
+                    if (bndataflag != true) {
+                      try {
+                        const newUserDataRef = usersRef.push(newBNData);
+                      } catch (error) {
+                        console.error("Error adding user:", error);
+                      }
+                    }
+                  } else {
+                    console.log(
+                      "Data retrieved is not an object (might be an array or null)."
+                    );
+                  }
+                } else {
+                  console.log("No users found in the database.");
+                }
+              } catch (error) {
+                console.error("Error fetching users:", error);
+              }
+            }
+
+            // Process fdata (your original code here)
+          } else {
+            console.log("Failed to retrieve data.");
+            // Handle unsuccessful data retrieval (optional)
+          }
+        } catch (error) {
+          console.error("Error in getBNCandleDataFirst usage:", error);
+        }
+      })();
+    </script>
+  </body>
+</html>
