@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BTC/USDT • 100% Exact AFL Replica + Hover Info</title>
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/indicators/indicators-all.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/stock/modules/accessibility.js"></script>
+<script src="https://code.highcharts.com/themes/dark-unica.js"></script>
+<style>
+    body { margin:0; background:#0e0e10; color:#0f0; font-family:system-ui; }
+    #container { height:100vh; }
+    .info { position:fixed; top:10px; left:10px; background:#000000cc; padding:8px 16px; border-radius:8px; z-index:100; font-size:14px; }
+</style>
+</head>
+<body>
+<div id="container"></div>
+<div class="info">Loading Crude...</div>
+
+<script>
+let chart = null;
+let lastTime = null;
+let indicatorCache = {}; // To store { time: { close, rsi, stoch, datetime } }
+let lastupdateDT = null;
+// ———————— INDICATORS (100% AFL IDENTICAL) ————————
+const EMA = (arr, period) => {
+    const k = 2 / (period + 1);
+    const ema = [arr[0]];
+    for (let i = 1; i < arr.length; i++) ema[i] = arr[i] * k + ema[i-1] * (1 - k);
+    return ema;
+};
+
+const MACDHist = (close) => {
+    const fast = EMA(close, 8);
+    const slow = EMA(close, 21);
+    const macdLine = fast.map((f,i) => f - slow[i]);
+    const signal = EMA(macdLine, 5);
+    return macdLine.map((m,i) => m - (signal[i] || 0));
+};
+
+const StochD = (high, low, close) => {
+    const k = new Array(close.length).fill(50);
+    for (let i = 7; i < close.length; i++) {
+        const h = Math.max(...high.slice(i-7, i+1));
+        const l = Math.min(...low.slice(i-7, i+1));
+        k[i] = (h === l) ? 50 : 100 * (close[i] - l) / (h - l);
+    }
+    const K = EMA(k, 3);
+    return EMA(K, 3);
+};
+
+const RSI = (close, period = 3) => {
+    const rsi = new Array(close.length).fill(50);
+    let avgGain = 0, avgLoss = 0;
+    for (let i = 1; i < close.length; i++) {
+        const diff = close[i] - close[i-1];
+        if (diff > 0) {
+            avgGain = (avgGain * (period-1) + diff) / period;
+            avgLoss = avgLoss * (period-1) / period;
+        } else {
+            avgLoss = (avgLoss * (period-1) - diff) / period;
+            avgGain = avgGain * (period-1) / period;
+        }
+        rsi[i] = avgLoss === 0 ? 100 : avgGain === 0 ? 0 : 100 - 100/(1 + avgGain/avgLoss);
+    }
+    return rsi;
+};
+
+function toIST(ts) { return ts + 5.5 * 3600000; }
+
+async function fetchData() {
+    const r = await fetch('https://vercelpup.vercel.app/cscrape', { cache: "no-store" });
+    const j = await r.json();
+
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // +5:30 hours
+
+    return j.t.map((timestamp, i) => {
+    const ts = timestamp * 1000; // convert seconds → milliseconds
+    return [
+      ts + IST_OFFSET_MS,  // timestamp in IST
+      j.o[i],           // open
+      j.h[i],           // high
+      j.l[i],           // low
+      j.c[i]            // close
+    ];
+  });
+
+    // return j.candles
+    //     .filter(c => c[4] != null)
+    //     .map(c => [toIST(c[0] * 1000), c[1], c[2], c[3], c[4]]);
+}
+
+// Custom Tooltip Formatter
+function createTooltipFormatter(type) {
+    return function () {
+        const pointTime = this.x;
+        const data = indicatorCache[pointTime];
+        if (!data) return false;
+
+        const date = new Date(pointTime).toLocaleString('en-IN', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', hour12: true
+        });
+
+        const bgColor = type === 'buy' ? '#004400' : '#440000';
+        const title = type === 'buy' ? 'BUY SIGNAL ZONE' : 'SELL SIGNAL ZONE';
+
+        return `
+            <div style="background:${bgColor}; color:#fff; padding:10px; border-radius:8px; font-size:13px; min-width:180px; border: 2px solid ${type === 'buy' ? '#00ff00' : '#ff0000'};">
+                <b>${title}</b><br/>
+                <hr style="border:0; border-top:1px solid #666; margin:4px 0"/>
+                Date: <b>${date}</b><br/>
+                Close: <b>$${data.close.toFixed(2)}</b><br/>
+                RSI(3): <b>${data.rsi.toFixed(2)}</b><br/>
+                Stoch %D: <b>${data.stoch.toFixed(2)}</b>
+            </div>
+        `;
+    };
+}
+
+// ———————— EXACT AFL LOGIC – 100% CORRECT ————————
+function generateSignals(data) {
+    if (!chart || data.length < 300) return;
+
+    const close = data.map(d => d[4]);
+    const open  = data.map(d => d[1]);
+    const high  = data.map(d => d[2]);
+    const low   = data.map(d => d[3]);
+    const time  = data.map(d => d[0]);
+
+    const ema100 = EMA(close, 100);
+    const MH     = MACDHist(close);
+    const SD     = StochD(high, low, close);
+    const rsi3   = RSI(close, 3);
+
+    // Clear cache and rebuild
+    indicatorCache = {};
+
+    // Populate cache
+    for (let i = 100; i < data.length; i++) {
+        indicatorCache[time[i]] = {
+            close: close[i],
+            rsi: rsi3[i],
+            stoch: SD[i],
+            datetime: time[i]
+        };
+    }
+
+    const buyTargetData  = [];
+    const sellTargetData = [];
+
+    let lastBuyEntryPrice  = null;
+    let lastSellEntryPrice = null;
+
+    let seenGreenCandle = false;
+    let seenRedCandle   = false;
+
+    let position = "none";
+
+    chart.get('buy-arrow')?.setData([], false);
+    chart.get('sell-arrow')?.setData([], false);
+
+    for (let i = 100; i < data.length; i++) {
+        if (close[i-1] > open[i-1]) seenGreenCandle = true;
+        if (close[i-1] < open[i-1]) seenRedCandle   = true;
+
+        const buyoCond = (MH[i] > 0 || (MH[i] > 0 && MH[i] > MH[i-1])) &&
+                         rsi3[i] > 50 &&
+                         SD[i] < 80 && SD[i] > SD[i-1] &&
+                         seenGreenCandle &&
+                         close[i] > ema100[i];
+
+        const selloCond = (MH[i] < 0 || (MH[i] < 0 && MH[i] < MH[i-1])) &&
+                          rsi3[i] < 50 &&
+                          SD[i] > 20 && SD[i] < SD[i-1] &&
+                          seenRedCandle &&
+                          close[i] < ema100[i];
+
+        if (buyoCond) {
+            lastBuyEntryPrice = close[i];
+            lastSellEntryPrice = null;
+        }
+        if (selloCond) {
+            lastSellEntryPrice = close[i];
+            lastBuyEntryPrice = null;
+        }
+
+        const buyTarget  = lastBuyEntryPrice  !== null ? lastBuyEntryPrice  + 0.135 : null;
+        const sellTarget = lastSellEntryPrice !== null ? lastSellEntryPrice - 0.135 : null;
+
+        if (buyTarget !== null) buyTargetData.push([time[i], buyTarget]);
+        if (sellTarget !== null) sellTargetData.push([time[i], sellTarget]);
+
+        const finalBuyCross  = buyTarget !== null && close[i] > buyTarget && close[i] > ema100[i];
+        const finalSellCross = sellTarget !== null && close[i] < sellTarget && close[i] < ema100[i];
+
+        if (finalBuyCross && position !== "long") {
+            chart.get('buy-arrow').addPoint({ x: time[i], y: low[i] - 0.2, title: 'BUY' }, false);
+            position = "long";
+        }
+
+        if (finalSellCross && position !== "short") {
+            chart.get('sell-arrow').addPoint({ x: time[i], y: high[i] + 0.2, title: 'SELL' }, false);
+            position = "short";
+        }
+    }
+
+    chart.get('buy-target-line')?.setData(buyTargetData, false);
+    chart.get('sell-target-line')?.setData(sellTargetData, false);
+
+    chart.redraw();
+}
+
+// ———————— CHART SETUP ————————
+async function update() {
+    const data = await fetchData();
+    if (!data || data.length < 300) return setTimeout(update, 10000);
+
+    const now = data[data.length-1][0];
+    lastupdateDT = data[data.length-1][0];
+    if (lastTime === now) return;
+    lastTime = now;
+
+    document.querySelector('.info').innerText = `Checked @: ${new Date(now).toLocaleString('en-IN')}`;
+
+    if (!chart) {
+        chart = Highcharts.stockChart('container', {
+            chart: { backgroundColor: '#1a1a1d' },
+            title: { text: 'BN , last update @ : ' +  Date(lastupdateDT).toLocaleString('en-IN')},
+            time: { timezoneOffset: -330 },
+            rangeSelector: { selected: 2, inputEnabled: false },
+            accessibility: { enabled: false },
+            tooltip: {
+                split: false,
+                shared: true,
+                useHTML: true,
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                borderWidth: 0,
+                shadow: true
+            },
+            yAxis: [{ height: '100%' }],
+            series: [
+                { type: 'candlestick', id: 'btc', name: 'BTC/USDT', data: data, dataGrouping: { enabled: false } },
+                { type: 'ema', linkedTo: 'btc', params: { period: 100 }, color: '#9c27b0', lineWidth: 2 },
+
+                // Buy Target Line (Hover Enabled)
+                { 
+                    id: 'buy-target-line', 
+                    type: 'line', 
+                    name: 'Buy +100', 
+                    data: [], 
+                    color: '#00ff00', 
+                    lineWidth: 4, 
+                    dashStyle: 'ShortDash',
+                    marker: { enabled: false }, 
+                    enableMouseTracking: true,
+                    tooltip: {
+                        formatter: createTooltipFormatter('buy'),
+                        valueDecimals: 2
+                    },
+                    zIndex: 5
+                },
+
+                // Sell Target Line (Hover Enabled)
+                { 
+                    id: 'sell-target-line', 
+                    type: 'line', 
+                    name: 'Sell -100', 
+                    data: [], 
+                    color: '#ff0000', 
+                    lineWidth: 4, 
+                    dashStyle: 'ShortDash',
+                    marker: { enabled: false }, 
+                    enableMouseTracking: true,
+                    tooltip: {
+                        formatter: createTooltipFormatter('sell'),
+                        valueDecimals: 2
+                    },
+                    zIndex: 5
+                },
+
+                // Buy Arrows (with hover info)
+                { 
+                    type: 'flags', 
+                    id: 'buy-arrow',  
+                    onSeries: 'btc', 
+                    shape: 'triangle-up',   
+                    fillColor: '#00ff00', 
+                    color: '#000',
+                    width: 36, 
+                    y: -70,
+                    tooltip: {
+                        formatter: createTooltipFormatter('buy')
+                    }
+                },
+                // Sell Arrows
+                { 
+                    type: 'flags', 
+                    id: 'sell-arrow', 
+                    onSeries: 'btc', 
+                    shape: 'triangle-down', 
+                    fillColor: '#ff0000',
+                    color: '#000',
+                    width: 36, 
+                    y: 70,
+                    tooltip: {
+                        formatter: createTooltipFormatter('sell')
+                    }
+                }
+            ]
+        });
+    } else {
+        chart.series[0].setData(data, false);
+    }
+
+    generateSignals(data);
+}
+
+update();
+setInterval(update, 30000);
+</script>
+</body>
+</html>
